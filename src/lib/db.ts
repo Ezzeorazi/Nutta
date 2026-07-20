@@ -14,6 +14,7 @@ const schema = i.schema({
       height: i.number(),
       activity: i.string(),
       objective: i.string(),
+      targetWeight: i.number().optional(), // meta de peso (kg)
     }),
     foods: i.entity({
       owner: i.string().indexed(),
@@ -48,6 +49,13 @@ const schema = i.schema({
       owner: i.string().indexed(),
       kind: i.string(), // habito | alimento | suplemento | lesion | objetivo | rutina | nota
       text: i.string(),
+      createdAt: i.number(),
+    }),
+    // Registro de peso corporal (un valor por día; el último gana).
+    weights: i.entity({
+      owner: i.string().indexed(),
+      date: i.string().indexed(), // YYYY-MM-DD
+      kg: i.number(),
       createdAt: i.number(),
     }),
   },

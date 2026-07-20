@@ -39,6 +39,13 @@ export type ChatMessage = {
   createdAt: number; // epoch ms
 };
 
+export type WeightEntry = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  kg: number;
+  createdAt: number;
+};
+
 export type MemoryKind =
   | "habito"
   | "alimento"

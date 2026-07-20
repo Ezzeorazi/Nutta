@@ -9,6 +9,7 @@ import type {
   FoodEntry,
   MemoryFact,
   MemoryKind,
+  WeightEntry,
 } from "@/lib/types";
 
 /**
@@ -29,6 +30,7 @@ export function useNutta() {
           exercises: {},
           messages: {},
           memories: {},
+          weights: {},
         }
       : null,
   );
@@ -51,6 +53,11 @@ export function useNutta() {
   )
     .filter((m) => m.owner === owner)
     .sort((a, b) => b.createdAt - a.createdAt);
+  const weights = (
+    (data?.weights ?? []) as unknown as (WeightEntry & { owner: string })[]
+  )
+    .filter((w) => w.owner === owner)
+    .sort((a, b) => a.date.localeCompare(b.date));
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -207,6 +214,33 @@ export function useNutta() {
   const removeMemory = (mid: string) =>
     db.transact(db.tx.memories[mid].delete());
 
+  const targetWeight = (
+    profileRec as unknown as { targetWeight?: number } | undefined
+  )?.targetWeight;
+  const setTargetWeight = (kg: number) => {
+    if (!profileId) return;
+    db.transact(db.tx.profiles[profileId].update({ targetWeight: kg }));
+  };
+
+  /** Registra el peso del día (upsert: si ya hay uno ese día, lo actualiza). */
+  const addWeight = (kg: number, date: string) => {
+    if (!user || !(kg > 0)) return;
+    const existing = weights.find((w) => w.date === date) as
+      | (WeightEntry & { id: string })
+      | undefined;
+    const wid = existing?.id ?? id();
+    db.transact(
+      db.tx.weights[wid].update({
+        owner: user.id,
+        date,
+        kg,
+        createdAt: Date.now(),
+      }),
+    );
+  };
+  const removeWeight = (wid: string) =>
+    db.transact(db.tx.weights[wid].delete());
+
   return {
     authLoading,
     dataLoading,
@@ -215,6 +249,8 @@ export function useNutta() {
     exercises,
     messages,
     memories,
+    weights,
+    targetWeight,
     profile,
     profileId,
     saveProfile,
@@ -226,5 +262,8 @@ export function useNutta() {
     removeMessage,
     addMemory,
     removeMemory,
+    addWeight,
+    removeWeight,
+    setTargetWeight,
   };
 }

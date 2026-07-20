@@ -12,6 +12,7 @@ import MacroBar from "@/components/MacroBar";
 import MemorySheet from "@/components/MemorySheet";
 import ScoreCard from "@/components/ScoreCard";
 import Timeline from "@/components/Timeline";
+import WeightPanel from "@/components/WeightPanel";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
 import { uid } from "@/components/Sheet";
@@ -42,6 +43,8 @@ export default function Home() {
     exercises,
     messages,
     memories,
+    weights,
+    targetWeight,
     profile,
     saveProfile,
     addFood,
@@ -51,6 +54,8 @@ export default function Home() {
     addMessage,
     addMemory,
     removeMemory,
+    addWeight,
+    setTargetWeight,
   } = useNutta();
 
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
@@ -211,6 +216,20 @@ export default function Home() {
           onOpenMemory={() => setMemoryOpen(true)}
           onAnalyze={runWeeklyAnalysis}
         />
+      ) : tab === "progreso" ? (
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
+          <header>
+            <h1 className="text-2xl font-bold">Progreso</h1>
+            <p className="text-sm text-muted">Tu peso y su evolución</p>
+          </header>
+          <WeightPanel
+            weights={weights}
+            targetWeight={targetWeight}
+            onAdd={addWeight}
+            onSetTarget={setTargetWeight}
+            today={today}
+          />
+        </main>
       ) : tab === "historial" ? (
         <History foods={foods} exercises={exercises} goals={goals} />
       ) : (
