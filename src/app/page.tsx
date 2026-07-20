@@ -9,12 +9,14 @@ import FoodForm from "@/components/FoodForm";
 import History from "@/components/History";
 import MacroBar from "@/components/MacroBar";
 import MemorySheet from "@/components/MemorySheet";
+import ScoreCard from "@/components/ScoreCard";
 import Timeline from "@/components/Timeline";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
 import { uid } from "@/components/Sheet";
 import { db } from "@/lib/db";
 import { computeGoals } from "@/lib/nutrition";
+import { dailyScore } from "@/lib/score";
 import { frequentFoodsSummary } from "@/lib/coachContext";
 import { useNutta } from "@/lib/useNutta";
 import {
@@ -133,6 +135,10 @@ export default function Home() {
   }, [todayFoods, todayEx]);
 
   const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
+  const score = useMemo(
+    () => dailyScore(todayFoods, todayEx, goals),
+    [todayFoods, todayEx, goals],
+  );
 
   const splash = (
     <div className="flex flex-1 items-center justify-center text-3xl font-bold">
@@ -195,6 +201,8 @@ export default function Home() {
               N
             </button>
           </header>
+
+          <ScoreCard data={score} />
 
           <section className="flex flex-col items-center gap-6 rounded-3xl border border-border bg-card p-6">
             <CalorieRing
