@@ -70,6 +70,23 @@ export type MeasureEntry = {
   createdAt: number;
 };
 
+export type GoalKind = "peso" | "levantamiento" | "medida";
+
+export const GOAL_KINDS: { key: GoalKind; label: string; unit: string }[] = [
+  { key: "peso", label: "Peso corporal", unit: "kg" },
+  { key: "levantamiento", label: "Levantamiento (PR)", unit: "kg" },
+  { key: "medida", label: "Medida corporal", unit: "cm" },
+];
+
+export type CustomGoal = {
+  id: string;
+  kind: GoalKind;
+  label: string;
+  target: number;
+  ref?: string;
+  createdAt: number;
+};
+
 export type PhotoEntry = {
   id: string;
   date: string; // YYYY-MM-DD

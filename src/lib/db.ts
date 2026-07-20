@@ -75,6 +75,15 @@ const schema = i.schema({
       sleepQuality: i.number().optional(), // 1-5
       steps: i.number().optional(),
     }),
+    // Metas personalizadas del usuario (peso, levantamiento, medida).
+    customGoals: i.entity({
+      owner: i.string().indexed(),
+      kind: i.string(), // peso | levantamiento | medida
+      label: i.string(),
+      target: i.number(),
+      ref: i.string().optional(), // ejercicio (levantamiento) o parte (medida)
+      createdAt: i.number(),
+    }),
     // Fotos de progreso (la imagen vive en storage; acá va la metadata).
     photos: i.entity({
       owner: i.string().indexed(),

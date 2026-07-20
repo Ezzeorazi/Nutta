@@ -42,6 +42,7 @@ export default function Home() {
     supplements,
     supplementLogs,
     strengthSets,
+    customGoals,
     photos,
     targetWeight,
     profile,
@@ -62,6 +63,8 @@ export default function Home() {
     toggleSupplement,
     addSet,
     removeSet,
+    addGoal,
+    removeGoal,
     addPhoto,
     removePhoto,
   } = useNutta();
@@ -267,12 +270,16 @@ export default function Home() {
           targetWeight={targetWeight}
           measures={measures}
           photos={photos}
+          strengthSets={strengthSets}
+          customGoals={customGoals}
           today={today}
           addWeight={addWeight}
           setTargetWeight={setTargetWeight}
           addMeasure={addMeasure}
           addPhoto={addPhoto}
           removePhoto={removePhoto}
+          addGoal={addGoal}
+          removeGoal={removeGoal}
         />
       ) : tab === "historial" ? (
         <History

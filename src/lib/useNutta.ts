@@ -7,9 +7,11 @@ import type { Profile } from "@/lib/nutrition";
 import type {
   BodyPart,
   ChatMessage,
+  CustomGoal,
   DailyMetrics,
   ExerciseEntry,
   FoodEntry,
+  GoalKind,
   MeasureEntry,
   MemoryFact,
   MemoryKind,
@@ -47,6 +49,7 @@ export function useNutta() {
           supplements: {},
           supplementLogs: {},
           strengthSets: {},
+          customGoals: {},
           photos: {},
         }
       : null,
@@ -106,6 +109,11 @@ export function useNutta() {
     })[]
   )
     .filter((s) => s.owner === owner)
+    .sort((a, b) => a.createdAt - b.createdAt);
+  const customGoals = (
+    (data?.customGoals ?? []) as unknown as (CustomGoal & { owner: string })[]
+  )
+    .filter((g) => g.owner === owner)
     .sort((a, b) => a.createdAt - b.createdAt);
   // URL de cada archivo, por id, desde la entidad de sistema $files.
   const fileUrlById = new Map<string, string>();
@@ -360,6 +368,27 @@ export function useNutta() {
   const removeSet = (sid: string) =>
     db.transact(db.tx.strengthSets[sid].delete());
 
+  const addGoal = (
+    kind: GoalKind,
+    label: string,
+    target: number,
+    ref?: string,
+  ) => {
+    if (!user || !label.trim() || !(target > 0)) return;
+    db.transact(
+      db.tx.customGoals[id()].update({
+        owner: user.id,
+        kind,
+        label: label.trim(),
+        target,
+        ...(ref?.trim() ? { ref: ref.trim() } : {}),
+        createdAt: Date.now(),
+      }),
+    );
+  };
+  const removeGoal = (gid: string) =>
+    db.transact(db.tx.customGoals[gid].delete());
+
   /** Sube una foto de progreso (la redimensiona antes) y guarda su metadata. */
   const addPhoto = async (file: File, date: string) => {
     if (!user) return;
@@ -434,6 +463,7 @@ export function useNutta() {
     supplements,
     supplementLogs,
     strengthSets,
+    customGoals,
     photos,
     targetWeight,
     profile,
@@ -458,6 +488,8 @@ export function useNutta() {
     toggleSupplement,
     addSet,
     removeSet,
+    addGoal,
+    removeGoal,
     addPhoto,
     removePhoto,
   };
