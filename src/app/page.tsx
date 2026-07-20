@@ -15,6 +15,7 @@ import Onboarding from "@/components/Onboarding";
 import { uid } from "@/components/Sheet";
 import { db } from "@/lib/db";
 import { computeGoals } from "@/lib/nutrition";
+import { frequentFoodsSummary } from "@/lib/coachContext";
 import { useNutta } from "@/lib/useNutta";
 import {
   DEFAULT_GOALS,
@@ -23,6 +24,7 @@ import {
   type ExerciseEntry,
   type FoodEntry,
   type MealType,
+  type MemoryKind,
 } from "@/lib/types";
 
 export default function Home() {
@@ -67,12 +69,15 @@ export default function Home() {
           message: text,
           weight: profile.weight,
           hour: new Date().getHours(),
+          memories: memories.map((m) => ({ kind: m.kind, text: m.text })),
+          frequent: frequentFoodsSummary(foods),
         }),
       });
       const data = (await res.json()) as {
         reply?: string;
         foods?: FoodEntry[];
         exercises?: ExerciseEntry[];
+        remember?: { kind: MemoryKind; text: string }[];
         error?: string;
       };
       if (!res.ok) throw new Error(data?.error ?? "error");
@@ -97,6 +102,9 @@ export default function Home() {
           minutes: e.minutes,
           caloriesBurned: e.caloriesBurned,
         });
+      }
+      for (const r of data.remember ?? []) {
+        if (r?.text?.trim()) addMemory(r.kind, r.text);
       }
       addMessage("assistant", data.reply || "Listo ✅");
     } catch {

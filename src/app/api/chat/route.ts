@@ -12,7 +12,13 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { message?: unknown; weight?: unknown; hour?: unknown };
+  let body: {
+    message?: unknown;
+    weight?: unknown;
+    hour?: unknown;
+    memories?: unknown;
+    frequent?: unknown;
+  };
   try {
     body = await request.json();
   } catch {
@@ -30,8 +36,26 @@ export async function POST(request: Request) {
     ? Number(body?.hour)
     : new Date().getHours();
 
+  // Contexto de memoria (saneado y acotado).
+  const memories = Array.isArray(body?.memories)
+    ? (body.memories as unknown[])
+        .filter(
+          (m): m is { kind: string; text: string } =>
+            !!m && typeof m === "object" && "text" in m && "kind" in m,
+        )
+        .map((m) => ({ kind: String(m.kind), text: String(m.text) }))
+        .slice(0, 40)
+    : [];
+  const frequent = String(body?.frequent ?? "").slice(0, 500);
+
   try {
-    const result = await interpretMessage({ message, weight, hour });
+    const result = await interpretMessage({
+      message,
+      weight,
+      hour,
+      memories,
+      frequent,
+    });
     return NextResponse.json(result);
   } catch (err) {
     console.error("[/api/chat]", err);

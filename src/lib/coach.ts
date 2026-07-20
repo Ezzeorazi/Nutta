@@ -41,6 +41,24 @@ export const coachSchema = z.object({
       }),
     )
     .describe("Ejercicios que el usuario hizo. Vacío si no hay."),
+  remember: z
+    .array(
+      z.object({
+        kind: z.enum([
+          "habito",
+          "alimento",
+          "suplemento",
+          "lesion",
+          "objetivo",
+          "rutina",
+          "nota",
+        ]),
+        text: z.string().describe("El hecho a recordar, breve y en 3ª persona"),
+      }),
+    )
+    .describe(
+      "Hechos NUEVOS y duraderos del usuario para recordar. Vacío si no hay nada nuevo.",
+    ),
 });
 
 export type CoachResult = z.infer<typeof coachSchema>;
@@ -56,19 +74,39 @@ Reglas:
 - Ejercicios: estimá minutos y caloriesBurned según el peso del usuario que te paso. "Hice espalda/pecho/pierna" o "entrené" ≈ 45 min de musculación. "Corrí 20 min" usá esos minutos.
 - El alcohol es un food con sus calorías (una cerveza 330 ml ≈ 140 kcal; una copa de vino ≈ 125 kcal).
 - reply: confirmá en 1-2 frases lo que registraste, en tono coach. Si el mensaje es una pregunta o saludo sin datos para registrar, dejá foods y exercises vacíos y respondé como coach.
-- NO inventes alimentos ni ejercicios que el usuario no mencionó.`;
+- NO inventes alimentos ni ejercicios que el usuario no mencionó.
+
+MEMORIA:
+- Te paso la MEMORIA del usuario y sus ALIMENTOS FRECUENTES. Si dice "lo de siempre", "lo habitual", "mi desayuno de siempre", etc., resolvé qué alimentos son usando esa memoria/frecuentes y registralos concretos.
+- En "remember" guardá SOLO hechos nuevos y duraderos (un hábito estable, un objetivo, una lesión, un suplemento que toma seguido, su rutina semanal, o cuando diga "de ahora en más..." / "siempre..."). NO guardes lo que pasó un solo día, ni algo que ya esté en la MEMORIA. Si no hay nada nuevo, dejá remember vacío.`;
 
 /** Llama a Groq y devuelve la interpretación estructurada del mensaje. */
 export async function interpretMessage(input: {
   message: string;
   weight: number;
   hour: number;
+  memories?: { kind: string; text: string }[];
+  frequent?: string;
 }): Promise<CoachResult> {
+  const mem =
+    input.memories && input.memories.length
+      ? input.memories.map((m) => `- [${m.kind}] ${m.text}`).join("\n")
+      : "(sin datos aún)";
+  const freq = input.frequent?.trim() || "(sin datos aún)";
+
   const { object } = await generateObject({
     model: groq(COACH_MODEL),
     schema: coachSchema,
     system: COACH_SYSTEM,
-    prompt: `Hora local del usuario: ${input.hour}:00. Peso del usuario: ${input.weight} kg.\n\nMensaje: "${input.message}"`,
+    prompt: `Hora local del usuario: ${input.hour}:00. Peso del usuario: ${input.weight} kg.
+
+MEMORIA DEL USUARIO:
+${mem}
+
+ALIMENTOS FRECUENTES POR COMIDA (histórico):
+${freq}
+
+Mensaje: "${input.message}"`,
   });
   return object;
 }
