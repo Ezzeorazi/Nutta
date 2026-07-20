@@ -75,6 +75,14 @@ const schema = i.schema({
       sleepQuality: i.number().optional(), // 1-5
       steps: i.number().optional(),
     }),
+    // Fotos de progreso (la imagen vive en storage; acá va la metadata).
+    photos: i.entity({
+      owner: i.string().indexed(),
+      date: i.string().indexed(), // YYYY-MM-DD
+      path: i.string(),
+      fileId: i.string(), // id en $files (para resolver url y borrar)
+      createdAt: i.number(),
+    }),
     // Series de entrenamiento de fuerza (una fila por serie).
     strengthSets: i.entity({
       owner: i.string().indexed(),

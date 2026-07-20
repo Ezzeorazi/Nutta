@@ -70,6 +70,14 @@ export type MeasureEntry = {
   createdAt: number;
 };
 
+export type PhotoEntry = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  path: string;
+  fileId: string;
+  createdAt: number;
+};
+
 export type StrengthSet = {
   id: string;
   date: string; // YYYY-MM-DD

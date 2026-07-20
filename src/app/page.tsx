@@ -42,6 +42,7 @@ export default function Home() {
     supplements,
     supplementLogs,
     strengthSets,
+    photos,
     targetWeight,
     profile,
     saveProfile,
@@ -61,6 +62,8 @@ export default function Home() {
     toggleSupplement,
     addSet,
     removeSet,
+    addPhoto,
+    removePhoto,
   } = useNutta();
 
   const [tab, setTab] = useState<Tab>("chat");
@@ -263,10 +266,13 @@ export default function Home() {
           weights={weights}
           targetWeight={targetWeight}
           measures={measures}
+          photos={photos}
           today={today}
           addWeight={addWeight}
           setTargetWeight={setTargetWeight}
           addMeasure={addMeasure}
+          addPhoto={addPhoto}
+          removePhoto={removePhoto}
         />
       ) : tab === "historial" ? (
         <History foods={foods} exercises={exercises} goals={goals} />

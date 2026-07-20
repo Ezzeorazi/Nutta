@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { db, id } from "@/lib/db";
+import { downscaleImage } from "@/lib/image";
 import type { Profile } from "@/lib/nutrition";
 import type {
   BodyPart,
@@ -12,11 +13,15 @@ import type {
   MeasureEntry,
   MemoryFact,
   MemoryKind,
+  PhotoEntry,
   StrengthSet,
   Supplement,
   SupplementLog,
   WeightEntry,
 } from "@/lib/types";
+
+/** Foto de progreso con la URL ya resuelta desde $files. */
+export type ResolvedPhoto = PhotoEntry & { url?: string };
 
 /**
  * Capa de datos de Nutta sobre InstantDB.
@@ -42,7 +47,15 @@ export function useNutta() {
           supplements: {},
           supplementLogs: {},
           strengthSets: {},
+          photos: {},
         }
+      : null,
+  );
+  // $files es una entidad de sistema (no está en el esquema tipado): query
+  // aparte con cast acotado para resolver las URLs de las fotos.
+  const { data: filesData } = db.useQuery(
+    user
+      ? ({ $files: {} } as unknown as Parameters<typeof db.useQuery>[0])
       : null,
   );
 
@@ -94,6 +107,19 @@ export function useNutta() {
   )
     .filter((s) => s.owner === owner)
     .sort((a, b) => a.createdAt - b.createdAt);
+  // URL de cada archivo, por id, desde la entidad de sistema $files.
+  const fileUrlById = new Map<string, string>();
+  const files = (filesData as unknown as { $files?: { id: string; url?: string }[] } | undefined)
+    ?.$files;
+  for (const f of files ?? []) {
+    if (f.url) fileUrlById.set(f.id, f.url);
+  }
+  const photos: ResolvedPhoto[] = (
+    (data?.photos ?? []) as unknown as (PhotoEntry & { owner: string })[]
+  )
+    .filter((p) => p.owner === owner)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((p) => ({ ...p, url: fileUrlById.get(p.fileId) }));
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -334,6 +360,36 @@ export function useNutta() {
   const removeSet = (sid: string) =>
     db.transact(db.tx.strengthSets[sid].delete());
 
+  /** Sube una foto de progreso (la redimensiona antes) y guarda su metadata. */
+  const addPhoto = async (file: File, date: string) => {
+    if (!user) return;
+    const blob = await downscaleImage(file);
+    const path = `progress/${user.id}/${date}-${id()}.jpg`;
+    const res = await db.storage.uploadFile(path, blob, {
+      contentType: "image/jpeg",
+    });
+    await db.transact(
+      db.tx.photos[id()].update({
+        owner: user.id,
+        date,
+        path,
+        fileId: res.data.id,
+        createdAt: Date.now(),
+      }),
+    );
+  };
+  const removePhoto = (photoId: string, fileId: string) => {
+    const filesTx = (
+      db.tx as unknown as {
+        $files: Record<string, { delete: () => unknown }>;
+      }
+    ).$files;
+    db.transact([
+      db.tx.photos[photoId].delete(),
+      filesTx[fileId].delete(),
+    ] as Parameters<typeof db.transact>[0]);
+  };
+
   /** Marca/desmarca un suplemento como tomado en un día. */
   const toggleSupplement = (supId: string, date: string) => {
     if (!user) return;
@@ -378,6 +434,7 @@ export function useNutta() {
     supplements,
     supplementLogs,
     strengthSets,
+    photos,
     targetWeight,
     profile,
     profileId,
@@ -401,5 +458,7 @@ export function useNutta() {
     toggleSupplement,
     addSet,
     removeSet,
+    addPhoto,
+    removePhoto,
   };
 }
