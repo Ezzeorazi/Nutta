@@ -170,16 +170,6 @@ export default function Chat({
             >
               🎙️
             </button>
-            <button
-              type="button"
-              onClick={() =>
-                flashHint("📷 El análisis de fotos llega en una próxima fase.")
-              }
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-card text-lg text-muted active:scale-95"
-              aria-label="Foto de comida"
-            >
-              📷
-            </button>
             <div className="flex flex-1 items-end gap-2 rounded-2xl border border-border bg-card px-3 py-1.5">
               <textarea
                 value={text}
