@@ -1,5 +1,5 @@
 import { groq } from "@ai-sdk/groq";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
 /**
@@ -109,4 +109,26 @@ ${freq}
 Mensaje: "${input.message}"`,
   });
   return object;
+}
+
+export const COACH_ANALYSIS_SYSTEM = `Sos Nutta, entrenador personal. Analizás los datos reales de la semana del usuario y le hablás DIRECTO, como un coach de verdad: sin rodeos, concreto y motivador pero honesto. Español rioplatense (de vos), 4-6 frases como máximo.
+
+Estructura: 1) destacá lo que hizo bien, 2) marcá sin vueltas lo que está fallando, 3) cerrá con 1-2 acciones claras para la semana que viene. NO inventes datos que no estén en el resumen. Nada de listas largas ni palabrería de ChatGPT.`;
+
+/** Análisis semanal en tono entrenador, a partir del resumen de datos. */
+export async function analyzeWeek(input: {
+  summary: string;
+  memories?: { kind: string; text: string }[];
+}): Promise<string> {
+  const mem =
+    input.memories && input.memories.length
+      ? input.memories.map((m) => `- [${m.kind}] ${m.text}`).join("\n")
+      : "(sin datos)";
+
+  const { text } = await generateText({
+    model: groq(COACH_MODEL),
+    system: COACH_ANALYSIS_SYSTEM,
+    prompt: `Datos de la última semana:\n${input.summary}\n\nMEMORIA DEL USUARIO:\n${mem}\n\nDale tu análisis de coach y las recomendaciones.`,
+  });
+  return text.trim();
 }

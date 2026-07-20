@@ -19,7 +19,7 @@ import { db } from "@/lib/db";
 import { computeGoals } from "@/lib/nutrition";
 import { dailyScore } from "@/lib/score";
 import { buildInsights } from "@/lib/insights";
-import { frequentFoodsSummary } from "@/lib/coachContext";
+import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
 import { useNutta } from "@/lib/useNutta";
 import {
   DEFAULT_GOALS,
@@ -121,6 +121,34 @@ export default function Home() {
     }
   };
 
+  // Pide al Coach IA un análisis de la última semana y lo publica en el chat.
+  const runWeeklyAnalysis = async () => {
+    if (!profile || sending) return;
+    setTab("chat");
+    addMessage("user", "📊 Analizá mi semana");
+    setSending(true);
+    try {
+      const res = await fetch("/api/coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          summary: weeklySummary(foods, exercises, goals, today),
+          memories: memories.map((m) => ({ kind: m.kind, text: m.text })),
+        }),
+      });
+      const data = (await res.json()) as { analysis?: string; error?: string };
+      if (!res.ok) throw new Error(data?.error ?? "error");
+      addMessage("assistant", data.analysis || "No tengo suficientes datos aún.");
+    } catch {
+      addMessage(
+        "assistant",
+        "Uy, no pude generar el análisis ahora 😅 Probá de nuevo en un momento.",
+      );
+    } finally {
+      setSending(false);
+    }
+  };
+
   const todayFoods = foods.filter((f) => f.date === today);
   const todayEx = exercises.filter((e) => e.date === today);
 
@@ -181,6 +209,7 @@ export default function Home() {
           onSend={sendChat}
           sending={sending}
           onOpenMemory={() => setMemoryOpen(true)}
+          onAnalyze={runWeeklyAnalysis}
         />
       ) : tab === "historial" ? (
         <History foods={foods} exercises={exercises} goals={goals} />

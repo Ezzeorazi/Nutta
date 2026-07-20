@@ -37,11 +37,13 @@ export default function Chat({
   messages,
   onSend,
   onOpenMemory,
+  onAnalyze,
   sending = false,
 }: {
   messages: ChatMessage[];
   onSend: (text: string) => void;
   onOpenMemory?: () => void;
+  onAnalyze?: () => void;
   sending?: boolean;
 }) {
   const [text, setText] = useState("");
@@ -103,15 +105,27 @@ export default function Chat({
           Nut<span className="text-primary">ta</span>
           <span className="ml-1 text-sm font-normal text-muted">tu coach</span>
         </h1>
-        {onOpenMemory && (
-          <button
-            onClick={onOpenMemory}
-            aria-label="Memoria"
-            className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-lg active:scale-95"
-          >
-            🧠
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {onAnalyze && (
+            <button
+              onClick={onAnalyze}
+              disabled={sending}
+              aria-label="Analizar mi semana"
+              className="grid h-9 w-9 place-items-center rounded-full bg-accent/10 text-lg active:scale-95 disabled:opacity-40"
+            >
+              📊
+            </button>
+          )}
+          {onOpenMemory && (
+            <button
+              onClick={onOpenMemory}
+              aria-label="Memoria"
+              className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-lg active:scale-95"
+            >
+              🧠
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Historial */}
