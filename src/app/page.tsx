@@ -7,6 +7,7 @@ import Chat from "@/components/Chat";
 import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
 import History from "@/components/History";
+import InsightsCard from "@/components/InsightsCard";
 import MacroBar from "@/components/MacroBar";
 import MemorySheet from "@/components/MemorySheet";
 import ScoreCard from "@/components/ScoreCard";
@@ -17,6 +18,7 @@ import { uid } from "@/components/Sheet";
 import { db } from "@/lib/db";
 import { computeGoals } from "@/lib/nutrition";
 import { dailyScore } from "@/lib/score";
+import { buildInsights } from "@/lib/insights";
 import { frequentFoodsSummary } from "@/lib/coachContext";
 import { useNutta } from "@/lib/useNutta";
 import {
@@ -139,6 +141,10 @@ export default function Home() {
     () => dailyScore(todayFoods, todayEx, goals),
     [todayFoods, todayEx, goals],
   );
+  const insights = useMemo(
+    () => buildInsights(foods, exercises, goals, today),
+    [foods, exercises, goals, today],
+  );
 
   const splash = (
     <div className="flex flex-1 items-center justify-center text-3xl font-bold">
@@ -231,6 +237,8 @@ export default function Home() {
               />
             </div>
           </section>
+
+          <InsightsCard insights={insights} />
 
           {/* Timeline cronológico del día */}
           <Timeline
