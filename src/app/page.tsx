@@ -275,7 +275,17 @@ export default function Home() {
           removePhoto={removePhoto}
         />
       ) : tab === "historial" ? (
-        <History foods={foods} exercises={exercises} goals={goals} />
+        <History
+          foods={foods}
+          exercises={exercises}
+          goals={goals}
+          strengthSets={strengthSets}
+          weights={weights}
+          metrics={metrics}
+          photos={photos}
+          targetWeight={targetWeight}
+          today={today}
+        />
       ) : (
         <HoyTab
           weight={profile.weight}

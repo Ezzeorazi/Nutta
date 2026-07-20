@@ -15,16 +15,41 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import AchievementsCard from "@/components/AchievementsCard";
 import { averages, lastNDays } from "@/lib/analytics";
-import type { Goals, ExerciseEntry, FoodEntry } from "@/lib/types";
+import type {
+  DailyMetrics,
+  ExerciseEntry,
+  FoodEntry,
+  Goals,
+  PhotoEntry,
+  StrengthSet,
+  WeightEntry,
+} from "@/lib/types";
 
 type Props = {
   foods: FoodEntry[];
   exercises: ExerciseEntry[];
   goals: Goals;
+  strengthSets: StrengthSet[];
+  weights: WeightEntry[];
+  metrics: DailyMetrics[];
+  photos: Pick<PhotoEntry, "id">[];
+  targetWeight?: number;
+  today: string;
 };
 
-export default function History({ foods, exercises, goals }: Props) {
+export default function History({
+  foods,
+  exercises,
+  goals,
+  strengthSets,
+  weights,
+  metrics,
+  photos,
+  targetWeight,
+  today,
+}: Props) {
   const stats = useMemo(
     () => lastNDays(foods, exercises, 7),
     [foods, exercises],
@@ -43,8 +68,19 @@ export default function History({ foods, exercises, goals }: Props) {
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
       <header>
         <h1 className="text-2xl font-bold">Historial</h1>
-        <p className="text-sm text-muted">Últimos 7 días</p>
+        <p className="text-sm text-muted">Rachas, logros y últimos 7 días</p>
       </header>
+
+      <AchievementsCard
+        foods={foods}
+        exercises={exercises}
+        strengthSets={strengthSets}
+        weights={weights}
+        metrics={metrics}
+        photos={photos}
+        targetWeight={targetWeight}
+        today={today}
+      />
 
       {/* Promedios */}
       <section className="grid grid-cols-3 gap-3">
