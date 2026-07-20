@@ -17,6 +17,8 @@ import type {
   MemoryFact,
   MemoryKind,
   PhotoEntry,
+  Recipe,
+  RecipeItem,
   StrengthSet,
   Supplement,
   SupplementLog,
@@ -52,6 +54,7 @@ export function useNutta() {
           strengthSets: {},
           customGoals: {},
           favorites: {},
+          recipes: {},
           photos: {},
         }
       : null,
@@ -122,6 +125,27 @@ export function useNutta() {
   )
     .filter((f) => f.owner === owner)
     .sort((a, b) => b.createdAt - a.createdAt);
+  const recipes: Recipe[] = (
+    (data?.recipes ?? []) as unknown as {
+      id: string;
+      owner: string;
+      name: string;
+      items: string;
+      createdAt: number;
+    }[]
+  )
+    .filter((r) => r.owner === owner)
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .map((r) => {
+      let items: RecipeItem[] = [];
+      try {
+        const parsed = JSON.parse(r.items);
+        if (Array.isArray(parsed)) items = parsed;
+      } catch {
+        // receta sin items válidos → lista vacía
+      }
+      return { id: r.id, name: r.name, items, createdAt: r.createdAt };
+    });
   // URL de cada archivo, por id, desde la entidad de sistema $files.
   const fileUrlById = new Map<string, string>();
   const files = (filesData as unknown as { $files?: { id: string; url?: string }[] } | undefined)
@@ -256,6 +280,20 @@ export function useNutta() {
   };
   const removeFavorite = (fid: string) =>
     db.transact(db.tx.favorites[fid].delete());
+
+  const addRecipe = (name: string, items: RecipeItem[]) => {
+    if (!user || !name.trim() || items.length === 0) return;
+    db.transact(
+      db.tx.recipes[id()].update({
+        owner: user.id,
+        name: name.trim(),
+        items: JSON.stringify(items),
+        createdAt: Date.now(),
+      }),
+    );
+  };
+  const removeRecipe = (rid: string) =>
+    db.transact(db.tx.recipes[rid].delete());
 
   const addExercise = (entry: ExerciseEntry) => {
     if (!user) return;
@@ -494,6 +532,7 @@ export function useNutta() {
     strengthSets,
     customGoals,
     favorites,
+    recipes,
     photos,
     targetWeight,
     profile,
@@ -503,6 +542,8 @@ export function useNutta() {
     removeFood,
     addFavorite,
     removeFavorite,
+    addRecipe,
+    removeRecipe,
     addExercise,
     removeExercise,
     addMessage,

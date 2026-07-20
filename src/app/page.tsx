@@ -44,6 +44,7 @@ export default function Home() {
     strengthSets,
     customGoals,
     favorites,
+    recipes,
     photos,
     targetWeight,
     profile,
@@ -52,6 +53,8 @@ export default function Home() {
     removeFood,
     addFavorite,
     removeFavorite,
+    addRecipe,
+    removeRecipe,
     addExercise,
     removeExercise,
     addMessage,
@@ -309,6 +312,7 @@ export default function Home() {
           todayEx={todayEx}
           foods={foods}
           favorites={favorites}
+          recipes={recipes}
           supplements={supplements}
           supplementLogs={supplementLogs}
           insights={insights}
@@ -319,6 +323,8 @@ export default function Home() {
           removeFood={removeFood}
           addFavorite={addFavorite}
           removeFavorite={removeFavorite}
+          addRecipe={addRecipe}
+          removeRecipe={removeRecipe}
           addExercise={addExercise}
           removeExercise={removeExercise}
           setMetric={setMetric}

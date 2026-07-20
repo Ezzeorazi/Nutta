@@ -101,6 +101,13 @@ const schema = i.schema({
       weight: i.number(), // kg
       createdAt: i.number(),
     }),
+    // Recetas: combos de alimentos que se agregan de una.
+    recipes: i.entity({
+      owner: i.string().indexed(),
+      name: i.string(),
+      items: i.string(), // JSON: [{name, qty, calories, protein, carbs, fat}]
+      createdAt: i.number(),
+    }),
     // Alimentos favoritos (guardados para re-cargar en un toque).
     favorites: i.entity({
       owner: i.string().indexed(),

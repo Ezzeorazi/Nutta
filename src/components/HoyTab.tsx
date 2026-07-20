@@ -5,6 +5,7 @@ import CalorieRing from "@/components/CalorieRing";
 import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
 import InsightsCard from "@/components/InsightsCard";
+import RecipesSheet from "@/components/RecipesSheet";
 import MacroBar from "@/components/MacroBar";
 import ScoreCard from "@/components/ScoreCard";
 import SupplementsCard from "@/components/SupplementsCard";
@@ -19,9 +20,12 @@ import {
   type FavoriteFood,
   type FoodEntry,
   type MealType,
+  type Recipe,
+  type RecipeItem,
   type Supplement,
   type SupplementLog,
 } from "@/lib/types";
+import { uid } from "@/components/Sheet";
 
 type Totals = {
   calories: number;
@@ -41,6 +45,7 @@ export default function HoyTab({
   todayEx,
   foods,
   favorites,
+  recipes,
   supplements,
   supplementLogs,
   insights,
@@ -51,6 +56,8 @@ export default function HoyTab({
   removeFood,
   addFavorite,
   removeFavorite,
+  addRecipe,
+  removeRecipe,
   addExercise,
   removeExercise,
   setMetric,
@@ -67,6 +74,7 @@ export default function HoyTab({
   todayEx: ExerciseEntry[];
   foods: FoodEntry[];
   favorites: FavoriteFood[];
+  recipes: Recipe[];
   supplements: Supplement[];
   supplementLogs: SupplementLog[];
   insights: Insight[];
@@ -77,6 +85,8 @@ export default function HoyTab({
   removeFood: (id: string) => void;
   addFavorite: (fav: Omit<FavoriteFood, "id" | "createdAt">) => void;
   removeFavorite: (id: string) => void;
+  addRecipe: (name: string, items: RecipeItem[]) => void;
+  removeRecipe: (id: string) => void;
   addExercise: (e: ExerciseEntry) => void;
   removeExercise: (id: string) => void;
   setMetric: (
@@ -89,6 +99,7 @@ export default function HoyTab({
 }) {
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
+  const [recipesOpen, setRecipesOpen] = useState(false);
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
@@ -188,6 +199,12 @@ export default function HoyTab({
           >
             + Ejercicio
           </button>
+          <button
+            onClick={() => setRecipesOpen(true)}
+            className="rounded-full border border-border px-3 py-1.5 text-sm transition active:scale-95 hover:border-primary"
+          >
+            🍲 Recetas
+          </button>
         </div>
       </section>
 
@@ -219,6 +236,19 @@ export default function HoyTab({
           onAdd={(entry) => {
             addExercise(entry);
             setExOpen(false);
+          }}
+        />
+      )}
+      {recipesOpen && (
+        <RecipesSheet
+          recipes={recipes}
+          onClose={() => setRecipesOpen(false)}
+          onCreate={addRecipe}
+          onRemove={removeRecipe}
+          onLog={(items, meal) => {
+            for (const it of items) {
+              addFood({ id: uid(), date: today, meal, ...it });
+            }
           }}
         />
       )}

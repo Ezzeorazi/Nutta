@@ -191,6 +191,22 @@ export type MemoryFact = {
   createdAt: number;
 };
 
+export type RecipeItem = {
+  name: string;
+  qty: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+};
+
+export type Recipe = {
+  id: string;
+  name: string;
+  items: RecipeItem[];
+  createdAt: number;
+};
+
 export type FavoriteFood = {
   id: string;
   name: string;
