@@ -33,6 +33,13 @@ const schema = i.schema({
       minutes: i.number(),
       caloriesBurned: i.number(),
     }),
+    // Historial del chat conversacional (estilo WhatsApp).
+    messages: i.entity({
+      owner: i.string().indexed(),
+      role: i.string(), // "user" | "assistant"
+      text: i.string(),
+      createdAt: i.number().indexed(), // Date.now() — para ordenar
+    }),
   },
 });
 

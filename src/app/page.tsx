@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import BottomNav, { type Tab } from "@/components/BottomNav";
 import CalorieRing from "@/components/CalorieRing";
+import Chat from "@/components/Chat";
 import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
 import History from "@/components/History";
@@ -23,12 +24,14 @@ export default function Home() {
     user,
     foods,
     exercises,
+    messages,
     profile,
     saveProfile,
     addFood,
     removeFood,
     addExercise,
     removeExercise,
+    addMessage,
   } = useNutta();
 
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
@@ -82,7 +85,9 @@ export default function Home() {
 
   return (
     <>
-      {tab === "historial" ? (
+      {tab === "chat" ? (
+        <Chat messages={messages} onSend={(t) => addMessage("user", t)} />
+      ) : tab === "historial" ? (
         <History foods={foods} exercises={exercises} goals={goals} />
       ) : (
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">

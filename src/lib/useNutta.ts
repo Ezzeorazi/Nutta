@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { db, id } from "@/lib/db";
 import type { Profile } from "@/lib/nutrition";
-import type { ExerciseEntry, FoodEntry } from "@/lib/types";
+import type { ChatMessage, ExerciseEntry, FoodEntry } from "@/lib/types";
 
 /**
  * Capa de datos de Nutta sobre InstantDB.
@@ -16,7 +16,7 @@ import type { ExerciseEntry, FoodEntry } from "@/lib/types";
 export function useNutta() {
   const { isLoading: authLoading, user } = db.useAuth();
   const { isLoading: dataLoading, data } = db.useQuery(
-    user ? { profiles: {}, foods: {}, exercises: {} } : null,
+    user ? { profiles: {}, foods: {}, exercises: {}, messages: {} } : null,
   );
 
   const owner = user?.id;
@@ -27,6 +27,11 @@ export function useNutta() {
   const exercises = (
     (data?.exercises ?? []) as unknown as (ExerciseEntry & { owner: string })[]
   ).filter((e) => e.owner === owner);
+  const messages = (
+    (data?.messages ?? []) as unknown as (ChatMessage & { owner: string })[]
+  )
+    .filter((m) => m.owner === owner)
+    .sort((a, b) => a.createdAt - b.createdAt);
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -141,12 +146,30 @@ export function useNutta() {
   const removeExercise = (eid: string) =>
     db.transact(db.tx.exercises[eid].delete());
 
+  /** Agrega un mensaje al historial del chat. Devuelve su id. */
+  const addMessage = (role: ChatMessage["role"], text: string) => {
+    if (!user) return null;
+    const mid = id();
+    db.transact(
+      db.tx.messages[mid].update({
+        owner: user.id,
+        role,
+        text,
+        createdAt: Date.now(),
+      }),
+    );
+    return mid;
+  };
+  const removeMessage = (mid: string) =>
+    db.transact(db.tx.messages[mid].delete());
+
   return {
     authLoading,
     dataLoading,
     user,
     foods,
     exercises,
+    messages,
     profile,
     profileId,
     saveProfile,
@@ -154,5 +177,7 @@ export function useNutta() {
     removeFood,
     addExercise,
     removeExercise,
+    addMessage,
+    removeMessage,
   };
 }
