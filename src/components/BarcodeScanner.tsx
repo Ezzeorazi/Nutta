@@ -12,7 +12,9 @@ export default function BarcodeScanner({ onDetected, onClose }: Props) {
   const doneRef = useRef(false);
   // callback estable para no reiniciar la cámara en cada render
   const cbRef = useRef(onDetected);
-  cbRef.current = onDetected;
+  useEffect(() => {
+    cbRef.current = onDetected;
+  }, [onDetected]);
 
   const [error, setError] = useState<string | null>(null);
   const [manual, setManual] = useState("");
