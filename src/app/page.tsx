@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import BottomNav, { type Tab } from "@/components/BottomNav";
 import Chat from "@/components/Chat";
+import GymTab from "@/components/GymTab";
 import History from "@/components/History";
 import HoyTab from "@/components/HoyTab";
 import MemorySheet from "@/components/MemorySheet";
@@ -40,6 +41,7 @@ export default function Home() {
     measures,
     supplements,
     supplementLogs,
+    strengthSets,
     targetWeight,
     profile,
     saveProfile,
@@ -57,6 +59,8 @@ export default function Home() {
     addSupplement,
     removeSupplement,
     toggleSupplement,
+    addSet,
+    removeSet,
   } = useNutta();
 
   const [tab, setTab] = useState<Tab>("chat");
@@ -234,6 +238,13 @@ export default function Home() {
           sending={sending}
           onOpenMemory={() => setMemoryOpen(true)}
           onAnalyze={runWeeklyAnalysis}
+        />
+      ) : tab === "gym" ? (
+        <GymTab
+          strengthSets={strengthSets}
+          today={today}
+          onAddSet={addSet}
+          onRemoveSet={removeSet}
         />
       ) : tab === "progreso" ? (
         <ProgresoTab

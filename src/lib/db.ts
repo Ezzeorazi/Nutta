@@ -75,6 +75,15 @@ const schema = i.schema({
       sleepQuality: i.number().optional(), // 1-5
       steps: i.number().optional(),
     }),
+    // Series de entrenamiento de fuerza (una fila por serie).
+    strengthSets: i.entity({
+      owner: i.string().indexed(),
+      date: i.string().indexed(), // YYYY-MM-DD
+      exercise: i.string(),
+      reps: i.number(),
+      weight: i.number(), // kg
+      createdAt: i.number(),
+    }),
     // Suplementos que toma el usuario (su lista).
     supplements: i.entity({
       owner: i.string().indexed(),

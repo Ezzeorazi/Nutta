@@ -12,6 +12,7 @@ import type {
   MeasureEntry,
   MemoryFact,
   MemoryKind,
+  StrengthSet,
   Supplement,
   SupplementLog,
   WeightEntry,
@@ -40,6 +41,7 @@ export function useNutta() {
           measures: {},
           supplements: {},
           supplementLogs: {},
+          strengthSets: {},
         }
       : null,
   );
@@ -85,6 +87,13 @@ export function useNutta() {
       owner: string;
     })[]
   ).filter((s) => s.owner === owner);
+  const strengthSets = (
+    (data?.strengthSets ?? []) as unknown as (StrengthSet & {
+      owner: string;
+    })[]
+  )
+    .filter((s) => s.owner === owner)
+    .sort((a, b) => a.createdAt - b.createdAt);
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -303,6 +312,28 @@ export function useNutta() {
   const removeSupplement = (sid: string) =>
     db.transact(db.tx.supplements[sid].delete());
 
+  /** Registra una serie de fuerza. */
+  const addSet = (
+    exercise: string,
+    reps: number,
+    weight: number,
+    date: string,
+  ) => {
+    if (!user || !exercise.trim() || !(reps > 0)) return;
+    db.transact(
+      db.tx.strengthSets[id()].update({
+        owner: user.id,
+        date,
+        exercise: exercise.trim(),
+        reps,
+        weight: weight || 0,
+        createdAt: Date.now(),
+      }),
+    );
+  };
+  const removeSet = (sid: string) =>
+    db.transact(db.tx.strengthSets[sid].delete());
+
   /** Marca/desmarca un suplemento como tomado en un día. */
   const toggleSupplement = (supId: string, date: string) => {
     if (!user) return;
@@ -346,6 +377,7 @@ export function useNutta() {
     measures,
     supplements,
     supplementLogs,
+    strengthSets,
     targetWeight,
     profile,
     profileId,
@@ -367,5 +399,7 @@ export function useNutta() {
     addSupplement,
     removeSupplement,
     toggleSupplement,
+    addSet,
+    removeSet,
   };
 }

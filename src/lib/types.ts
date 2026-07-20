@@ -70,6 +70,31 @@ export type MeasureEntry = {
   createdAt: number;
 };
 
+export type StrengthSet = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  exercise: string;
+  reps: number;
+  weight: number; // kg
+  createdAt: number;
+};
+
+/** Ejercicios de fuerza comunes para alta rápida. */
+export const COMMON_LIFTS = [
+  "Press banca",
+  "Sentadilla",
+  "Peso muerto",
+  "Press militar",
+  "Remo con barra",
+  "Dominadas",
+  "Jalón al pecho",
+  "Curl de bíceps",
+  "Extensión de tríceps",
+  "Press inclinado",
+  "Hip thrust",
+  "Prensa",
+];
+
 export type Supplement = {
   id: string;
   name: string;

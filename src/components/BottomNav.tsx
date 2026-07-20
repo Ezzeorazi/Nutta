@@ -1,6 +1,6 @@
 "use client";
 
-export type Tab = "chat" | "hoy" | "progreso" | "historial";
+export type Tab = "chat" | "hoy" | "gym" | "progreso" | "historial";
 
 type Props = {
   tab: Tab;
@@ -10,6 +10,7 @@ type Props = {
 const items: { key: Tab; label: string; icon: string }[] = [
   { key: "chat", label: "Chat", icon: "💬" },
   { key: "hoy", label: "Hoy", icon: "🍽️" },
+  { key: "gym", label: "Gym", icon: "🏋️" },
   { key: "progreso", label: "Progreso", icon: "📈" },
   { key: "historial", label: "Historial", icon: "📊" },
 ];
