@@ -16,12 +16,15 @@ import {
   YAxis,
 } from "recharts";
 import AchievementsCard from "@/components/AchievementsCard";
+import ExportPanel from "@/components/ExportPanel";
 import { averages, lastNDays } from "@/lib/analytics";
 import type {
+  CustomGoal,
   DailyMetrics,
   ExerciseEntry,
   FoodEntry,
   Goals,
+  MeasureEntry,
   PhotoEntry,
   StrengthSet,
   WeightEntry,
@@ -34,6 +37,8 @@ type Props = {
   strengthSets: StrengthSet[];
   weights: WeightEntry[];
   metrics: DailyMetrics[];
+  measures: MeasureEntry[];
+  customGoals: CustomGoal[];
   photos: Pick<PhotoEntry, "id">[];
   targetWeight?: number;
   today: string;
@@ -46,6 +51,8 @@ export default function History({
   strengthSets,
   weights,
   metrics,
+  measures,
+  customGoals,
   photos,
   targetWeight,
   today,
@@ -193,6 +200,16 @@ export default function History({
           Registrá comidas y ejercicio para ver tu progreso acá.
         </p>
       )}
+
+      <ExportPanel
+        foods={foods}
+        exercises={exercises}
+        strengthSets={strengthSets}
+        weights={weights}
+        measures={measures}
+        metrics={metrics}
+        customGoals={customGoals}
+      />
     </main>
   );
 }

@@ -289,6 +289,8 @@ export default function Home() {
           strengthSets={strengthSets}
           weights={weights}
           metrics={metrics}
+          measures={measures}
+          customGoals={customGoals}
           photos={photos}
           targetWeight={targetWeight}
           today={today}
