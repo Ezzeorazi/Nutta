@@ -46,6 +46,18 @@ export type WeightEntry = {
   createdAt: number;
 };
 
+export type DailyMetrics = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  water?: number; // litros
+  sleepHours?: number;
+  sleepQuality?: number; // 1-5
+  steps?: number;
+};
+
+/** Meta diaria de hidratación (litros). */
+export const WATER_GOAL_L = 2.5;
+
 export type MemoryKind =
   | "habito"
   | "alimento"

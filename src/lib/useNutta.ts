@@ -5,6 +5,7 @@ import { db, id } from "@/lib/db";
 import type { Profile } from "@/lib/nutrition";
 import type {
   ChatMessage,
+  DailyMetrics,
   ExerciseEntry,
   FoodEntry,
   MemoryFact,
@@ -31,6 +32,7 @@ export function useNutta() {
           messages: {},
           memories: {},
           weights: {},
+          metrics: {},
         }
       : null,
   );
@@ -58,6 +60,9 @@ export function useNutta() {
   )
     .filter((w) => w.owner === owner)
     .sort((a, b) => a.date.localeCompare(b.date));
+  const metrics = (
+    (data?.metrics ?? []) as unknown as (DailyMetrics & { owner: string })[]
+  ).filter((m) => m.owner === owner);
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -241,6 +246,21 @@ export function useNutta() {
   const removeWeight = (wid: string) =>
     db.transact(db.tx.weights[wid].delete());
 
+  /** Actualiza (o crea) las métricas de bienestar de un día. */
+  const setMetric = (
+    date: string,
+    patch: Partial<Pick<DailyMetrics, "water" | "sleepHours" | "sleepQuality" | "steps">>,
+  ) => {
+    if (!user) return;
+    const existing = metrics.find((m) => m.date === date) as
+      | (DailyMetrics & { id: string })
+      | undefined;
+    const mid = existing?.id ?? id();
+    db.transact(
+      db.tx.metrics[mid].update({ owner: user.id, date, ...patch }),
+    );
+  };
+
   return {
     authLoading,
     dataLoading,
@@ -250,6 +270,7 @@ export function useNutta() {
     messages,
     memories,
     weights,
+    metrics,
     targetWeight,
     profile,
     profileId,
@@ -265,5 +286,6 @@ export function useNutta() {
     addWeight,
     removeWeight,
     setTargetWeight,
+    setMetric,
   };
 }

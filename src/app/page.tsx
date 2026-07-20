@@ -13,6 +13,7 @@ import MemorySheet from "@/components/MemorySheet";
 import ScoreCard from "@/components/ScoreCard";
 import Timeline from "@/components/Timeline";
 import WeightPanel from "@/components/WeightPanel";
+import WellbeingCard from "@/components/WellbeingCard";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
 import { uid } from "@/components/Sheet";
@@ -44,6 +45,7 @@ export default function Home() {
     messages,
     memories,
     weights,
+    metrics,
     targetWeight,
     profile,
     saveProfile,
@@ -56,6 +58,7 @@ export default function Home() {
     removeMemory,
     addWeight,
     setTargetWeight,
+    setMetric,
   } = useNutta();
 
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
@@ -160,6 +163,7 @@ export default function Home() {
 
   const todayFoods = foods.filter((f) => f.date === today);
   const todayEx = exercises.filter((e) => e.date === today);
+  const todayMetrics = metrics.find((m) => m.date === today);
 
   const totals = useMemo(() => {
     const t = { calories: 0, protein: 0, carbs: 0, fat: 0, burned: 0 };
@@ -175,8 +179,8 @@ export default function Home() {
 
   const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
   const score = useMemo(
-    () => dailyScore(todayFoods, todayEx, goals),
-    [todayFoods, todayEx, goals],
+    () => dailyScore(todayFoods, todayEx, goals, todayMetrics),
+    [todayFoods, todayEx, goals, todayMetrics],
   );
   const insights = useMemo(
     () => buildInsights(foods, exercises, goals, today),
@@ -289,6 +293,12 @@ export default function Home() {
               />
             </div>
           </section>
+
+          <WellbeingCard
+            metrics={todayMetrics}
+            onSetWater={(l) => setMetric(today, { water: l })}
+            onSetSleep={(h) => setMetric(today, { sleepHours: h })}
+          />
 
           <InsightsCard insights={insights} />
 

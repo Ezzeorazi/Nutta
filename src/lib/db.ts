@@ -58,6 +58,15 @@ const schema = i.schema({
       kg: i.number(),
       createdAt: i.number(),
     }),
+    // Métricas diarias de bienestar (una fila por día): agua, sueño, pasos.
+    metrics: i.entity({
+      owner: i.string().indexed(),
+      date: i.string().indexed(), // YYYY-MM-DD
+      water: i.number().optional(), // litros
+      sleepHours: i.number().optional(),
+      sleepQuality: i.number().optional(), // 1-5
+      steps: i.number().optional(),
+    }),
   },
 });
 

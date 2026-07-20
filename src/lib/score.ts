@@ -1,4 +1,10 @@
-import type { ExerciseEntry, FoodEntry, Goals } from "@/lib/types";
+import {
+  WATER_GOAL_L,
+  type DailyMetrics,
+  type ExerciseEntry,
+  type FoodEntry,
+  type Goals,
+} from "@/lib/types";
 
 /** Bebidas alcohólicas (penalizan el score). */
 const ALCOHOL =
@@ -31,16 +37,25 @@ function label(score: number): string {
   return "A arrancar";
 }
 
+/** Calidad del sueño según horas (ideal 7-9 h). */
+function sleepRatio(hours: number): number {
+  if (hours <= 0) return 0;
+  if (hours >= 7 && hours <= 9) return 1;
+  if (hours < 7) return clamp((hours / 7) * 0.95, 0, 0.95);
+  return clamp(1 - (hours - 9) * 0.1, 0.5, 0.9); // dormir de más resta un poco
+}
+
 /**
  * Score diario 0-100 a partir de lo registrado hoy y las metas.
- * Factores actuales: proteína (30), calorías (25), macros (15),
- * entrenamiento (30) y penalización por alcohol (−15).
- * Sueño y agua se sumarán cuando se registren (Fase 3).
+ * Factores: proteína, calorías, macros, entrenamiento y —si se registran—
+ * sueño y agua. El puntaje se normaliza sobre los factores presentes, así
+ * que NO registrar sueño/agua no penaliza. El alcohol resta puntos.
  */
 export function dailyScore(
   foods: FoodEntry[],
   exercises: ExerciseEntry[],
   goals: Goals,
+  metrics?: Pick<DailyMetrics, "water" | "sleepHours">,
 ): DailyScore {
   const protein = foods.reduce((s, f) => s + f.protein, 0);
   const calories = foods.reduce((s, f) => s + f.calories, 0);
@@ -49,28 +64,51 @@ export function dailyScore(
   const trained = exercises.length > 0;
   const hasAlcohol = foods.some((f) => ALCOHOL.test(f.name));
 
-  const pPts = Math.round(clamp(protein / (goals.protein || 1), 0, 1) * 30);
-  const cPts = Math.round(closeness(calories, goals.calories, 0.35) * 25);
-  const mPts = Math.round(
-    ((closeness(carbs, goals.carbs, 0.5) + closeness(fat, goals.fat, 0.5)) /
-      2) *
-      15,
-  );
-  const tPts = trained ? 30 : 0;
-  const alcPen = hasAlcohol ? 15 : 0;
-
-  const score = clamp(
-    Math.round(pPts + cPts + mPts + tPts - alcPen),
-    0,
-    100,
-  );
-
-  const parts: ScorePart[] = [
-    { label: "Proteína", points: pPts, max: 30 },
-    { label: "Calorías", points: cPts, max: 25 },
-    { label: "Macros", points: mPts, max: 15 },
-    { label: "Entrenamiento", points: tPts, max: 30 },
+  const factors: { label: string; weight: number; ratio: number }[] = [
+    {
+      label: "Proteína",
+      weight: 30,
+      ratio: clamp(protein / (goals.protein || 1), 0, 1),
+    },
+    { label: "Calorías", weight: 25, ratio: closeness(calories, goals.calories, 0.35) },
+    {
+      label: "Macros",
+      weight: 15,
+      ratio:
+        (closeness(carbs, goals.carbs, 0.5) +
+          closeness(fat, goals.fat, 0.5)) /
+        2,
+    },
+    { label: "Entrenamiento", weight: 30, ratio: trained ? 1 : 0 },
   ];
+
+  const hasSleep = metrics?.sleepHours != null && metrics.sleepHours > 0;
+  const hasWater = metrics?.water != null && metrics.water > 0;
+  if (hasSleep) {
+    factors.push({
+      label: "Sueño",
+      weight: 20,
+      ratio: sleepRatio(metrics!.sleepHours!),
+    });
+  }
+  if (hasWater) {
+    factors.push({
+      label: "Agua",
+      weight: 10,
+      ratio: clamp(metrics!.water! / WATER_GOAL_L, 0, 1),
+    });
+  }
+
+  const totW = factors.reduce((s, f) => s + f.weight, 0);
+  const base = (factors.reduce((s, f) => s + f.weight * f.ratio, 0) / totW) * 100;
+  const alcPen = hasAlcohol ? 15 : 0;
+  const score = clamp(Math.round(base - alcPen), 0, 100);
+
+  const parts: ScorePart[] = factors.map((f) => ({
+    label: f.label,
+    points: Math.round(f.weight * f.ratio),
+    max: f.weight,
+  }));
   if (alcPen) parts.push({ label: "Alcohol", points: -alcPen, max: 0 });
 
   const tips: string[] = [];
@@ -87,6 +125,15 @@ export function dailyScore(
     tips.push("Te pasaste de calorías; ojo con las porciones.");
   } else if (calories > 0 && calories < goals.calories * 0.6) {
     tips.push("Vas muy por debajo de tus calorías; comé algo más.");
+  }
+  if (hasSleep && metrics!.sleepHours! < 6) {
+    tips.push(`Dormiste poco (${metrics!.sleepHours} h); apuntá a 7-8.`);
+  }
+  if (hasWater && metrics!.water! < WATER_GOAL_L * 0.6) {
+    tips.push("Tomá más agua para llegar a tu meta.");
+  }
+  if (!hasSleep && !hasWater) {
+    tips.push("Registrá tu sueño y agua para un score más completo.");
   }
   if (hasAlcohol) tips.push("El alcohol sumó calorías y bajó tu score.");
   if (score >= 85) tips.unshift("Gran día, seguí así 💪");
