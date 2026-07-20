@@ -14,6 +14,7 @@ import { inputCls } from "@/components/Sheet";
 import {
   exerciseProgress,
   groupByExercise,
+  muscleRecommendation,
   personalRecords,
   totalVolume,
   usedExercises,
@@ -48,6 +49,10 @@ export default function GymTab({
   const groups = useMemo(() => groupByExercise(todaySets), [todaySets]);
   const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
   const dayVolume = totalVolume(todaySets);
+  const recommendation = useMemo(
+    () => muscleRecommendation(strengthSets, today),
+    [strengthSets, today],
+  );
 
   const used = useMemo(() => usedExercises(strengthSets), [strengthSets]);
   const options = useMemo(
@@ -99,6 +104,13 @@ export default function GymTab({
           </span>
         )}
       </header>
+
+      {recommendation && (
+        <div className="flex items-center gap-3 rounded-2xl border border-border border-l-4 border-l-accent bg-card px-4 py-3">
+          <span className="text-lg leading-none">🎯</span>
+          <p className="text-sm">{recommendation}</p>
+        </div>
+      )}
 
       {/* Alta de serie */}
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">

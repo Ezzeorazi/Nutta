@@ -52,6 +52,76 @@ export function usedExercises(sets: StrengthSet[]): string[] {
     .map(([name]) => name);
 }
 
+/** Grupos musculares detectables por el nombre del ejercicio. */
+const MUSCLE_LIFTS: { group: string; re: RegExp }[] = [
+  { group: "pecho", re: /press banca|inclinad|pectoral|apertura|fondos|pecho/i },
+  {
+    group: "espalda",
+    re: /dominada|remo|jal[oó]n|pull|peso muerto|dorsal|espalda/i,
+  },
+  {
+    group: "piernas",
+    re: /sentadilla|prensa|hip thrust|zancada|extensi[oó]n de cu[aá]dri|femoral|gemelo|pierna|gl[uú]teo/i,
+  },
+  { group: "hombros", re: /press militar|hombro|lateral|arnold|deltoide/i },
+  { group: "brazos", re: /curl|b[ií]ceps|tr[ií]ceps/i },
+];
+
+const groupsOf = (name: string) =>
+  MUSCLE_LIFTS.filter((m) => m.re.test(name)).map((m) => m.group);
+
+const dayDiff = (a: string, b: string) =>
+  Math.round(
+    (Date.parse(`${a}T00:00:00`) - Date.parse(`${b}T00:00:00`)) / 86400000,
+  );
+
+/**
+ * Recomendación de qué entrenar hoy, según los grupos trabajados
+ * recientemente. Devuelve una frase o null si no hay historial suficiente.
+ */
+export function muscleRecommendation(
+  sets: StrengthSet[],
+  today: string,
+): string | null {
+  if (sets.length === 0) return null;
+
+  const lastByGroup = new Map<string, string>();
+  const todayGroups = new Set<string>();
+  const yesterday = new Set<string>();
+  for (const s of sets) {
+    for (const g of groupsOf(s.exercise)) {
+      const prev = lastByGroup.get(g);
+      if (!prev || s.date > prev) lastByGroup.set(g, s.date);
+      if (s.date === today) todayGroups.add(g);
+      if (dayDiff(today, s.date) === 1) yesterday.add(g);
+    }
+  }
+
+  if (todayGroups.size > 0) {
+    return `Hoy ya moviste ${[...todayGroups].join(" y ")}. 🔥`;
+  }
+
+  // Grupo con más días sin entrenar (los nunca entrenados = gap grande).
+  const groups = MUSCLE_LIFTS.map((m) => m.group);
+  let pick = groups[0];
+  let maxGap = -1;
+  for (const g of groups) {
+    const last = lastByGroup.get(g);
+    const gap = last ? dayDiff(today, last) : 999;
+    if (gap > maxGap) {
+      maxGap = gap;
+      pick = g;
+    }
+  }
+
+  const yPart = yesterday.size ? `Ayer entrenaste ${[...yesterday].join(" y ")}. ` : "";
+  const last = lastByGroup.get(pick);
+  if (last && maxGap >= 5) {
+    return `${yPart}Hace ${maxGap} días que no entrenás ${pick} — hoy es un buen día.`;
+  }
+  return `${yPart}Hoy te conviene ${pick}.`;
+}
+
 /** Mejor peso por día para un ejercicio (para graficar progresión). */
 export function exerciseProgress(
   sets: StrengthSet[],
