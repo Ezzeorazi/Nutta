@@ -18,6 +18,7 @@ export type FoodEntry = {
   protein: number; // g
   carbs: number; // g
   fat: number; // g
+  createdAt?: number; // epoch ms (para el timeline)
 };
 
 export type ExerciseEntry = {
@@ -26,6 +27,7 @@ export type ExerciseEntry = {
   name: string;
   minutes: number;
   caloriesBurned: number;
+  createdAt?: number; // epoch ms (para el timeline)
 };
 
 export type ChatRole = "user" | "assistant";

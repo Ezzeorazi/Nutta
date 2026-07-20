@@ -126,6 +126,7 @@ export function useNutta() {
         protein: entry.protein,
         carbs: entry.carbs,
         fat: entry.fat,
+        createdAt: entry.createdAt ?? Date.now(),
       }),
     );
   };
@@ -140,6 +141,7 @@ export function useNutta() {
         name: entry.name,
         minutes: entry.minutes,
         caloriesBurned: entry.caloriesBurned,
+        createdAt: entry.createdAt ?? Date.now(),
       }),
     );
   };

@@ -25,6 +25,7 @@ const schema = i.schema({
       protein: i.number(),
       carbs: i.number(),
       fat: i.number(),
+      createdAt: i.number().optional(), // epoch ms — para el timeline
     }),
     exercises: i.entity({
       owner: i.string().indexed(),
@@ -32,6 +33,7 @@ const schema = i.schema({
       name: i.string(),
       minutes: i.number(),
       caloriesBurned: i.number(),
+      createdAt: i.number().optional(), // epoch ms — para el timeline
     }),
     // Historial del chat conversacional (estilo WhatsApp).
     messages: i.entity({

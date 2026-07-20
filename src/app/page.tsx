@@ -8,6 +8,7 @@ import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
 import History from "@/components/History";
 import MacroBar from "@/components/MacroBar";
+import Timeline from "@/components/Timeline";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
 import { uid } from "@/components/Sheet";
@@ -205,109 +206,34 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Comidas */}
-          <section className="flex flex-col gap-3">
-            {MEALS.map((m) => {
-              const items = todayFoods.filter((f) => f.meal === m.key);
-              const kcal = Math.round(
-                items.reduce((s, f) => s + f.calories, 0),
-              );
-              return (
-                <div
-                  key={m.key}
-                  className="rounded-2xl border border-border bg-card p-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="font-semibold">{m.label}</h2>
-                      <span className="text-xs text-muted tabular-nums">
-                        {kcal} kcal
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setFoodOpen(m.key)}
-                      className="grid h-8 w-8 place-items-center rounded-full bg-primary text-lg leading-none text-primary-foreground active:scale-95"
-                      aria-label={`Agregar a ${m.label}`}
-                    >
-                      +
-                    </button>
-                  </div>
-                  {items.length > 0 && (
-                    <ul className="mt-3 flex flex-col gap-2">
-                      {items.map((f) => (
-                        <li
-                          key={f.id}
-                          className="flex items-center justify-between text-sm"
-                        >
-                          <span>
-                            {f.name}{" "}
-                            <span className="text-muted">· {f.qty} g</span>
-                          </span>
-                          <span className="flex items-center gap-3">
-                            <span className="tabular-nums text-muted">
-                              {Math.round(f.calories)} kcal
-                            </span>
-                            <button
-                              onClick={() => removeFood(f.id)}
-                              className="text-muted hover:text-accent"
-                              aria-label="Eliminar"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              );
-            })}
-          </section>
+          {/* Timeline cronológico del día */}
+          <Timeline
+            foods={todayFoods}
+            exercises={todayEx}
+            onRemoveFood={removeFood}
+            onRemoveExercise={removeExercise}
+          />
 
-          {/* Ejercicio */}
+          {/* Agregar manualmente (el chat es la vía principal) */}
           <section className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-semibold">Ejercicio</h2>
-                <span className="text-xs text-muted tabular-nums">
-                  {Math.round(totals.burned)} kcal quemadas
-                </span>
-              </div>
+            <h2 className="mb-3 text-sm font-semibold text-muted">Agregar</h2>
+            <div className="flex flex-wrap gap-2">
+              {MEALS.map((m) => (
+                <button
+                  key={m.key}
+                  onClick={() => setFoodOpen(m.key)}
+                  className="rounded-full border border-border px-3 py-1.5 text-sm transition active:scale-95 hover:border-primary"
+                >
+                  + {m.label}
+                </button>
+              ))}
               <button
                 onClick={() => setExOpen(true)}
-                className="grid h-8 w-8 place-items-center rounded-full bg-accent text-lg leading-none text-accent-foreground active:scale-95"
-                aria-label="Agregar ejercicio"
+                className="rounded-full border border-border px-3 py-1.5 text-sm text-accent transition active:scale-95 hover:border-accent"
               >
-                +
+                + Ejercicio
               </button>
             </div>
-            {todayEx.length > 0 && (
-              <ul className="mt-3 flex flex-col gap-2">
-                {todayEx.map((e) => (
-                  <li
-                    key={e.id}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <span>
-                      {e.name}{" "}
-                      <span className="text-muted">· {e.minutes} min</span>
-                    </span>
-                    <span className="flex items-center gap-3">
-                      <span className="tabular-nums text-muted">
-                        {Math.round(e.caloriesBurned)} kcal
-                      </span>
-                      <button
-                        onClick={() => removeExercise(e.id)}
-                        className="text-muted hover:text-accent"
-                        aria-label="Eliminar"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
           </section>
 
           <button
