@@ -12,9 +12,10 @@ import BottomNav, { type Tab } from "@/components/BottomNav";
 import CalorieRing from "@/components/CalorieRing";
 import History from "@/components/History";
 import MacroBar from "@/components/MacroBar";
+import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
+import { db, id } from "@/lib/db";
 import { computeGoals, type Profile } from "@/lib/nutrition";
-import { useLocalStorage } from "@/lib/store";
 import {
   DEFAULT_GOALS,
   MEALS,
@@ -28,23 +29,137 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 
 export default function Home() {
   const today = todayISO();
-  const { value: foods, setValue: setFoods } = useLocalStorage<FoodEntry[]>(
-    "nutta.foods",
-    [],
+
+  const { isLoading: authLoading, user } = db.useAuth();
+  const { isLoading: dataLoading, data } = db.useQuery(
+    user ? { profiles: {}, foods: {}, exercises: {} } : null,
   );
-  const { value: exercises, setValue: setExercises } = useLocalStorage<
-    ExerciseEntry[]
-  >("nutta.exercises", []);
-  const {
-    value: profile,
-    setValue: setProfile,
-    hydrated: profileHydrated,
-  } = useLocalStorage<Profile | null>("nutta.profile", null);
 
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
   const [editProfile, setEditProfile] = useState(false);
   const [tab, setTab] = useState<Tab>("hoy");
+
+  const owner = user?.id;
+  const foods = (
+    (data?.foods ?? []) as unknown as (FoodEntry & { owner: string })[]
+  ).filter((f) => f.owner === owner);
+  const exercises = (
+    (data?.exercises ?? []) as unknown as (ExerciseEntry & { owner: string })[]
+  ).filter((e) => e.owner === owner);
+  const profileRec = (
+    (data?.profiles ?? []) as unknown as (Profile & {
+      id: string;
+      owner: string;
+    })[]
+  ).find((p) => p.owner === owner);
+  const profileId = profileRec?.id;
+  const profile = (profileRec
+    ? {
+        sex: profileRec.sex,
+        age: profileRec.age,
+        weight: profileRec.weight,
+        height: profileRec.height,
+        activity: profileRec.activity,
+        objective: profileRec.objective,
+      }
+    : null) as Profile | null;
+
+  // Migración única de los datos locales (localStorage) a la cuenta.
+  useEffect(() => {
+    if (!user || dataLoading) return;
+    if (localStorage.getItem("nutta.migrated")) return;
+    try {
+      const lsFoods = JSON.parse(localStorage.getItem("nutta.foods") || "[]");
+      const lsEx = JSON.parse(localStorage.getItem("nutta.exercises") || "[]");
+      const lsProfile = JSON.parse(
+        localStorage.getItem("nutta.profile") || "null",
+      );
+      const txns = [];
+      for (const f of lsFoods) {
+        txns.push(
+          db.tx.foods[id()].update({
+            owner: user.id,
+            date: f.date,
+            meal: f.meal,
+            name: f.name,
+            qty: f.qty,
+            calories: f.calories,
+            protein: f.protein,
+            carbs: f.carbs,
+            fat: f.fat,
+          }),
+        );
+      }
+      for (const e of lsEx) {
+        txns.push(
+          db.tx.exercises[id()].update({
+            owner: user.id,
+            date: e.date,
+            name: e.name,
+            minutes: e.minutes,
+            caloriesBurned: e.caloriesBurned,
+          }),
+        );
+      }
+      if (lsProfile && !profileId) {
+        txns.push(
+          db.tx.profiles[id()].update({
+            owner: user.id,
+            sex: lsProfile.sex,
+            age: lsProfile.age,
+            weight: lsProfile.weight,
+            height: lsProfile.height,
+            activity: lsProfile.activity,
+            objective: lsProfile.objective,
+          }),
+        );
+      }
+      localStorage.setItem("nutta.migrated", "1");
+      if (txns.length) db.transact(txns);
+    } catch {
+      // si algo falla, no bloquea la app
+    }
+  }, [user, dataLoading, profileId]);
+
+  const saveProfile = (p: Profile) => {
+    if (!user) return;
+    if (profileId) db.transact(db.tx.profiles[profileId].update(p));
+    else db.transact(db.tx.profiles[id()].update({ owner: user.id, ...p }));
+  };
+
+  const addFood = (entry: FoodEntry) => {
+    if (!user) return;
+    db.transact(
+      db.tx.foods[id()].update({
+        owner: user.id,
+        date: entry.date,
+        meal: entry.meal,
+        name: entry.name,
+        qty: entry.qty,
+        calories: entry.calories,
+        protein: entry.protein,
+        carbs: entry.carbs,
+        fat: entry.fat,
+      }),
+    );
+  };
+  const removeFood = (fid: string) => db.transact(db.tx.foods[fid].delete());
+
+  const addExercise = (entry: ExerciseEntry) => {
+    if (!user) return;
+    db.transact(
+      db.tx.exercises[id()].update({
+        owner: user.id,
+        date: entry.date,
+        name: entry.name,
+        minutes: entry.minutes,
+        caloriesBurned: entry.caloriesBurned,
+      }),
+    );
+  };
+  const removeExercise = (eid: string) =>
+    db.transact(db.tx.exercises[eid].delete());
 
   const todayFoods = foods.filter((f) => f.date === today);
   const todayEx = exercises.filter((e) => e.date === today);
@@ -63,25 +178,26 @@ export default function Home() {
 
   const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
 
-  // Evita el flash del dashboard antes de leer el perfil de localStorage.
-  if (!profileHydrated) {
-    return (
-      <div className="flex flex-1 items-center justify-center text-3xl font-bold">
-        Nut<span className="text-primary">ta</span>
-      </div>
-    );
-  }
+  const splash = (
+    <div className="flex flex-1 items-center justify-center text-3xl font-bold">
+      Nut<span className="text-primary">ta</span>
+    </div>
+  );
+
+  if (authLoading) return splash;
+  if (!user) return <Login />;
+  if (dataLoading) return splash;
 
   // Primera vez: sin perfil → onboarding a pantalla completa.
   if (!profile) {
-    return <Onboarding onDone={(p) => setProfile(p)} />;
+    return <Onboarding onDone={saveProfile} />;
   }
   if (editProfile) {
     return (
       <Onboarding
         initial={profile}
         onDone={(p) => {
-          setProfile(p);
+          saveProfile(p);
           setEditProfile(false);
         }}
         onCancel={() => setEditProfile(false)}
@@ -186,7 +302,7 @@ export default function Home() {
                         </span>
                         <button
                           onClick={() =>
-                            setFoods((prev) => prev.filter((x) => x.id !== f.id))
+                            removeFood(f.id)
                           }
                           className="text-muted hover:text-accent"
                           aria-label="Eliminar"
@@ -236,7 +352,7 @@ export default function Home() {
                   </span>
                   <button
                     onClick={() =>
-                      setExercises((prev) => prev.filter((x) => x.id !== e.id))
+                      removeExercise(e.id)
                     }
                     className="text-muted hover:text-accent"
                     aria-label="Eliminar"
@@ -250,12 +366,19 @@ export default function Home() {
         )}
       </section>
 
+      <button
+        onClick={() => db.auth.signOut()}
+        className="mx-auto text-xs text-muted underline-offset-2 hover:underline"
+      >
+        Cerrar sesión
+      </button>
+
       {foodOpen && (
         <FoodForm
           meal={foodOpen}
           onClose={() => setFoodOpen(null)}
           onAdd={(entry) => {
-            setFoods((prev) => [...prev, entry]);
+            addFood(entry);
             setFoodOpen(null);
           }}
         />
@@ -265,7 +388,7 @@ export default function Home() {
           weight={profile.weight}
           onClose={() => setExOpen(false)}
           onAdd={(entry) => {
-            setExercises((prev) => [...prev, entry]);
+            addExercise(entry);
             setExOpen(false);
           }}
         />
