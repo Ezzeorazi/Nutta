@@ -61,6 +61,18 @@ export const coachSchema = z.object({
     .describe(
       "Cantidad de pasos SOLO si menciona un número de pasos (ej. 'caminé 8000 pasos'→8000). 0 si no. (Caminar X minutos NO es esto, es un ejercicio.)",
     ),
+  strength: z
+    .array(
+      z.object({
+        exercise: z.string().describe("Nombre del ejercicio de fuerza"),
+        sets: z.number().describe("Cantidad de series"),
+        reps: z.number().describe("Repeticiones por serie"),
+        weight: z.number().describe("Peso en kg (0 si es peso corporal)"),
+      }),
+    )
+    .describe(
+      "Ejercicios de FUERZA con series/reps/peso SOLO si los menciona (ej. 'press banca 4x8 con 60'→sets 4, reps 8, weight 60). Vacío si no.",
+    ),
   remember: z
     .array(
       z.object({
@@ -91,7 +103,8 @@ Reglas:
 - Estimá cantidades realistas en gramos/ml si el usuario no las dice. Referencias: 1 huevo ≈ 50 g y 78 kcal (6 g proteína, 5 g grasa); un café con leche ≈ 200 ml; media palta ≈ 100 g (160 kcal); una banana ≈ 120 g; un plato de arroz ≈ 200 g cocido; una pechuga de pollo ≈ 150 g.
 - calories, protein, carbs y fat SIEMPRE son el total por la cantidad mencionada, NO por 100 g. Usá números planos (sin unidades).
 - meal: inferí de las palabras (desayuné→desayuno, almorcé→almuerzo, merendé→merienda, cené→cena, "de snack"→snack). Si no hay pista, usá la hora local que te paso (5-11→desayuno, 11-15→almuerzo, 15-19→merienda, 19-24→cena, resto→snack).
-- Ejercicios: estimá minutos y caloriesBurned según el peso del usuario que te paso. "Hice espalda/pecho/pierna" o "entrené" ≈ 45 min de musculación. "Corrí 20 min" usá esos minutos.
+- Ejercicios (exercises = cardio/gasto calórico): estimá minutos y caloriesBurned según el peso del usuario que te paso. "Corrí 20 min" usá esos minutos. "Hice espalda/pecho/pierna" o "entrené" genérico ≈ 45 min de musculación.
+- strength (fuerza estructurada): si menciona un ejercicio con SERIES/REPS/PESO (ej. "press banca 4x8 con 60", "sentadilla 3 series de 10 a 80 kg"), cargalo en strength (sets, reps, weight) y NO lo dupliques en exercises. "4x8" = sets 4, reps 8.
 - El alcohol es un food con sus calorías (una cerveza 330 ml ≈ 140 kcal; una copa de vino ≈ 125 kcal).
 - bodyweight: poné un número SOLO si el usuario dice su peso EN EL MENSAJE (ej. "me pesé 80", "peso 79.5"). NUNCA copies el "Peso de referencia" que te paso en el contexto: ese es solo para calcular calorías de ejercicio, no es algo que el usuario haya dicho. Si el mensaje no menciona el peso, poné 0.
 - water, sleepHours, steps: completá cada uno SOLO si el usuario lo menciona explícitamente en el mensaje; si no, poné 0. Un vaso de agua ≈ 0.25 L. "Caminé 20 minutos" es un exercise, NO steps.

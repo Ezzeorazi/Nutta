@@ -122,6 +122,12 @@ export default function Home() {
         water?: number;
         sleepHours?: number;
         steps?: number;
+        strength?: {
+          exercise: string;
+          sets: number;
+          reps: number;
+          weight: number;
+        }[];
         remember?: { kind: MemoryKind; text: string }[];
         error?: string;
       };
@@ -150,6 +156,12 @@ export default function Home() {
       }
       if (typeof data.bodyweight === "number" && data.bodyweight > 0) {
         addWeight(data.bodyweight, today);
+      }
+      for (const st of data.strength ?? []) {
+        const n = Math.min(20, Math.max(1, Math.round(st.sets) || 1));
+        for (let i = 0; i < n; i++) {
+          addSet(st.exercise, st.reps, st.weight, today);
+        }
       }
       // Métricas de bienestar en un solo upsert (evita filas duplicadas).
       const patch: { water?: number; sleepHours?: number; steps?: number } = {};

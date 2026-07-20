@@ -1,14 +1,29 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { inputCls } from "@/components/Sheet";
 import {
+  exerciseProgress,
   groupByExercise,
   personalRecords,
   totalVolume,
   usedExercises,
 } from "@/lib/gym";
 import { COMMON_LIFTS, type StrengthSet } from "@/lib/types";
+
+const shortDate = (iso: string) => {
+  const d = new Date(`${iso}T00:00:00`);
+  return `${d.getDate()}/${d.getMonth() + 1}`;
+};
 
 export default function GymTab({
   strengthSets,
@@ -24,6 +39,7 @@ export default function GymTab({
   const [exercise, setExercise] = useState("");
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
+  const [progExercise, setProgExercise] = useState<string | null>(null);
 
   const todaySets = useMemo(
     () => strengthSets.filter((s) => s.date === today),
@@ -33,10 +49,31 @@ export default function GymTab({
   const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
   const dayVolume = totalVolume(todaySets);
 
-  const options = useMemo(() => {
-    const used = usedExercises(strengthSets);
-    return [...new Set([...used, ...COMMON_LIFTS])];
-  }, [strengthSets]);
+  const used = useMemo(() => usedExercises(strengthSets), [strengthSets]);
+  const options = useMemo(
+    () => [...new Set([...used, ...COMMON_LIFTS])],
+    [used],
+  );
+
+  const selectedProg = progExercise ?? used[0] ?? null;
+  const progData = useMemo(
+    () =>
+      selectedProg
+        ? exerciseProgress(strengthSets, selectedProg).map((p) => ({
+            label: shortDate(p.date),
+            peso: p.weight,
+          }))
+        : [],
+    [strengthSets, selectedProg],
+  );
+
+  const tooltipStyle = {
+    background: "var(--card)",
+    border: "1px solid var(--border)",
+    borderRadius: 12,
+    fontSize: 12,
+    color: "var(--foreground)",
+  } as const;
 
   const canAdd = exercise.trim() !== "" && Number(reps) > 0;
   const submit = () => {
@@ -170,6 +207,71 @@ export default function GymTab({
               </div>
             );
           })}
+        </section>
+      )}
+
+      {/* Progresión por ejercicio */}
+      {used.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-muted">Progresión</h2>
+          <div className="flex flex-wrap gap-2">
+            {used.slice(0, 8).map((ex) => (
+              <button
+                key={ex}
+                onClick={() => setProgExercise(ex)}
+                className={`rounded-full border px-3 py-1.5 text-sm transition active:scale-95 ${
+                  selectedProg === ex
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted"
+                }`}
+              >
+                {ex}
+              </button>
+            ))}
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-4">
+            {progData.length >= 2 ? (
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart
+                  data={progData}
+                  margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
+                >
+                  <CartesianGrid vertical={false} stroke="var(--border)" />
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={11}
+                    stroke="var(--muted)"
+                  />
+                  <YAxis
+                    domain={["dataMin - 2", "dataMax + 2"]}
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={11}
+                    stroke="var(--muted)"
+                    width={40}
+                  />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(v) => [`${v} kg`, "Peso máx."]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="peso"
+                    stroke="var(--accent)"
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: "var(--accent)" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="py-3 text-center text-sm text-muted">
+                Registrá {selectedProg} en más de un día para ver tu
+                progresión.
+              </p>
+            )}
+          </div>
         </section>
       )}
     </main>
