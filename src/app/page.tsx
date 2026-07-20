@@ -10,10 +10,18 @@ import History from "@/components/History";
 import MacroBar from "@/components/MacroBar";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
+import { uid } from "@/components/Sheet";
 import { db } from "@/lib/db";
 import { computeGoals } from "@/lib/nutrition";
 import { useNutta } from "@/lib/useNutta";
-import { DEFAULT_GOALS, MEALS, todayISO, type MealType } from "@/lib/types";
+import {
+  DEFAULT_GOALS,
+  MEALS,
+  todayISO,
+  type ExerciseEntry,
+  type FoodEntry,
+  type MealType,
+} from "@/lib/types";
 
 export default function Home() {
   const today = todayISO();
@@ -37,7 +45,63 @@ export default function Home() {
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
   const [editProfile, setEditProfile] = useState(false);
-  const [tab, setTab] = useState<Tab>("hoy");
+  const [tab, setTab] = useState<Tab>("chat");
+  const [sending, setSending] = useState(false);
+
+  // Envía un mensaje al coach IA, persiste los registros y responde.
+  const sendChat = async (text: string) => {
+    if (!profile) return;
+    addMessage("user", text);
+    setSending(true);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          weight: profile.weight,
+          hour: new Date().getHours(),
+        }),
+      });
+      const data = (await res.json()) as {
+        reply?: string;
+        foods?: FoodEntry[];
+        exercises?: ExerciseEntry[];
+        error?: string;
+      };
+      if (!res.ok) throw new Error(data?.error ?? "error");
+      for (const f of data.foods ?? []) {
+        addFood({
+          id: uid(),
+          date: today,
+          meal: f.meal,
+          name: f.name,
+          qty: f.qty,
+          calories: f.calories,
+          protein: f.protein,
+          carbs: f.carbs,
+          fat: f.fat,
+        });
+      }
+      for (const e of data.exercises ?? []) {
+        addExercise({
+          id: uid(),
+          date: today,
+          name: e.name,
+          minutes: e.minutes,
+          caloriesBurned: e.caloriesBurned,
+        });
+      }
+      addMessage("assistant", data.reply || "Listo ✅");
+    } catch {
+      addMessage(
+        "assistant",
+        "Uy, no pude procesar eso ahora 😅 Probá de nuevo en un momento.",
+      );
+    } finally {
+      setSending(false);
+    }
+  };
 
   const todayFoods = foods.filter((f) => f.date === today);
   const todayEx = exercises.filter((e) => e.date === today);
@@ -86,7 +150,7 @@ export default function Home() {
   return (
     <>
       {tab === "chat" ? (
-        <Chat messages={messages} onSend={(t) => addMessage("user", t)} />
+        <Chat messages={messages} onSend={sendChat} sending={sending} />
       ) : tab === "historial" ? (
         <History foods={foods} exercises={exercises} goals={goals} />
       ) : (

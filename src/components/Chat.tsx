@@ -36,9 +36,11 @@ const timeFmt = (ms: number) =>
 export default function Chat({
   messages,
   onSend,
+  sending = false,
 }: {
   messages: ChatMessage[];
   onSend: (text: string) => void;
+  sending?: boolean;
 }) {
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
@@ -46,10 +48,10 @@ export default function Chat({
   const endRef = useRef<HTMLDivElement>(null);
   const recRef = useRef<SpeechRecognitionLike | null>(null);
 
-  // Auto-scroll al último mensaje.
+  // Auto-scroll al último mensaje (o al aparecer el indicador de escritura).
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [messages.length, sending]);
 
   const send = () => {
     const t = text.trim();
@@ -139,6 +141,13 @@ export default function Chat({
             </div>
           </div>
         ))}
+        {sending && (
+          <div className="flex justify-start">
+            <div className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-border bg-card px-3.5 py-3">
+              <Dot /> <Dot delay="150ms" /> <Dot delay="300ms" />
+            </div>
+          </div>
+        )}
         <div ref={endRef} />
       </div>
 
@@ -200,6 +209,15 @@ export default function Chat({
         </div>
       </div>
     </main>
+  );
+}
+
+function Dot({ delay = "0ms" }: { delay?: string }) {
+  return (
+    <span
+      className="h-2 w-2 animate-bounce rounded-full bg-muted"
+      style={{ animationDelay: delay }}
+    />
   );
 }
 
