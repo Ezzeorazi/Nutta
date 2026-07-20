@@ -327,6 +327,7 @@ export default function Home() {
             metrics={todayMetrics}
             onSetWater={(l) => setMetric(today, { water: l })}
             onSetSleep={(h) => setMetric(today, { sleepHours: h })}
+            onSetSteps={(n) => setMetric(today, { steps: n })}
           />
 
           <SupplementsCard

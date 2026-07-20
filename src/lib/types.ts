@@ -108,6 +108,9 @@ export type DailyMetrics = {
 /** Meta diaria de hidratación (litros). */
 export const WATER_GOAL_L = 2.5;
 
+/** Meta diaria de pasos. */
+export const STEPS_GOAL = 8000;
+
 export type MemoryKind =
   | "habito"
   | "alimento"
