@@ -8,6 +8,7 @@ import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
 import History from "@/components/History";
 import MacroBar from "@/components/MacroBar";
+import MemorySheet from "@/components/MemorySheet";
 import Timeline from "@/components/Timeline";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
@@ -34,6 +35,7 @@ export default function Home() {
     foods,
     exercises,
     messages,
+    memories,
     profile,
     saveProfile,
     addFood,
@@ -41,6 +43,8 @@ export default function Home() {
     addExercise,
     removeExercise,
     addMessage,
+    addMemory,
+    removeMemory,
   } = useNutta();
 
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
@@ -48,6 +52,7 @@ export default function Home() {
   const [editProfile, setEditProfile] = useState(false);
   const [tab, setTab] = useState<Tab>("chat");
   const [sending, setSending] = useState(false);
+  const [memoryOpen, setMemoryOpen] = useState(false);
 
   // Envía un mensaje al coach IA, persiste los registros y responde.
   const sendChat = async (text: string) => {
@@ -151,7 +156,12 @@ export default function Home() {
   return (
     <>
       {tab === "chat" ? (
-        <Chat messages={messages} onSend={sendChat} sending={sending} />
+        <Chat
+          messages={messages}
+          onSend={sendChat}
+          sending={sending}
+          onOpenMemory={() => setMemoryOpen(true)}
+        />
       ) : tab === "historial" ? (
         <History foods={foods} exercises={exercises} goals={goals} />
       ) : (
@@ -264,6 +274,14 @@ export default function Home() {
             />
           )}
         </main>
+      )}
+      {memoryOpen && (
+        <MemorySheet
+          memories={memories}
+          onAdd={addMemory}
+          onRemove={removeMemory}
+          onClose={() => setMemoryOpen(false)}
+        />
       )}
       <BottomNav tab={tab} onChange={setTab} />
     </>

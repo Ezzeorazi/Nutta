@@ -36,10 +36,12 @@ const timeFmt = (ms: number) =>
 export default function Chat({
   messages,
   onSend,
+  onOpenMemory,
   sending = false,
 }: {
   messages: ChatMessage[];
   onSend: (text: string) => void;
+  onOpenMemory?: () => void;
   sending?: boolean;
 }) {
   const [text, setText] = useState("");
@@ -95,8 +97,25 @@ export default function Chat({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col">
+      {/* Barra superior */}
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
+        <h1 className="text-lg font-bold">
+          Nut<span className="text-primary">ta</span>
+          <span className="ml-1 text-sm font-normal text-muted">tu coach</span>
+        </h1>
+        {onOpenMemory && (
+          <button
+            onClick={onOpenMemory}
+            aria-label="Memoria"
+            className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-lg active:scale-95"
+          >
+            🧠
+          </button>
+        )}
+      </header>
+
       {/* Historial */}
-      <div className="flex flex-1 flex-col gap-2 px-4 pb-36 pt-5">
+      <div className="flex flex-1 flex-col gap-2 px-4 pb-36 pt-4">
         {messages.length === 0 && (
           <div className="mt-4 flex flex-col gap-3">
             <Bubble role="assistant">

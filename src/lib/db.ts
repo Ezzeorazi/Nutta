@@ -42,6 +42,14 @@ const schema = i.schema({
       text: i.string(),
       createdAt: i.number().indexed(), // Date.now() — para ordenar
     }),
+    // Memoria del usuario: hábitos, alimentos frecuentes, lesiones, objetivos…
+    // La IA la lee ("lo de siempre") y la escribe (aprende sola).
+    memories: i.entity({
+      owner: i.string().indexed(),
+      kind: i.string(), // habito | alimento | suplemento | lesion | objetivo | rutina | nota
+      text: i.string(),
+      createdAt: i.number(),
+    }),
   },
 });
 

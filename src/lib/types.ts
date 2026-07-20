@@ -39,6 +39,36 @@ export type ChatMessage = {
   createdAt: number; // epoch ms
 };
 
+export type MemoryKind =
+  | "habito"
+  | "alimento"
+  | "suplemento"
+  | "lesion"
+  | "objetivo"
+  | "rutina"
+  | "nota";
+
+export const MEMORY_KINDS: {
+  key: MemoryKind;
+  label: string;
+  emoji: string;
+}[] = [
+  { key: "habito", label: "Hábito", emoji: "🔁" },
+  { key: "alimento", label: "Alimento frecuente", emoji: "🍽️" },
+  { key: "suplemento", label: "Suplemento", emoji: "💊" },
+  { key: "lesion", label: "Lesión", emoji: "🩹" },
+  { key: "objetivo", label: "Objetivo", emoji: "🎯" },
+  { key: "rutina", label: "Rutina", emoji: "📅" },
+  { key: "nota", label: "Nota", emoji: "📝" },
+];
+
+export type MemoryFact = {
+  id: string;
+  kind: MemoryKind;
+  text: string;
+  createdAt: number;
+};
+
 export type Goals = {
   calories: number;
   protein: number;

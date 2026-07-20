@@ -3,7 +3,13 @@
 import { useEffect } from "react";
 import { db, id } from "@/lib/db";
 import type { Profile } from "@/lib/nutrition";
-import type { ChatMessage, ExerciseEntry, FoodEntry } from "@/lib/types";
+import type {
+  ChatMessage,
+  ExerciseEntry,
+  FoodEntry,
+  MemoryFact,
+  MemoryKind,
+} from "@/lib/types";
 
 /**
  * Capa de datos de Nutta sobre InstantDB.
@@ -16,7 +22,15 @@ import type { ChatMessage, ExerciseEntry, FoodEntry } from "@/lib/types";
 export function useNutta() {
   const { isLoading: authLoading, user } = db.useAuth();
   const { isLoading: dataLoading, data } = db.useQuery(
-    user ? { profiles: {}, foods: {}, exercises: {}, messages: {} } : null,
+    user
+      ? {
+          profiles: {},
+          foods: {},
+          exercises: {},
+          messages: {},
+          memories: {},
+        }
+      : null,
   );
 
   const owner = user?.id;
@@ -32,6 +46,11 @@ export function useNutta() {
   )
     .filter((m) => m.owner === owner)
     .sort((a, b) => a.createdAt - b.createdAt);
+  const memories = (
+    (data?.memories ?? []) as unknown as (MemoryFact & { owner: string })[]
+  )
+    .filter((m) => m.owner === owner)
+    .sort((a, b) => b.createdAt - a.createdAt);
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -165,6 +184,29 @@ export function useNutta() {
   const removeMessage = (mid: string) =>
     db.transact(db.tx.messages[mid].delete());
 
+  /** Guarda un hecho en la memoria del usuario (evita duplicar textos iguales). */
+  const addMemory = (kind: MemoryKind, text: string) => {
+    if (!user) return null;
+    const clean = text.trim();
+    if (!clean) return null;
+    const dup = memories.find(
+      (m) => m.kind === kind && m.text.toLowerCase() === clean.toLowerCase(),
+    );
+    if (dup) return dup.id;
+    const mid = id();
+    db.transact(
+      db.tx.memories[mid].update({
+        owner: user.id,
+        kind,
+        text: clean,
+        createdAt: Date.now(),
+      }),
+    );
+    return mid;
+  };
+  const removeMemory = (mid: string) =>
+    db.transact(db.tx.memories[mid].delete());
+
   return {
     authLoading,
     dataLoading,
@@ -172,6 +214,7 @@ export function useNutta() {
     foods,
     exercises,
     messages,
+    memories,
     profile,
     profileId,
     saveProfile,
@@ -181,5 +224,7 @@ export function useNutta() {
     removeExercise,
     addMessage,
     removeMessage,
+    addMemory,
+    removeMemory,
   };
 }
