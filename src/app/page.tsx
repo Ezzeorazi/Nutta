@@ -12,6 +12,7 @@ import MacroBar from "@/components/MacroBar";
 import MeasuresPanel from "@/components/MeasuresPanel";
 import MemorySheet from "@/components/MemorySheet";
 import ScoreCard from "@/components/ScoreCard";
+import SupplementsCard from "@/components/SupplementsCard";
 import Timeline from "@/components/Timeline";
 import WeightPanel from "@/components/WeightPanel";
 import WellbeingCard from "@/components/WellbeingCard";
@@ -48,6 +49,8 @@ export default function Home() {
     weights,
     metrics,
     measures,
+    supplements,
+    supplementLogs,
     targetWeight,
     profile,
     saveProfile,
@@ -62,6 +65,9 @@ export default function Home() {
     setTargetWeight,
     setMetric,
     addMeasure,
+    addSupplement,
+    removeSupplement,
+    toggleSupplement,
   } = useNutta();
 
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
@@ -321,6 +327,15 @@ export default function Home() {
             metrics={todayMetrics}
             onSetWater={(l) => setMetric(today, { water: l })}
             onSetSleep={(h) => setMetric(today, { sleepHours: h })}
+          />
+
+          <SupplementsCard
+            supplements={supplements}
+            logs={supplementLogs}
+            today={today}
+            onAdd={addSupplement}
+            onRemove={removeSupplement}
+            onToggle={toggleSupplement}
           />
 
           <InsightsCard insights={insights} />

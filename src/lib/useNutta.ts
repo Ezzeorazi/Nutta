@@ -12,6 +12,8 @@ import type {
   MeasureEntry,
   MemoryFact,
   MemoryKind,
+  Supplement,
+  SupplementLog,
   WeightEntry,
 } from "@/lib/types";
 
@@ -36,6 +38,8 @@ export function useNutta() {
           weights: {},
           metrics: {},
           measures: {},
+          supplements: {},
+          supplementLogs: {},
         }
       : null,
   );
@@ -71,6 +75,16 @@ export function useNutta() {
   )
     .filter((m) => m.owner === owner)
     .sort((a, b) => a.date.localeCompare(b.date));
+  const supplements = (
+    (data?.supplements ?? []) as unknown as (Supplement & { owner: string })[]
+  )
+    .filter((s) => s.owner === owner)
+    .sort((a, b) => a.createdAt - b.createdAt);
+  const supplementLogs = (
+    (data?.supplementLogs ?? []) as unknown as (SupplementLog & {
+      owner: string;
+    })[]
+  ).filter((s) => s.owner === owner);
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -274,6 +288,36 @@ export function useNutta() {
   const removeMeasure = (mid: string) =>
     db.transact(db.tx.measures[mid].delete());
 
+  const addSupplement = (name: string, dose?: string, time?: string) => {
+    if (!user || !name.trim()) return;
+    db.transact(
+      db.tx.supplements[id()].update({
+        owner: user.id,
+        name: name.trim(),
+        ...(dose?.trim() ? { dose: dose.trim() } : {}),
+        ...(time?.trim() ? { time: time.trim() } : {}),
+        createdAt: Date.now(),
+      }),
+    );
+  };
+  const removeSupplement = (sid: string) =>
+    db.transact(db.tx.supplements[sid].delete());
+
+  /** Marca/desmarca un suplemento como tomado en un día. */
+  const toggleSupplement = (supId: string, date: string) => {
+    if (!user) return;
+    const existing = supplementLogs.find(
+      (l) => l.supId === supId && l.date === date,
+    ) as (SupplementLog & { id: string }) | undefined;
+    if (existing) {
+      db.transact(db.tx.supplementLogs[existing.id].delete());
+    } else {
+      db.transact(
+        db.tx.supplementLogs[id()].update({ owner: user.id, supId, date }),
+      );
+    }
+  };
+
   /** Actualiza (o crea) las métricas de bienestar de un día. */
   const setMetric = (
     date: string,
@@ -300,6 +344,8 @@ export function useNutta() {
     weights,
     metrics,
     measures,
+    supplements,
+    supplementLogs,
     targetWeight,
     profile,
     profileId,
@@ -318,5 +364,8 @@ export function useNutta() {
     setMetric,
     addMeasure,
     removeMeasure,
+    addSupplement,
+    removeSupplement,
+    toggleSupplement,
   };
 }

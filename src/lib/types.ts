@@ -70,6 +70,32 @@ export type MeasureEntry = {
   createdAt: number;
 };
 
+export type Supplement = {
+  id: string;
+  name: string;
+  dose?: string;
+  time?: string; // "HH:MM"
+  createdAt: number;
+};
+
+export type SupplementLog = {
+  id: string;
+  supId: string;
+  date: string;
+};
+
+/** Suplementos comunes para alta rápida. */
+export const COMMON_SUPPLEMENTS = [
+  "Creatina",
+  "Proteína",
+  "Omega 3",
+  "Colágeno",
+  "Cafeína",
+  "Multivitamínico",
+  "Vitamina D",
+  "Magnesio",
+];
+
 export type DailyMetrics = {
   id: string;
   date: string; // YYYY-MM-DD

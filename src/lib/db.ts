@@ -75,6 +75,20 @@ const schema = i.schema({
       sleepQuality: i.number().optional(), // 1-5
       steps: i.number().optional(),
     }),
+    // Suplementos que toma el usuario (su lista).
+    supplements: i.entity({
+      owner: i.string().indexed(),
+      name: i.string(),
+      dose: i.string().optional(),
+      time: i.string().optional(), // "HH:MM" para recordatorio
+      createdAt: i.number(),
+    }),
+    // Registro de toma de un suplemento en un día (presencia = tomado).
+    supplementLogs: i.entity({
+      owner: i.string().indexed(),
+      supId: i.string().indexed(),
+      date: i.string().indexed(),
+    }),
   },
 });
 
