@@ -41,6 +41,11 @@ export const coachSchema = z.object({
       }),
     )
     .describe("Ejercicios que el usuario hizo. Vacío si no hay."),
+  bodyweight: z
+    .number()
+    .describe(
+      "Peso corporal en kg SOLO si el usuario dice cuánto pesa (ej. 'me pesé 80', 'peso 79.5 kg'). 0 si no lo menciona.",
+    ),
   remember: z
     .array(
       z.object({
@@ -73,6 +78,7 @@ Reglas:
 - meal: inferí de las palabras (desayuné→desayuno, almorcé→almuerzo, merendé→merienda, cené→cena, "de snack"→snack). Si no hay pista, usá la hora local que te paso (5-11→desayuno, 11-15→almuerzo, 15-19→merienda, 19-24→cena, resto→snack).
 - Ejercicios: estimá minutos y caloriesBurned según el peso del usuario que te paso. "Hice espalda/pecho/pierna" o "entrené" ≈ 45 min de musculación. "Corrí 20 min" usá esos minutos.
 - El alcohol es un food con sus calorías (una cerveza 330 ml ≈ 140 kcal; una copa de vino ≈ 125 kcal).
+- bodyweight: poné un número SOLO si el usuario dice su peso EN EL MENSAJE (ej. "me pesé 80", "peso 79.5"). NUNCA copies el "Peso de referencia" que te paso en el contexto: ese es solo para calcular calorías de ejercicio, no es algo que el usuario haya dicho. Si el mensaje no menciona el peso, poné 0.
 - reply: confirmá en 1-2 frases lo que registraste, en tono coach. Si el mensaje es una pregunta o saludo sin datos para registrar, dejá foods y exercises vacíos y respondé como coach.
 - NO inventes alimentos ni ejercicios que el usuario no mencionó.
 
@@ -98,7 +104,7 @@ export async function interpretMessage(input: {
     model: groq(COACH_MODEL),
     schema: coachSchema,
     system: COACH_SYSTEM,
-    prompt: `Hora local del usuario: ${input.hour}:00. Peso del usuario: ${input.weight} kg.
+    prompt: `Hora local del usuario: ${input.hour}:00. Peso de referencia para calcular calorías de ejercicio (NO es bodyweight, no lo copies): ${input.weight} kg.
 
 MEMORIA DEL USUARIO:
 ${mem}

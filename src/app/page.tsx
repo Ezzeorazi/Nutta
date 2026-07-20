@@ -86,6 +86,7 @@ export default function Home() {
         reply?: string;
         foods?: FoodEntry[];
         exercises?: ExerciseEntry[];
+        bodyweight?: number;
         remember?: { kind: MemoryKind; text: string }[];
         error?: string;
       };
@@ -111,6 +112,9 @@ export default function Home() {
           minutes: e.minutes,
           caloriesBurned: e.caloriesBurned,
         });
+      }
+      if (typeof data.bodyweight === "number" && data.bodyweight > 0) {
+        addWeight(data.bodyweight, today);
       }
       for (const r of data.remember ?? []) {
         if (r?.text?.trim()) addMemory(r.kind, r.text);
