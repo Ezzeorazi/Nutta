@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -57,11 +57,14 @@ export default function History({
   targetWeight,
   today,
 }: Props) {
+  const [days, setDays] = useState<7 | 30>(7);
   const stats = useMemo(
-    () => lastNDays(foods, exercises, 7),
-    [foods, exercises],
+    () => lastNDays(foods, exercises, days),
+    [foods, exercises, days],
   );
   const avg = useMemo(() => averages(stats), [stats]);
+  const xKey = days === 7 ? "label" : "dm";
+  const xInterval = days === 7 ? 0 : 4;
 
   const tooltipStyle = {
     background: "var(--card)",
@@ -73,9 +76,26 @@ export default function History({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
-      <header>
-        <h1 className="text-2xl font-bold">Historial</h1>
-        <p className="text-sm text-muted">Rachas, logros y últimos 7 días</p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Historial</h1>
+          <p className="text-sm text-muted">Rachas, logros y estadísticas</p>
+        </div>
+        <div className="flex rounded-full border border-border p-0.5 text-xs">
+          {([7, 30] as const).map((d) => (
+            <button
+              key={d}
+              onClick={() => setDays(d)}
+              className={`rounded-full px-3 py-1 font-medium transition ${
+                days === d
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted"
+              }`}
+            >
+              {d}d
+            </button>
+          ))}
+        </div>
       </header>
 
       <AchievementsCard
@@ -91,7 +111,7 @@ export default function History({
 
       {/* Promedios */}
       <section className="grid grid-cols-3 gap-3">
-        <StatTile label="Días" value={avg.daysLogged} suffix="/7" />
+        <StatTile label="Días" value={avg.daysLogged} suffix={`/${days}`} />
         <StatTile label="Prom. kcal" value={avg.calories} />
         <StatTile label="Prom. prot." value={avg.protein} suffix="g" />
       </section>
@@ -108,7 +128,8 @@ export default function History({
           <BarChart data={stats} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
-              dataKey="label"
+              dataKey={xKey}
+              interval={xInterval}
               tickLine={false}
               axisLine={false}
               fontSize={12}
@@ -152,7 +173,8 @@ export default function History({
           <LineChart data={stats} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
-              dataKey="label"
+              dataKey={xKey}
+              interval={xInterval}
               tickLine={false}
               axisLine={false}
               fontSize={12}

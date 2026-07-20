@@ -3,6 +3,7 @@ import type { ExerciseEntry, FoodEntry } from "./types";
 export type DayStats = {
   date: string; // YYYY-MM-DD
   label: string; // Lun, Mar...
+  dm: string; // d/m (para vistas largas)
   calories: number; // consumidas
   protein: number;
   carbs: number;
@@ -45,6 +46,7 @@ export function lastNDays(
     out.push({
       date,
       label: DOW[d.getDay()],
+      dm: `${d.getDate()}/${d.getMonth() + 1}`,
       calories: Math.round(calories),
       protein: Math.round(protein),
       carbs: Math.round(carbs),
