@@ -90,6 +90,9 @@ export default function Home() {
         foods?: FoodEntry[];
         exercises?: ExerciseEntry[];
         bodyweight?: number;
+        water?: number;
+        sleepHours?: number;
+        steps?: number;
         remember?: { kind: MemoryKind; text: string }[];
         error?: string;
       };
@@ -119,6 +122,18 @@ export default function Home() {
       if (typeof data.bodyweight === "number" && data.bodyweight > 0) {
         addWeight(data.bodyweight, today);
       }
+      // Métricas de bienestar en un solo upsert (evita filas duplicadas).
+      const patch: {
+        water?: number;
+        sleepHours?: number;
+        steps?: number;
+      } = {};
+      if (data.water && data.water > 0)
+        patch.water = (todayMetrics?.water ?? 0) + data.water;
+      if (data.sleepHours && data.sleepHours > 0)
+        patch.sleepHours = data.sleepHours;
+      if (data.steps && data.steps > 0) patch.steps = data.steps;
+      if (Object.keys(patch).length) setMetric(today, patch);
       for (const r of data.remember ?? []) {
         if (r?.text?.trim()) addMemory(r.kind, r.text);
       }

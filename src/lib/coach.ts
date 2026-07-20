@@ -46,6 +46,21 @@ export const coachSchema = z.object({
     .describe(
       "Peso corporal en kg SOLO si el usuario dice cuánto pesa (ej. 'me pesé 80', 'peso 79.5 kg'). 0 si no lo menciona.",
     ),
+  water: z
+    .number()
+    .describe(
+      "Litros de agua que tomó SOLO si lo menciona (ej. 'tomé 2 litros'→2, '3 vasos'→0.75, 'un vaso de agua'→0.25). 0 si no.",
+    ),
+  sleepHours: z
+    .number()
+    .describe(
+      "Horas que durmió SOLO si lo menciona (ej. 'dormí 7 horas'→7, 'dormí mal 5hs'→5). 0 si no.",
+    ),
+  steps: z
+    .number()
+    .describe(
+      "Cantidad de pasos SOLO si menciona un número de pasos (ej. 'caminé 8000 pasos'→8000). 0 si no. (Caminar X minutos NO es esto, es un ejercicio.)",
+    ),
   remember: z
     .array(
       z.object({
@@ -79,6 +94,7 @@ Reglas:
 - Ejercicios: estimá minutos y caloriesBurned según el peso del usuario que te paso. "Hice espalda/pecho/pierna" o "entrené" ≈ 45 min de musculación. "Corrí 20 min" usá esos minutos.
 - El alcohol es un food con sus calorías (una cerveza 330 ml ≈ 140 kcal; una copa de vino ≈ 125 kcal).
 - bodyweight: poné un número SOLO si el usuario dice su peso EN EL MENSAJE (ej. "me pesé 80", "peso 79.5"). NUNCA copies el "Peso de referencia" que te paso en el contexto: ese es solo para calcular calorías de ejercicio, no es algo que el usuario haya dicho. Si el mensaje no menciona el peso, poné 0.
+- water, sleepHours, steps: completá cada uno SOLO si el usuario lo menciona explícitamente en el mensaje; si no, poné 0. Un vaso de agua ≈ 0.25 L. "Caminé 20 minutos" es un exercise, NO steps.
 - reply: confirmá en 1-2 frases lo que registraste, en tono coach. Si el mensaje es una pregunta o saludo sin datos para registrar, dejá foods y exercises vacíos y respondé como coach.
 - NO inventes alimentos ni ejercicios que el usuario no mencionó.
 
