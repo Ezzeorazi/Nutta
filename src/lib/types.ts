@@ -46,6 +46,30 @@ export type WeightEntry = {
   createdAt: number;
 };
 
+export type BodyPart =
+  | "cintura"
+  | "pecho"
+  | "brazo"
+  | "muslo"
+  | "pantorrilla";
+
+export const MEASURE_PARTS: { key: BodyPart; label: string; emoji: string }[] =
+  [
+    { key: "cintura", label: "Cintura", emoji: "📏" },
+    { key: "pecho", label: "Pecho", emoji: "🫀" },
+    { key: "brazo", label: "Brazo", emoji: "💪" },
+    { key: "muslo", label: "Muslo", emoji: "🦵" },
+    { key: "pantorrilla", label: "Pantorrilla", emoji: "🦶" },
+  ];
+
+export type MeasureEntry = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  part: BodyPart;
+  cm: number;
+  createdAt: number;
+};
+
 export type DailyMetrics = {
   id: string;
   date: string; // YYYY-MM-DD

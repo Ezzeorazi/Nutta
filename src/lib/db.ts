@@ -58,6 +58,14 @@ const schema = i.schema({
       kg: i.number(),
       createdAt: i.number(),
     }),
+    // Medidas corporales (una fila por parte y día): cintura, pecho, brazo…
+    measures: i.entity({
+      owner: i.string().indexed(),
+      date: i.string().indexed(), // YYYY-MM-DD
+      part: i.string(), // cintura | pecho | brazo | muslo | pantorrilla
+      cm: i.number(),
+      createdAt: i.number(),
+    }),
     // Métricas diarias de bienestar (una fila por día): agua, sueño, pasos.
     metrics: i.entity({
       owner: i.string().indexed(),

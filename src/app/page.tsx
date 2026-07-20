@@ -9,6 +9,7 @@ import FoodForm from "@/components/FoodForm";
 import History from "@/components/History";
 import InsightsCard from "@/components/InsightsCard";
 import MacroBar from "@/components/MacroBar";
+import MeasuresPanel from "@/components/MeasuresPanel";
 import MemorySheet from "@/components/MemorySheet";
 import ScoreCard from "@/components/ScoreCard";
 import Timeline from "@/components/Timeline";
@@ -46,6 +47,7 @@ export default function Home() {
     memories,
     weights,
     metrics,
+    measures,
     targetWeight,
     profile,
     saveProfile,
@@ -59,6 +61,7 @@ export default function Home() {
     addWeight,
     setTargetWeight,
     setMetric,
+    addMeasure,
   } = useNutta();
 
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
@@ -250,6 +253,11 @@ export default function Home() {
             targetWeight={targetWeight}
             onAdd={addWeight}
             onSetTarget={setTargetWeight}
+            today={today}
+          />
+          <MeasuresPanel
+            measures={measures}
+            onAdd={addMeasure}
             today={today}
           />
         </main>

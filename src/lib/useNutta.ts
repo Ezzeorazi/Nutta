@@ -4,10 +4,12 @@ import { useEffect } from "react";
 import { db, id } from "@/lib/db";
 import type { Profile } from "@/lib/nutrition";
 import type {
+  BodyPart,
   ChatMessage,
   DailyMetrics,
   ExerciseEntry,
   FoodEntry,
+  MeasureEntry,
   MemoryFact,
   MemoryKind,
   WeightEntry,
@@ -33,6 +35,7 @@ export function useNutta() {
           memories: {},
           weights: {},
           metrics: {},
+          measures: {},
         }
       : null,
   );
@@ -63,6 +66,11 @@ export function useNutta() {
   const metrics = (
     (data?.metrics ?? []) as unknown as (DailyMetrics & { owner: string })[]
   ).filter((m) => m.owner === owner);
+  const measures = (
+    (data?.measures ?? []) as unknown as (MeasureEntry & { owner: string })[]
+  )
+    .filter((m) => m.owner === owner)
+    .sort((a, b) => a.date.localeCompare(b.date));
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -246,6 +254,26 @@ export function useNutta() {
   const removeWeight = (wid: string) =>
     db.transact(db.tx.weights[wid].delete());
 
+  /** Registra una medida corporal del día (upsert por parte + día). */
+  const addMeasure = (part: BodyPart, cm: number, date: string) => {
+    if (!user || !(cm > 0)) return;
+    const existing = measures.find(
+      (m) => m.part === part && m.date === date,
+    ) as (MeasureEntry & { id: string }) | undefined;
+    const mid = existing?.id ?? id();
+    db.transact(
+      db.tx.measures[mid].update({
+        owner: user.id,
+        date,
+        part,
+        cm,
+        createdAt: Date.now(),
+      }),
+    );
+  };
+  const removeMeasure = (mid: string) =>
+    db.transact(db.tx.measures[mid].delete());
+
   /** Actualiza (o crea) las métricas de bienestar de un día. */
   const setMetric = (
     date: string,
@@ -271,6 +299,7 @@ export function useNutta() {
     memories,
     weights,
     metrics,
+    measures,
     targetWeight,
     profile,
     profileId,
@@ -287,5 +316,7 @@ export function useNutta() {
     removeWeight,
     setTargetWeight,
     setMetric,
+    addMeasure,
+    removeMeasure,
   };
 }
