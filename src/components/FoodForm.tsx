@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { normalizeProduct, type FoodProduct, type OffProduct } from "@/lib/off";
 import BarcodeScanner from "@/components/BarcodeScanner";
 import Sheet, { Field, inputCls, uid } from "@/components/Sheet";
-import { MEALS, todayISO, type FoodEntry, type MealType } from "@/lib/types";
+import {
+  MEALS,
+  todayISO,
+  type FavoriteFood,
+  type FoodEntry,
+  type MealType,
+} from "@/lib/types";
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
@@ -21,12 +27,20 @@ function scale(per100: FoodProduct["per100"], qty: number) {
 
 export default function FoodForm({
   meal,
+  foods,
+  favorites,
   onAdd,
   onClose,
+  onAddFavorite,
+  onRemoveFavorite,
 }: {
   meal: MealType;
+  foods: FoodEntry[];
+  favorites: FavoriteFood[];
   onAdd: (e: FoodEntry) => void;
   onClose: () => void;
+  onAddFavorite: (fav: Omit<FavoriteFood, "id" | "createdAt">) => void;
+  onRemoveFavorite: (id: string) => void;
 }) {
   const [f, setF] = useState({
     name: "",
@@ -45,6 +59,59 @@ export default function FoodForm({
   const [scanning, setScanning] = useState(false);
   const [scanMsg, setScanMsg] = useState<string | null>(null);
   const label = MEALS.find((m) => m.key === meal)?.label ?? "";
+
+  // Comidas recientes (únicas por nombre, más nuevas primero).
+  const recents = useMemo(() => {
+    const seen = new Set<string>();
+    const out: FoodEntry[] = [];
+    for (const item of [...foods].sort(
+      (a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0),
+    )) {
+      const key = item.name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(item);
+      if (out.length >= 8) break;
+    }
+    return out;
+  }, [foods]);
+
+  const fill = (item: {
+    name: string;
+    qty: number;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }) => {
+    setBase(null);
+    setF({
+      name: item.name,
+      qty: String(item.qty),
+      calories: String(Math.round(item.calories)),
+      protein: String(item.protein),
+      carbs: String(item.carbs),
+      fat: String(item.fat),
+    });
+    setQuery("");
+    setResults([]);
+  };
+
+  const currentFav = favorites.find(
+    (x) => x.name.toLowerCase() === f.name.trim().toLowerCase(),
+  );
+  const toggleFav = () => {
+    if (currentFav) onRemoveFavorite(currentFav.id);
+    else if (f.name.trim())
+      onAddFavorite({
+        name: f.name.trim(),
+        qty: Number(f.qty) || 0,
+        calories: Number(f.calories) || 0,
+        protein: Number(f.protein) || 0,
+        carbs: Number(f.carbs) || 0,
+        fat: Number(f.fat) || 0,
+      });
+  };
 
   // Búsqueda con debounce contra Open Food Facts.
   useEffect(() => {
@@ -197,12 +264,60 @@ export default function FoodForm({
         </div>
         {scanMsg && <p className="-mt-2 text-xs text-accent">{scanMsg}</p>}
 
-        <input
-          className={inputCls}
-          placeholder="Alimento (ej. Yogur natural)"
-          value={f.name}
-          onChange={(e) => setF({ ...f, name: e.target.value })}
-        />
+        {/* Favoritos y recientes (acceso rápido) */}
+        {query.trim() === "" && (favorites.length > 0 || recents.length > 0) && (
+          <div className="flex flex-col gap-2">
+            {favorites.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {favorites.slice(0, 8).map((fav) => (
+                  <button
+                    key={fav.id}
+                    type="button"
+                    onClick={() => fill(fav)}
+                    className="rounded-full border border-primary/40 bg-primary/5 px-2.5 py-1 text-xs active:scale-95"
+                  >
+                    ★ {fav.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {recents.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {recents.map((rec) => (
+                  <button
+                    key={rec.id}
+                    type="button"
+                    onClick={() => fill(rec)}
+                    className="rounded-full border border-border px-2.5 py-1 text-xs text-muted active:scale-95 hover:border-primary"
+                  >
+                    {rec.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <input
+            className={inputCls}
+            placeholder="Alimento (ej. Yogur natural)"
+            value={f.name}
+            onChange={(e) => setF({ ...f, name: e.target.value })}
+          />
+          <button
+            type="button"
+            onClick={toggleFav}
+            disabled={!f.name.trim()}
+            className="shrink-0 rounded-xl border border-border px-3 text-lg active:scale-95 disabled:opacity-40"
+            aria-label={
+              currentFav ? "Quitar de favoritos" : "Guardar como favorito"
+            }
+            title={currentFav ? "Quitar de favoritos" : "Guardar como favorito"}
+          >
+            {currentFav ? "★" : "☆"}
+          </button>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Cantidad (g)">
             <input

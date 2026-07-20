@@ -43,12 +43,15 @@ export default function Home() {
     supplementLogs,
     strengthSets,
     customGoals,
+    favorites,
     photos,
     targetWeight,
     profile,
     saveProfile,
     addFood,
     removeFood,
+    addFavorite,
+    removeFavorite,
     addExercise,
     removeExercise,
     addMessage,
@@ -304,6 +307,8 @@ export default function Home() {
           todayMetrics={todayMetrics}
           todayFoods={todayFoods}
           todayEx={todayEx}
+          foods={foods}
+          favorites={favorites}
           supplements={supplements}
           supplementLogs={supplementLogs}
           insights={insights}
@@ -312,6 +317,8 @@ export default function Home() {
           onSignOut={() => db.auth.signOut()}
           addFood={addFood}
           removeFood={removeFood}
+          addFavorite={addFavorite}
+          removeFavorite={removeFavorite}
           addExercise={addExercise}
           removeExercise={removeExercise}
           setMetric={setMetric}

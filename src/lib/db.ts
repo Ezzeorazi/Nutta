@@ -101,6 +101,17 @@ const schema = i.schema({
       weight: i.number(), // kg
       createdAt: i.number(),
     }),
+    // Alimentos favoritos (guardados para re-cargar en un toque).
+    favorites: i.entity({
+      owner: i.string().indexed(),
+      name: i.string(),
+      qty: i.number(),
+      calories: i.number(),
+      protein: i.number(),
+      carbs: i.number(),
+      fat: i.number(),
+      createdAt: i.number(),
+    }),
     // Suplementos que toma el usuario (su lista).
     supplements: i.entity({
       owner: i.string().indexed(),

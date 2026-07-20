@@ -10,6 +10,7 @@ import type {
   CustomGoal,
   DailyMetrics,
   ExerciseEntry,
+  FavoriteFood,
   FoodEntry,
   GoalKind,
   MeasureEntry,
@@ -50,6 +51,7 @@ export function useNutta() {
           supplementLogs: {},
           strengthSets: {},
           customGoals: {},
+          favorites: {},
           photos: {},
         }
       : null,
@@ -115,6 +117,11 @@ export function useNutta() {
   )
     .filter((g) => g.owner === owner)
     .sort((a, b) => a.createdAt - b.createdAt);
+  const favorites = (
+    (data?.favorites ?? []) as unknown as (FavoriteFood & { owner: string })[]
+  )
+    .filter((f) => f.owner === owner)
+    .sort((a, b) => b.createdAt - a.createdAt);
   // URL de cada archivo, por id, desde la entidad de sistema $files.
   const fileUrlById = new Map<string, string>();
   const files = (filesData as unknown as { $files?: { id: string; url?: string }[] } | undefined)
@@ -227,6 +234,28 @@ export function useNutta() {
     );
   };
   const removeFood = (fid: string) => db.transact(db.tx.foods[fid].delete());
+
+  const addFavorite = (fav: Omit<FavoriteFood, "id" | "createdAt">) => {
+    if (!user || !fav.name.trim()) return;
+    const dup = favorites.find(
+      (f) => f.name.toLowerCase() === fav.name.trim().toLowerCase(),
+    );
+    if (dup) return;
+    db.transact(
+      db.tx.favorites[id()].update({
+        owner: user.id,
+        name: fav.name.trim(),
+        qty: fav.qty,
+        calories: fav.calories,
+        protein: fav.protein,
+        carbs: fav.carbs,
+        fat: fav.fat,
+        createdAt: Date.now(),
+      }),
+    );
+  };
+  const removeFavorite = (fid: string) =>
+    db.transact(db.tx.favorites[fid].delete());
 
   const addExercise = (entry: ExerciseEntry) => {
     if (!user) return;
@@ -464,6 +493,7 @@ export function useNutta() {
     supplementLogs,
     strengthSets,
     customGoals,
+    favorites,
     photos,
     targetWeight,
     profile,
@@ -471,6 +501,8 @@ export function useNutta() {
     saveProfile,
     addFood,
     removeFood,
+    addFavorite,
+    removeFavorite,
     addExercise,
     removeExercise,
     addMessage,

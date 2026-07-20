@@ -16,6 +16,7 @@ import {
   MEALS,
   type DailyMetrics,
   type ExerciseEntry,
+  type FavoriteFood,
   type FoodEntry,
   type MealType,
   type Supplement,
@@ -38,6 +39,8 @@ export default function HoyTab({
   todayMetrics,
   todayFoods,
   todayEx,
+  foods,
+  favorites,
   supplements,
   supplementLogs,
   insights,
@@ -46,6 +49,8 @@ export default function HoyTab({
   onSignOut,
   addFood,
   removeFood,
+  addFavorite,
+  removeFavorite,
   addExercise,
   removeExercise,
   setMetric,
@@ -60,6 +65,8 @@ export default function HoyTab({
   todayMetrics?: DailyMetrics;
   todayFoods: FoodEntry[];
   todayEx: ExerciseEntry[];
+  foods: FoodEntry[];
+  favorites: FavoriteFood[];
   supplements: Supplement[];
   supplementLogs: SupplementLog[];
   insights: Insight[];
@@ -68,6 +75,8 @@ export default function HoyTab({
   onSignOut: () => void;
   addFood: (e: FoodEntry) => void;
   removeFood: (id: string) => void;
+  addFavorite: (fav: Omit<FavoriteFood, "id" | "createdAt">) => void;
+  removeFavorite: (id: string) => void;
   addExercise: (e: ExerciseEntry) => void;
   removeExercise: (id: string) => void;
   setMetric: (
@@ -192,11 +201,15 @@ export default function HoyTab({
       {foodOpen && (
         <FoodForm
           meal={foodOpen}
+          foods={foods}
+          favorites={favorites}
           onClose={() => setFoodOpen(null)}
           onAdd={(entry) => {
             addFood(entry);
             setFoodOpen(null);
           }}
+          onAddFavorite={addFavorite}
+          onRemoveFavorite={removeFavorite}
         />
       )}
       {exOpen && (
