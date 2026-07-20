@@ -129,7 +129,7 @@ export default function Chat({
       </header>
 
       {/* Historial */}
-      <div className="flex flex-1 flex-col gap-2 px-4 pb-36 pt-4">
+      <div className="flex flex-1 flex-col gap-2 px-4 pb-[calc(9rem+env(safe-area-inset-bottom))] pt-4">
         {messages.length === 0 && (
           <div className="mt-4 flex flex-col gap-3">
             <Bubble role="assistant">
@@ -185,7 +185,7 @@ export default function Chat({
       </div>
 
       {/* Barra de entrada (fija, por encima del BottomNav) */}
-      <div className="fixed inset-x-0 bottom-14 z-30 border-t border-border bg-background/95 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-background/95 backdrop-blur">
         <div className="mx-auto w-full max-w-md px-3 py-2.5">
           {hint && (
             <p className="mb-1.5 px-1 text-center text-xs text-accent">{hint}</p>

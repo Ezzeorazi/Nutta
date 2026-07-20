@@ -2,20 +2,11 @@
 
 import { useMemo, useState } from "react";
 import BottomNav, { type Tab } from "@/components/BottomNav";
-import CalorieRing from "@/components/CalorieRing";
 import Chat from "@/components/Chat";
-import ExerciseForm from "@/components/ExerciseForm";
-import FoodForm from "@/components/FoodForm";
 import History from "@/components/History";
-import InsightsCard from "@/components/InsightsCard";
-import MacroBar from "@/components/MacroBar";
-import MeasuresPanel from "@/components/MeasuresPanel";
+import HoyTab from "@/components/HoyTab";
 import MemorySheet from "@/components/MemorySheet";
-import ScoreCard from "@/components/ScoreCard";
-import SupplementsCard from "@/components/SupplementsCard";
-import Timeline from "@/components/Timeline";
-import WeightPanel from "@/components/WeightPanel";
-import WellbeingCard from "@/components/WellbeingCard";
+import ProgresoTab from "@/components/ProgresoTab";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
 import { uid } from "@/components/Sheet";
@@ -27,11 +18,9 @@ import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
 import { useNutta } from "@/lib/useNutta";
 import {
   DEFAULT_GOALS,
-  MEALS,
   todayISO,
   type ExerciseEntry,
   type FoodEntry,
-  type MealType,
   type MemoryKind,
 } from "@/lib/types";
 
@@ -70,14 +59,41 @@ export default function Home() {
     toggleSupplement,
   } = useNutta();
 
-  const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
-  const [exOpen, setExOpen] = useState(false);
-  const [editProfile, setEditProfile] = useState(false);
   const [tab, setTab] = useState<Tab>("chat");
   const [sending, setSending] = useState(false);
+  const [editProfile, setEditProfile] = useState(false);
   const [memoryOpen, setMemoryOpen] = useState(false);
 
-  // Envía un mensaje al coach IA, persiste los registros y responde.
+  // --- Derivados del día ---
+  const todayFoods = foods.filter((f) => f.date === today);
+  const todayEx = exercises.filter((e) => e.date === today);
+  const todayMetrics = metrics.find((m) => m.date === today);
+  const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
+
+  const totals = useMemo(() => {
+    const t = { calories: 0, protein: 0, carbs: 0, fat: 0, burned: 0 };
+    for (const f of todayFoods) {
+      t.calories += f.calories;
+      t.protein += f.protein;
+      t.carbs += f.carbs;
+      t.fat += f.fat;
+    }
+    for (const e of todayEx) t.burned += e.caloriesBurned;
+    return t;
+  }, [todayFoods, todayEx]);
+
+  const score = useMemo(
+    () => dailyScore(todayFoods, todayEx, goals, todayMetrics),
+    [todayFoods, todayEx, goals, todayMetrics],
+  );
+  const insights = useMemo(
+    () => buildInsights(foods, exercises, goals, today),
+    [foods, exercises, goals, today],
+  );
+
+  // --- Coach IA ---
+
+  // Envía un mensaje al coach, persiste los registros que detecta y responde.
   const sendChat = async (text: string) => {
     if (!profile) return;
     addMessage("user", text);
@@ -132,11 +148,7 @@ export default function Home() {
         addWeight(data.bodyweight, today);
       }
       // Métricas de bienestar en un solo upsert (evita filas duplicadas).
-      const patch: {
-        water?: number;
-        sleepHours?: number;
-        steps?: number;
-      } = {};
+      const patch: { water?: number; sleepHours?: number; steps?: number } = {};
       if (data.water && data.water > 0)
         patch.water = (todayMetrics?.water ?? 0) + data.water;
       if (data.sleepHours && data.sleepHours > 0)
@@ -157,7 +169,7 @@ export default function Home() {
     }
   };
 
-  // Pide al Coach IA un análisis de la última semana y lo publica en el chat.
+  // Pide al coach un análisis de la última semana y lo publica en el chat.
   const runWeeklyAnalysis = async () => {
     if (!profile || sending) return;
     setTab("chat");
@@ -174,7 +186,10 @@ export default function Home() {
       });
       const data = (await res.json()) as { analysis?: string; error?: string };
       if (!res.ok) throw new Error(data?.error ?? "error");
-      addMessage("assistant", data.analysis || "No tengo suficientes datos aún.");
+      addMessage(
+        "assistant",
+        data.analysis || "No tengo suficientes datos aún.",
+      );
     } catch {
       addMessage(
         "assistant",
@@ -184,32 +199,6 @@ export default function Home() {
       setSending(false);
     }
   };
-
-  const todayFoods = foods.filter((f) => f.date === today);
-  const todayEx = exercises.filter((e) => e.date === today);
-  const todayMetrics = metrics.find((m) => m.date === today);
-
-  const totals = useMemo(() => {
-    const t = { calories: 0, protein: 0, carbs: 0, fat: 0, burned: 0 };
-    for (const f of todayFoods) {
-      t.calories += f.calories;
-      t.protein += f.protein;
-      t.carbs += f.carbs;
-      t.fat += f.fat;
-    }
-    for (const e of todayEx) t.burned += e.caloriesBurned;
-    return t;
-  }, [todayFoods, todayEx]);
-
-  const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
-  const score = useMemo(
-    () => dailyScore(todayFoods, todayEx, goals, todayMetrics),
-    [todayFoods, todayEx, goals, todayMetrics],
-  );
-  const insights = useMemo(
-    () => buildInsights(foods, exercises, goals, today),
-    [foods, exercises, goals, today],
-  );
 
   const splash = (
     <div className="flex flex-1 items-center justify-center text-3xl font-bold">
@@ -222,9 +211,7 @@ export default function Home() {
   if (dataLoading) return splash;
 
   // Primera vez: sin perfil → onboarding a pantalla completa.
-  if (!profile) {
-    return <Onboarding onDone={saveProfile} />;
-  }
+  if (!profile) return <Onboarding onDone={saveProfile} />;
   if (editProfile) {
     return (
       <Onboarding
@@ -249,156 +236,41 @@ export default function Home() {
           onAnalyze={runWeeklyAnalysis}
         />
       ) : tab === "progreso" ? (
-        <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
-          <header>
-            <h1 className="text-2xl font-bold">Progreso</h1>
-            <p className="text-sm text-muted">Tu peso y su evolución</p>
-          </header>
-          <WeightPanel
-            weights={weights}
-            targetWeight={targetWeight}
-            onAdd={addWeight}
-            onSetTarget={setTargetWeight}
-            today={today}
-          />
-          <MeasuresPanel
-            measures={measures}
-            onAdd={addMeasure}
-            today={today}
-          />
-        </main>
+        <ProgresoTab
+          weights={weights}
+          targetWeight={targetWeight}
+          measures={measures}
+          today={today}
+          addWeight={addWeight}
+          setTargetWeight={setTargetWeight}
+          addMeasure={addMeasure}
+        />
       ) : tab === "historial" ? (
         <History foods={foods} exercises={exercises} goals={goals} />
       ) : (
-        <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
-          <header className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">
-                Nut<span className="text-primary">ta</span>
-              </h1>
-              <p className="text-sm text-muted">
-                {new Date().toLocaleDateString("es-AR", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                })}
-              </p>
-            </div>
-            <button
-              onClick={() => setEditProfile(true)}
-              className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-lg font-bold text-primary active:scale-95"
-              aria-label="Editar perfil"
-            >
-              N
-            </button>
-          </header>
-
-          <ScoreCard data={score} />
-
-          <section className="flex flex-col items-center gap-6 rounded-3xl border border-border bg-card p-6">
-            <CalorieRing
-              consumed={Math.round(totals.calories)}
-              burned={Math.round(totals.burned)}
-              goal={goals.calories}
-            />
-            <div className="flex w-full flex-col gap-3">
-              <MacroBar
-                label="Proteínas"
-                value={totals.protein}
-                goal={goals.protein}
-                color="var(--primary)"
-              />
-              <MacroBar
-                label="Carbohidratos"
-                value={totals.carbs}
-                goal={goals.carbs}
-                color="var(--accent)"
-              />
-              <MacroBar
-                label="Grasas"
-                value={totals.fat}
-                goal={goals.fat}
-                color="var(--success)"
-              />
-            </div>
-          </section>
-
-          <WellbeingCard
-            metrics={todayMetrics}
-            onSetWater={(l) => setMetric(today, { water: l })}
-            onSetSleep={(h) => setMetric(today, { sleepHours: h })}
-            onSetSteps={(n) => setMetric(today, { steps: n })}
-          />
-
-          <SupplementsCard
-            supplements={supplements}
-            logs={supplementLogs}
-            today={today}
-            onAdd={addSupplement}
-            onRemove={removeSupplement}
-            onToggle={toggleSupplement}
-          />
-
-          <InsightsCard insights={insights} />
-
-          {/* Timeline cronológico del día */}
-          <Timeline
-            foods={todayFoods}
-            exercises={todayEx}
-            onRemoveFood={removeFood}
-            onRemoveExercise={removeExercise}
-          />
-
-          {/* Agregar manualmente (el chat es la vía principal) */}
-          <section className="rounded-2xl border border-border bg-card p-4">
-            <h2 className="mb-3 text-sm font-semibold text-muted">Agregar</h2>
-            <div className="flex flex-wrap gap-2">
-              {MEALS.map((m) => (
-                <button
-                  key={m.key}
-                  onClick={() => setFoodOpen(m.key)}
-                  className="rounded-full border border-border px-3 py-1.5 text-sm transition active:scale-95 hover:border-primary"
-                >
-                  + {m.label}
-                </button>
-              ))}
-              <button
-                onClick={() => setExOpen(true)}
-                className="rounded-full border border-border px-3 py-1.5 text-sm text-accent transition active:scale-95 hover:border-accent"
-              >
-                + Ejercicio
-              </button>
-            </div>
-          </section>
-
-          <button
-            onClick={() => db.auth.signOut()}
-            className="mx-auto text-xs text-muted underline-offset-2 hover:underline"
-          >
-            Cerrar sesión
-          </button>
-
-          {foodOpen && (
-            <FoodForm
-              meal={foodOpen}
-              onClose={() => setFoodOpen(null)}
-              onAdd={(entry) => {
-                addFood(entry);
-                setFoodOpen(null);
-              }}
-            />
-          )}
-          {exOpen && (
-            <ExerciseForm
-              weight={profile.weight}
-              onClose={() => setExOpen(false)}
-              onAdd={(entry) => {
-                addExercise(entry);
-                setExOpen(false);
-              }}
-            />
-          )}
-        </main>
+        <HoyTab
+          weight={profile.weight}
+          score={score}
+          totals={totals}
+          goals={goals}
+          todayMetrics={todayMetrics}
+          todayFoods={todayFoods}
+          todayEx={todayEx}
+          supplements={supplements}
+          supplementLogs={supplementLogs}
+          insights={insights}
+          today={today}
+          onEditProfile={() => setEditProfile(true)}
+          onSignOut={() => db.auth.signOut()}
+          addFood={addFood}
+          removeFood={removeFood}
+          addExercise={addExercise}
+          removeExercise={removeExercise}
+          setMetric={setMetric}
+          addSupplement={addSupplement}
+          removeSupplement={removeSupplement}
+          toggleSupplement={toggleSupplement}
+        />
       )}
       {memoryOpen && (
         <MemorySheet
