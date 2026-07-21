@@ -12,9 +12,9 @@ import {
 } from "recharts";
 import { inputCls } from "@/components/Sheet";
 import {
+  dailyRoutineSuggestion,
   exerciseProgress,
   groupByExercise,
-  muscleRecommendation,
   personalRecords,
   totalVolume,
   usedExercises,
@@ -29,11 +29,13 @@ const shortDate = (iso: string) => {
 
 export default function GymTab({
   strengthSets,
+  exercises = [],
   today,
   onAddSet,
   onRemoveSet,
 }: {
   strengthSets: StrengthSet[];
+  exercises?: { date: string }[];
   today: string;
   onAddSet: (exercise: string, reps: number, weight: number, date: string) => void;
   onRemoveSet: (id: string) => void;
@@ -50,10 +52,22 @@ export default function GymTab({
   const groups = useMemo(() => groupByExercise(todaySets), [todaySets]);
   const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
   const dayVolume = totalVolume(todaySets);
-  const recommendation = useMemo(
-    () => muscleRecommendation(strengthSets, today),
-    [strengthSets, today],
+  const suggestion = useMemo(
+    () => dailyRoutineSuggestion(strengthSets, exercises, today),
+    [strengthSets, exercises, today],
   );
+  // Descarte por jornada: se guarda la clave del día en localStorage. Se lee en
+  // el inicializador (GymTab solo monta al abrir el tab, nunca en SSR).
+  const [dismissedKey, setDismissedKey] = useState<string | null>(() =>
+    typeof window === "undefined"
+      ? null
+      : localStorage.getItem("nutta.routineDismissed"),
+  );
+  const showSuggestion = suggestion.key !== dismissedKey;
+  const dismissSuggestion = () => {
+    localStorage.setItem("nutta.routineDismissed", suggestion.key);
+    setDismissedKey(suggestion.key);
+  };
 
   const used = useMemo(() => usedExercises(strengthSets), [strengthSets]);
   // Historial y comunes primero (lo más relevante), luego el catálogo canónico
@@ -108,10 +122,31 @@ export default function GymTab({
         )}
       </header>
 
-      {recommendation && (
-        <div className="flex items-center gap-3 rounded-2xl border border-border border-l-4 border-l-accent bg-card px-4 py-3">
-          <span className="text-lg leading-none">🎯</span>
-          <p className="text-sm">{recommendation}</p>
+      {showSuggestion && (
+        <div
+          className={`flex items-center gap-3 rounded-2xl border border-border border-l-4 bg-card px-4 py-3 ${
+            suggestion.tone === "recovery"
+              ? "border-l-primary"
+              : suggestion.tone === "done"
+                ? "border-l-success"
+                : "border-l-accent"
+          }`}
+        >
+          <span className="text-lg leading-none">
+            {suggestion.tone === "recovery"
+              ? "🧘"
+              : suggestion.tone === "done"
+                ? "✅"
+                : "🎯"}
+          </span>
+          <p className="flex-1 text-sm">{suggestion.text}</p>
+          <button
+            onClick={dismissSuggestion}
+            aria-label="Descartar sugerencia"
+            className="shrink-0 text-muted hover:text-accent"
+          >
+            ×
+          </button>
         </div>
       )}
 

@@ -1,4 +1,16 @@
 import type { StrengthSet } from "@/lib/types";
+import exerciseGroups from "@/data/exercise-groups.json";
+
+/** Mapa nombre_normalizado → grupo muscular (precalculado del dataset RepDB). */
+const GROUP_MAP = exerciseGroups as Record<string, string>;
+
+const normName = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 
 /** Volumen de una serie = reps × peso. */
 export const setVolume = (s: Pick<StrengthSet, "reps" | "weight">) =>
@@ -67,8 +79,16 @@ const MUSCLE_LIFTS: { group: string; re: RegExp }[] = [
   { group: "brazos", re: /curl|b[ií]ceps|tr[ií]ceps/i },
 ];
 
-const groupsOf = (name: string) =>
-  MUSCLE_LIFTS.filter((m) => m.re.test(name)).map((m) => m.group);
+/**
+ * Grupos musculares de un ejercicio. Primero busca el nombre en el mapa real
+ * del dataset (preciso para los nombres canónicos); si no está —alta manual
+ * con nombre libre— cae a la detección por regex.
+ */
+const groupsOf = (name: string): string[] => {
+  const mapped = GROUP_MAP[normName(name)];
+  if (mapped) return [mapped];
+  return MUSCLE_LIFTS.filter((m) => m.re.test(name)).map((m) => m.group);
+};
 
 const dayDiff = (a: string, b: string) =>
   Math.round(
@@ -120,6 +140,83 @@ export function muscleRecommendation(
     return `${yPart}Hace ${maxGap} días que no entrenás ${pick} — hoy es un buen día.`;
   }
   return `${yPart}Hoy te conviene ${pick}.`;
+}
+
+/** Objetivo de días de fuerza por semana (dispara los días de recuperación). */
+export const GYM_DAYS_GOAL = 5;
+
+const toISO = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+/** Lunes de la semana a la que pertenece `iso` (YYYY-MM-DD). */
+const startOfWeek = (iso: string) => {
+  const d = new Date(`${iso}T00:00:00`);
+  const dow = (d.getDay() + 6) % 7; // 0 = lunes
+  d.setDate(d.getDate() - dow);
+  return toISO(d);
+};
+
+/** Cantidad de días distintos (con actividad) en la semana de `today`. */
+const distinctDaysThisWeek = (dates: string[], today: string) => {
+  const start = startOfWeek(today);
+  const set = new Set(dates.filter((d) => d >= start && d <= today));
+  return set.size;
+};
+
+export type RoutineSuggestion = {
+  text: string;
+  tone: "train" | "recovery" | "done";
+  /** clave estable del día para poder descartarla por jornada. */
+  key: string;
+};
+
+/**
+ * Sugerencia del día para armar la rutina, según cuántos días de fuerza llevás
+ * en la semana y qué grupo te falta. Al llegar al objetivo, propone
+ * recuperación activa (cardio suave + core/movilidad).
+ */
+export function dailyRoutineSuggestion(
+  strengthSets: StrengthSet[],
+  cardio: { date: string }[],
+  today: string,
+  goal: number = GYM_DAYS_GOAL,
+): RoutineSuggestion {
+  const strengthDays = distinctDaysThisWeek(
+    strengthSets.map((s) => s.date),
+    today,
+  );
+  const trainedToday = strengthSets.some((s) => s.date === today);
+  const cardioToday = cardio.some((c) => c.date === today);
+  const key = `${today}:${strengthDays}:${trainedToday ? "t" : "n"}`;
+
+  if (trainedToday) {
+    return {
+      key,
+      tone: "done",
+      text: `Listo por hoy 💪 Llevás ${strengthDays}/${goal} días de fuerza esta semana.`,
+    };
+  }
+
+  if (strengthDays >= goal) {
+    const extra = cardioToday ? " Ya sumaste cardio hoy 👏" : "";
+    return {
+      key,
+      tone: "recovery",
+      text: `Ya cumpliste tus ${goal} días de fuerza 🔥 Hoy toca recuperación activa: cardio suave + core/movilidad.${extra}`,
+    };
+  }
+
+  const rec = muscleRecommendation(strengthSets, today);
+  const prefix = `Vas ${strengthDays}/${goal} días esta semana. `;
+  return {
+    key,
+    tone: "train",
+    text: rec ? prefix + rec : prefix + "Arrancá tu primer día de la semana 💪",
+  };
 }
 
 /** Mejor peso por día para un ejercicio (para graficar progresión). */

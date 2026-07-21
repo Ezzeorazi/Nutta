@@ -266,6 +266,7 @@ export default function Home() {
       ) : tab === "gym" ? (
         <GymTab
           strengthSets={strengthSets}
+          exercises={exercises}
           today={today}
           onAddSet={addSet}
           onRemoveSet={removeSet}

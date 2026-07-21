@@ -17,7 +17,7 @@ Ejemplo real:
 
 …queda todo registrado (con calorías y macros estimados) sin tocar un solo formulario.
 
-Además lleva **memoria** de tus hábitos ("hice lo de siempre"), te da un **score diario 0-100**, **insights** automáticos, seguimiento de **peso/medidas** con gráficos y predicción, y un **análisis semanal** en tono de entrenador. Los datos se **sincronizan en la nube** y funciona offline.
+Además lleva **memoria** de tus hábitos ("hice lo de siempre"), te da un **score diario 0-100**, **insights** automáticos, seguimiento de **peso/medidas** con gráficos y predicción, **entrenamiento de fuerza** (series/reps/PR/volumen con un catálogo de +400 ejercicios), **rachas, logros y metas**, **exportación** CSV/PDF, y un **análisis semanal** en tono de entrenador. Los datos se **sincronizan en la nube** y funciona offline.
 
 ---
 
@@ -30,6 +30,7 @@ Además lleva **memoria** de tus hábitos ("hice lo de siempre"), te da un **sco
 | Base de datos + Auth | InstantDB (sync en tiempo real + login por código mágico) |
 | IA (coach) | Vercel AI SDK v7 + Groq (modelo `openai/gpt-oss-20b`, gratis) |
 | Datos de alimentos | Open Food Facts (API pública) |
+| Datos de ejercicios | RepDB (catálogo de +400 ejercicios, licencia free; bundleado en `src/data/`) |
 | Escaneo de códigos | ZXing (`@zxing/browser`, carga diferida) |
 | Voz | Web Speech API (dictado, es-AR) |
 | Gráficos | Recharts |
@@ -51,16 +52,17 @@ Abrir app
 ¿Tiene perfil? ──no──► Onboarding (2 pasos) → calcula metas
    │ sí
    ▼
-CHAT (pantalla principal) ◄─► Hoy ◄─► Progreso ◄─► Historial  (tabs abajo)
+CHAT (principal) ◄─► Hoy ◄─► Gym ◄─► Progreso ◄─► Historial  (tabs abajo)
 ```
 
 La **primera vez** que iniciás sesión, los datos que tuvieras guardados localmente (de antes de la nube) se **suben automáticamente** a tu cuenta.
 
-Los **4 tabs**:
+Los **5 tabs**:
 - **💬 Chat** — hablás y la IA registra. Es la pantalla de inicio.
 - **🍽️ Hoy** — resumen del día: score, calorías/macros, bienestar, suplementos, insights y timeline.
-- **📈 Progreso** — peso (con meta y predicción) y medidas corporales.
-- **📊 Historial** — gráficos de los últimos 7 días.
+- **🏋️ Gym** — entrenamiento de fuerza: series/reps/peso, PR, volumen y progresión.
+- **📈 Progreso** — peso (con meta y predicción), medidas, fotos y metas personalizadas.
+- **📊 Historial** — gráficos de los últimos 7/30 días, rachas y logros, y exportación.
 
 ---
 
@@ -69,6 +71,7 @@ Los **4 tabs**:
 ### El Chat con IA (el corazón)
 - Escribís (o dictás con el 🎙️) en lenguaje natural; el mensaje va al endpoint [`/api/chat`](../src/app/api/chat/route.ts).
 - La IA (Groq) devuelve **salida estructurada** (`generateObject` con un esquema Zod): la respuesta del coach + los registros detectados (comidas con macros, ejercicios, peso, agua, sueño, pasos) + hechos nuevos para recordar.
+- Antes de responder, un **post-proceso determinístico** ([`src/lib/coachEnrich.ts`](../src/lib/coachEnrich.ts)) "snapea" los ejercicios detectados contra el catálogo de RepDB: **normaliza el nombre** al canónico (evita duplicados de PR/volumen) y **recalcula las calorías con el MET real**. Esto es código, no IA: el dataset **nunca** entra al prompt.
 - El cliente persiste todo en InstantDB y muestra la respuesta como en un chat.
 - Lógica de la IA en [`src/lib/coach.ts`](../src/lib/coach.ts); orquestación en [`src/app/page.tsx`](../src/app/page.tsx); UI en [`Chat.tsx`](../src/components/Chat.tsx).
 
@@ -95,8 +98,19 @@ Los **4 tabs**:
 
 ### Comidas y ejercicio (alta manual, además del chat)
 - **Comidas**: búsqueda en Open Food Facts (desde el navegador) + escaneo de código de barras; los macros se escalan por gramos. Formularios en [`FoodForm.tsx`](../src/components/FoodForm.tsx).
-- **Ejercicio**: actividades con valores **MET** (`MET × peso × horas`) en [`ExerciseForm.tsx`](../src/components/ExerciseForm.tsx) y [`src/lib/exercises.ts`](../src/lib/exercises.ts).
+- **Ejercicio (cardio)**: actividades con valores **MET** (`MET × peso × horas`) en [`ExerciseForm.tsx`](../src/components/ExerciseForm.tsx) y [`src/lib/exercises.ts`](../src/lib/exercises.ts).
 - Onboarding y metas (Mifflin-St Jeor → TDEE → macros) en [`src/lib/nutrition.ts`](../src/lib/nutrition.ts).
+
+### Gym — entrenamiento de fuerza (tab Gym)
+- Alta rápida estilo Strong: ejercicio (con **autocompletado** de tu historial + los 400 nombres de RepDB), reps y peso; calcula **volumen** (reps × peso), marca **PR** 🏆 y grafica la **progresión** por ejercicio.
+- Recomendación de qué entrenar hoy según los grupos musculares recientes ("ayer pecho, hoy espalda").
+- Desde el chat, frases como *"press banca 4x8 con 60"* se cargan como series de fuerza y se normalizan al nombre canónico de RepDB.
+- Lógica en [`src/lib/gym.ts`](../src/lib/gym.ts); catálogo y matcher en [`src/lib/exerciseDb.ts`](../src/lib/exerciseDb.ts); UI en [`GymTab.tsx`](../src/components/GymTab.tsx).
+
+### Catálogo de ejercicios (RepDB)
+- Dataset de **+400 ejercicios** con nombre en español, **MET**, grupos musculares y categoría, adelgazado a [`src/data/exercises.json`](../src/data/exercises.json) por el script `npm run data:exercises`.
+- El matcher ([`exerciseDb.ts`](../src/lib/exerciseDb.ts)) normaliza (sin tildes/minúsculas) y compara por tokens; un guard evita que frases genéricas ("entrené espalda") se snapeen a un ejercicio puntual.
+- Se usa **solo como post-proceso determinístico**, nunca dentro de la IA (lo exige la licencia RepDB).
 
 ### Progreso corporal
 - **Peso**: gráfico de evolución, meta y **predicción** (regresión lineal → ETA a la meta). En [`WeightPanel.tsx`](../src/components/WeightPanel.tsx) y [`src/lib/weight.ts`](../src/lib/weight.ts).
@@ -115,7 +129,7 @@ Los **4 tabs**:
 
 - La base de datos es **InstantDB** (en la nube), asociada a tu cuenta por **email**.
 - Entidades, cada una con un campo `owner` (= tu id de usuario):
-  `profiles`, `foods`, `exercises`, `messages` (chat), `memories`, `weights`, `metrics` (agua/sueño/pasos), `measures`, `supplements` y `supplementLogs`.
+  `profiles`, `foods`, `exercises`, `messages` (chat), `memories`, `weights`, `metrics` (agua/sueño/pasos), `measures`, `supplements`, `supplementLogs`, `strengthSets` (fuerza), `customGoals` (metas), `favorites`, `recipes` y `photos` (+ `$files` de storage).
 - Las escrituras son **optimistas**: se ven al instante y se sincronizan en segundo plano (funciona offline y reconcilia al reconectar).
 - **Seguridad**: reglas de permisos que solo permiten a cada usuario ver/editar sus propios registros (`auth.id == data.owner`).
 - Cliente y esquema en [`src/lib/db.ts`](../src/lib/db.ts); acceso centralizado en el hook [`src/lib/useNutta.ts`](../src/lib/useNutta.ts); login en [`Login.tsx`](../src/components/Login.tsx).
@@ -129,6 +143,7 @@ Los **4 tabs**:
 - **Dos endpoints** (Vercel Functions, server-side): `/api/chat` (parseo de mensaje → registros, `generateObject`) y `/api/coach` (análisis semanal, `generateText`).
 - Toda la lógica de IA vive en [`src/lib/coach.ts`](../src/lib/coach.ts) (server-only; importa `@ai-sdk/groq`). El armado de contexto es puro y client-safe en [`src/lib/coachContext.ts`](../src/lib/coachContext.ts).
 - `page.tsx` **nunca** importa `coach.ts` → el bundle del cliente no arrastra el SDK de IA.
+- **Post-proceso determinístico**: la salida de la IA pasa por [`coachEnrich.ts`](../src/lib/coachEnrich.ts) (nombres canónicos + calorías por MET real desde el catálogo RepDB). Es código puro y client-safe; el dataset no se le pasa al modelo.
 - **Modelo**: `openai/gpt-oss-20b` en Groq (gratis y rápido). Se eligió porque los modelos Llama de Groq **no soportan** salida estructurada (`json_schema`) y estos sí. Se puede cambiar con la env `GROQ_MODEL`.
 
 ---
@@ -149,6 +164,8 @@ npm install
 # crear .env.local con GROQ_API_KEY=... (gratis, de console.groq.com)
 npm run dev      # http://localhost:3000
 npm run build    # build de producción
+
+npm run data:exercises   # regenera el catálogo de ejercicios (RepDB)
 ```
 
 - Cada `git push` a `main` dispara un **deploy automático** a producción en Vercel.
@@ -181,23 +198,34 @@ src/
 │  ├─ MeasuresPanel.tsx   Medidas corporales por parte
 │  ├─ WellbeingCard.tsx   Agua / sueño / pasos
 │  ├─ SupplementsCard.tsx Suplementos + checklist
+│  ├─ GymTab.tsx          Tab "Gym" (fuerza, PR, volumen, progresión)
 │  ├─ FoodForm/ExerciseForm/Sheet, History, BottomNav, BarcodeScanner…
 │  └─ Login.tsx / Onboarding.tsx
+├─ data/
+│  ├─ exercises.json       Catálogo RepDB adelgazado (server)
+│  └─ exercise-names.json  Solo nombres (autocompletado del cliente)
 └─ lib/
    ├─ db.ts               Cliente y esquema de InstantDB
    ├─ useNutta.ts         Hook central de datos (query + mutaciones)
    ├─ coach.ts            IA: esquema, prompts, interpretMessage/analyzeWeek
    ├─ coachContext.ts     Contexto puro para la IA (frecuentes, resumen semanal)
+   ├─ coachEnrich.ts      Post-proceso: nombres canónicos + MET real (RepDB)
+   ├─ exerciseDb.ts       Catálogo RepDB + matcher + grupos musculares
+   ├─ gym.ts              Volumen, PR, progresión y recomendaciones
    ├─ score.ts            Score diario
    ├─ insights.ts         Insights
+   ├─ achievements.ts     Rachas y logros
+   ├─ export.ts           Exportación CSV/PDF
    ├─ weight.ts           Predicción de peso
    ├─ emoji.ts            Emoji por palabra clave
    ├─ nutrition.ts        Mifflin-St Jeor y metas
-   ├─ exercises.ts        Tabla MET
+   ├─ exercises.ts        Tabla MET (cardio)
    ├─ analytics.ts        Agregación del historial
    ├─ off.ts              Normalización de Open Food Facts
    └─ types.ts            Tipos compartidos
 ```
+
+> El script [`scripts/build-exercises.mjs`](../scripts/build-exercises.mjs) genera los dos JSON de `data/` a partir del dataset de RepDB.
 
 ---
 
@@ -207,13 +235,13 @@ src/
 - Groq **no ofrece visión gratis** en esta cuenta, por eso no hay análisis de fotos: el registro es por texto o voz.
 - Sin `GROQ_API_KEY` el chat/coach no funcionan (el resto de la app sí).
 - Los datos requieren estar **logueado**; sin sesión no hay acceso.
+- **Licencia del catálogo de ejercicios (RepDB, free)**: permite uso comercial pero exige **atribución visible** ("Exercise data by RepDB — repdb.co", en el README y al pie del Gym) y **prohíbe** redistribuirlo como dataset/API o usarlo dentro de modelos generativos de IA. Por eso el dataset se bundlea en la app y solo se usa como post-proceso determinístico.
 
 ---
 
 ## 11. Ideas a futuro
 
-- **Rutinas de gym**: series/reps/peso, PR, volumen total y recomendaciones ("ayer pecho, hoy espalda").
-- **Fotos** antes/después con slider comparativo.
-- **Rachas, logros y metas** personalizadas.
-- **Estadísticas** mensuales y **exportación** CSV/PDF.
-- **Recetas / favoritos** para cargar más rápido.
+- **Biblioteca visual de ejercicios**: fichas con imágenes (RepDB), músculos e instrucciones, para tocar y cargar.
+- **Tabla de alias** para vocabulario que hoy no matchea el catálogo (ej. "zancada" → estocada).
+- **Recordatorios push** reales (suplementos, hidratación) — hoy solo visual.
+- **Análisis de fotos** con visión (bloqueado: Groq no ofrece visión gratis en esta cuenta).
