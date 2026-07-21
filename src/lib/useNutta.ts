@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { db, id } from "@/lib/db";
 import { downscaleImage } from "@/lib/image";
+import { localDateFromMs } from "@/lib/types";
 import type { Profile } from "@/lib/nutrition";
 import type {
   BodyPart,
@@ -253,6 +254,41 @@ export function useNutta() {
       // si algo falla, no bloquea la app
     }
   }, [user, dataLoading, profileId]);
+
+  // Migración única: corrige el `date` de registros mal-fechados por el bug de
+  // UTC, reescribiéndolo con el día LOCAL de su createdAt.
+  useEffect(() => {
+    if (!user || dataLoading) return;
+    if (localStorage.getItem("nutta.datefix.v1")) return;
+    try {
+      const txns = [];
+      for (const f of foods) {
+        if (!f.createdAt) continue;
+        const correct = localDateFromMs(f.createdAt);
+        if (f.date !== correct) {
+          txns.push(db.tx.foods[f.id].update({ date: correct }));
+        }
+      }
+      for (const e of exercises) {
+        if (!e.createdAt) continue;
+        const correct = localDateFromMs(e.createdAt);
+        if (e.date !== correct) {
+          txns.push(db.tx.exercises[e.id].update({ date: correct }));
+        }
+      }
+      for (const s of strengthSets) {
+        const correct = localDateFromMs(s.createdAt);
+        if (s.date !== correct) {
+          txns.push(db.tx.strengthSets[s.id].update({ date: correct }));
+        }
+      }
+      localStorage.setItem("nutta.datefix.v1", "1");
+      if (txns.length) db.transact(txns);
+    } catch {
+      // no bloquea la app
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, dataLoading]);
 
   const saveProfile = (p: Profile) => {
     if (!user) return;
