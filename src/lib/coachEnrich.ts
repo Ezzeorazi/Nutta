@@ -14,8 +14,9 @@ type ExItem = { name: string; minutes: number; caloriesBurned: number };
 type StrItem = { exercise: string; sets: number; reps: number; weight: number };
 
 /**
- * Enriquece los ejercicios de cardio/gasto: nombre canónico + calorías por MET
- * real cuando hay match y hay minutos. Si no matchea, deja el item intacto.
+ * Enriquece los ejercicios de cardio/gasto: nombre canónico y, SOLO si no vino
+ * un número de calorías, lo estima por MET real. Si el usuario ya dio las
+ * calorías (ej. las del reloj/smartwatch), se respetan tal cual.
  */
 export function enrichExercises<T extends ExItem>(
   items: T[],
@@ -25,10 +26,13 @@ export function enrichExercises<T extends ExItem>(
     const m = matchExercise(it.name);
     if (!m) return it;
     const minutes = it.minutes > 0 ? it.minutes : 0;
+    // Solo estimamos cuando NO hay calorías cargadas (respeta el dato del reloj).
     const caloriesBurned =
-      m.met != null && minutes > 0
-        ? caloriesFromMet(m.met, weight, minutes)
-        : it.caloriesBurned;
+      it.caloriesBurned > 0
+        ? it.caloriesBurned
+        : m.met != null && minutes > 0
+          ? caloriesFromMet(m.met, weight, minutes)
+          : it.caloriesBurned;
     return { ...it, name: m.name_es, caloriesBurned };
   });
 }

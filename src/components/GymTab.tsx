@@ -27,6 +27,23 @@ const shortDate = (iso: string) => {
   return `${d.getDate()}/${d.getMonth() + 1}`;
 };
 
+/** Corre una fecha YYYY-MM-DD `delta` días (local). */
+const shiftISO = (iso: string, delta: number) => {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() + delta);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+const longDate = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString("es-AR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+
 export default function GymTab({
   strengthSets,
   exercises = [],
@@ -44,14 +61,17 @@ export default function GymTab({
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
   const [progExercise, setProgExercise] = useState<string | null>(null);
+  // Día que se está mirando (permite consultar sesiones anteriores).
+  const [viewDate, setViewDate] = useState(today);
+  const isToday = viewDate === today;
 
-  const todaySets = useMemo(
-    () => strengthSets.filter((s) => s.date === today),
-    [strengthSets, today],
+  const daySets = useMemo(
+    () => strengthSets.filter((s) => s.date === viewDate),
+    [strengthSets, viewDate],
   );
-  const groups = useMemo(() => groupByExercise(todaySets), [todaySets]);
+  const groups = useMemo(() => groupByExercise(daySets), [daySets]);
   const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
-  const dayVolume = totalVolume(todaySets);
+  const dayVolume = totalVolume(daySets);
   const suggestion = useMemo(
     () => dailyRoutineSuggestion(strengthSets, exercises, today),
     [strengthSets, exercises, today],
@@ -112,9 +132,9 @@ export default function GymTab({
           <h1 className="text-2xl font-bold">Entreno</h1>
           <p className="text-sm text-muted">Series, peso y PR</p>
         </div>
-        {todaySets.length > 0 && (
+        {daySets.length > 0 && (
           <span className="text-right text-xs text-muted">
-            Volumen hoy
+            Volumen
             <span className="block text-base font-bold tabular-nums text-foreground">
               {Math.round(dayVolume).toLocaleString("es-AR")} kg
             </span>
@@ -122,7 +142,29 @@ export default function GymTab({
         )}
       </header>
 
-      {showSuggestion && (
+      {/* Navegador de días: consultar sesiones anteriores */}
+      <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-2 py-1.5">
+        <button
+          onClick={() => setViewDate((d) => shiftISO(d, -1))}
+          className="rounded-lg px-4 py-1 text-xl text-muted active:scale-90"
+          aria-label="Día anterior"
+        >
+          ‹
+        </button>
+        <span className="text-sm font-semibold capitalize">
+          {isToday ? "Hoy" : longDate(viewDate)}
+        </span>
+        <button
+          onClick={() => setViewDate((d) => shiftISO(d, 1))}
+          disabled={isToday}
+          className="rounded-lg px-4 py-1 text-xl text-muted active:scale-90 disabled:opacity-30"
+          aria-label="Día siguiente"
+        >
+          ›
+        </button>
+      </div>
+
+      {isToday && showSuggestion && (
         <div
           className={`flex items-center gap-3 rounded-2xl border border-border border-l-4 bg-card px-4 py-3 ${
             suggestion.tone === "recovery"
@@ -150,7 +192,8 @@ export default function GymTab({
         </div>
       )}
 
-      {/* Alta de serie */}
+      {/* Alta de serie (solo el día de hoy) */}
+      {isToday && (
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
         <input
           className={inputCls}
@@ -196,15 +239,20 @@ export default function GymTab({
           Dejá el peso en 0 para ejercicios con peso corporal.
         </p>
       </section>
+      )}
 
-      {/* Sesión de hoy */}
+      {/* Sesión del día */}
       {groups.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted">
-          Todavía no cargaste series hoy. Sumá tu primera serie arriba 💪
+          {isToday
+            ? "Todavía no cargaste series hoy. Sumá tu primera serie arriba 💪"
+            : "No entrenaste este día."}
         </p>
       ) : (
         <section className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-muted">Sesión de hoy</h2>
+          <h2 className="text-sm font-semibold text-muted">
+            {isToday ? "Sesión de hoy" : `Sesión — ${longDate(viewDate)}`}
+          </h2>
           {groups.map((g) => {
             const pr = prs.get(g.exercise) ?? 0;
             const isPr = g.topWeight >= pr && pr > 0;

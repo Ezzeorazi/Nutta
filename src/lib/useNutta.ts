@@ -63,12 +63,19 @@ export function useNutta() {
 
   const owner = user?.id;
 
+  // El `date` efectivo se deriva del createdAt LOCAL (con fallback al date
+  // guardado): así los registros quedan en el día correcto aunque se hayan
+  // guardado en UTC (bug histórico), sin esperar la migración.
   const foods = (
     (data?.foods ?? []) as unknown as (FoodEntry & { owner: string })[]
-  ).filter((f) => f.owner === owner);
+  )
+    .filter((f) => f.owner === owner)
+    .map((f) => (f.createdAt ? { ...f, date: localDateFromMs(f.createdAt) } : f));
   const exercises = (
     (data?.exercises ?? []) as unknown as (ExerciseEntry & { owner: string })[]
-  ).filter((e) => e.owner === owner);
+  )
+    .filter((e) => e.owner === owner)
+    .map((e) => (e.createdAt ? { ...e, date: localDateFromMs(e.createdAt) } : e));
   const messages = (
     (data?.messages ?? []) as unknown as (ChatMessage & { owner: string })[]
   )
@@ -108,6 +115,7 @@ export function useNutta() {
     })[]
   )
     .filter((s) => s.owner === owner)
+    .map((s) => ({ ...s, date: localDateFromMs(s.createdAt) }))
     .sort((a, b) => a.createdAt - b.createdAt);
   const customGoals = (
     (data?.customGoals ?? []) as unknown as (CustomGoal & { owner: string })[]
