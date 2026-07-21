@@ -17,7 +17,7 @@ export default function PhotosPanel({
   photos: ResolvedPhoto[];
   today: string;
   onAdd: (file: File, date: string) => Promise<void>;
-  onRemove: (id: string, fileId: string) => void;
+  onRemove: (id: string, path: string) => void;
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -159,7 +159,7 @@ export default function PhotosPanel({
                   {shortDate(p.date)}
                 </span>
                 <button
-                  onClick={() => onRemove(p.id, p.fileId)}
+                  onClick={() => onRemove(p.id, p.path)}
                   className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-sm text-white active:scale-90"
                   aria-label="Eliminar foto"
                 >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { db, id } from "@/lib/db";
 import { downscaleImage } from "@/lib/image";
 import type { Profile } from "@/lib/nutrition";
@@ -57,13 +57,6 @@ export function useNutta() {
           recipes: {},
           photos: {},
         }
-      : null,
-  );
-  // $files es una entidad de sistema (no está en el esquema tipado): query
-  // aparte con cast acotado para resolver las URLs de las fotos.
-  const { data: filesData } = db.useQuery(
-    user
-      ? ({ $files: {} } as unknown as Parameters<typeof db.useQuery>[0])
       : null,
   );
 
@@ -146,19 +139,46 @@ export function useNutta() {
       }
       return { id: r.id, name: r.name, items, createdAt: r.createdAt };
     });
-  // URL de cada archivo, por id, desde la entidad de sistema $files.
-  const fileUrlById = new Map<string, string>();
-  const files = (filesData as unknown as { $files?: { id: string; url?: string }[] } | undefined)
-    ?.$files;
-  for (const f of files ?? []) {
-    if (f.url) fileUrlById.set(f.id, f.url);
-  }
-  const photos: ResolvedPhoto[] = (
+  const photoRecords = (
     (data?.photos ?? []) as unknown as (PhotoEntry & { owner: string })[]
   )
     .filter((p) => p.owner === owner)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .map((p) => ({ ...p, url: fileUrlById.get(p.fileId) }));
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  // Las URLs de storage se resuelven por path con la API de storage (no se
+  // puede consultar $files como entidad porque no está en el esquema).
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
+  const photoKey = photoRecords.map((p) => p.path).join("|");
+  useEffect(() => {
+    let cancelled = false;
+    const missing = photoRecords.filter((p) => !photoUrls[p.path]);
+    if (missing.length === 0) return;
+    (async () => {
+      const resolved: Record<string, string> = {};
+      await Promise.all(
+        missing.map(async (p) => {
+          try {
+            const url = await db.storage.getDownloadUrl(p.path);
+            if (url) resolved[p.path] = String(url);
+          } catch {
+            // sin URL: la foto simplemente no se muestra
+          }
+        }),
+      );
+      if (!cancelled && Object.keys(resolved).length) {
+        setPhotoUrls((prev) => ({ ...prev, ...resolved }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photoKey]);
+
+  const photos: ResolvedPhoto[] = photoRecords.map((p) => ({
+    ...p,
+    url: photoUrls[p.path],
+  }));
   const profileRec = (
     (data?.profiles ?? []) as unknown as (Profile & {
       id: string;
@@ -474,16 +494,9 @@ export function useNutta() {
       }),
     );
   };
-  const removePhoto = (photoId: string, fileId: string) => {
-    const filesTx = (
-      db.tx as unknown as {
-        $files: Record<string, { delete: () => unknown }>;
-      }
-    ).$files;
-    db.transact([
-      db.tx.photos[photoId].delete(),
-      filesTx[fileId].delete(),
-    ] as Parameters<typeof db.transact>[0]);
+  const removePhoto = (photoId: string, path: string) => {
+    db.transact(db.tx.photos[photoId].delete());
+    void db.storage.delete(path).catch(() => {});
   };
 
   /** Marca/desmarca un suplemento como tomado en un día. */
