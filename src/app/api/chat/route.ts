@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { interpretMessage } from "@/lib/coach";
+import { enrichExercises, enrichStrength } from "@/lib/coachEnrich";
 
 export const maxDuration = 30;
 
@@ -56,7 +57,15 @@ export async function POST(request: Request) {
       memories,
       frequent,
     });
-    return NextResponse.json(result);
+
+    // Post-proceso determinístico con el dataset de ejercicios (RepDB):
+    // nombres canónicos + calorías por MET real. No toca la comida ni la IA.
+    const enriched = {
+      ...result,
+      exercises: enrichExercises(result.exercises ?? [], weight),
+      strength: enrichStrength(result.strength ?? []),
+    };
+    return NextResponse.json(enriched);
   } catch (err) {
     console.error("[/api/chat]", err);
     return NextResponse.json(

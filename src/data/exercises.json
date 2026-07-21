@@ -1,0 +1,7416 @@
+{
+  "source": "RepDB (repdb.co)",
+  "attribution": "Exercise data by RepDB (repdb.co)",
+  "schema_version": 3,
+  "count": 400,
+  "exercises": [
+    {
+      "id": "ab-wheel-rollout",
+      "name_es": "Rueda Abdominal",
+      "name_en": "Ab Wheel Rollout",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ab_wheel",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "rectus_abdominis",
+        "transverse_abdominis"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "latissimus_dorsi",
+        "obliques",
+        "serratus_anterior"
+      ]
+    },
+    {
+      "id": "air-bike",
+      "name_es": "Bicicleta de Aire",
+      "name_en": "Air Bike",
+      "category": "strength",
+      "met": 6,
+      "equipment": "air_bike",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "latissimus_dorsi",
+        "pectoralis_major",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "archer-pull-ups",
+      "name_es": "Dominadas Arquero",
+      "name_en": "Archer Pull Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "forearm_flexors",
+        "posterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "archer-push-ups",
+      "name_es": "Push-Ups Arquero",
+      "name_en": "Archer Push Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "rectus_abdominis",
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "arnold-press",
+      "name_es": "Press Arnold",
+      "name_en": "Arnold Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "assisted-dips",
+      "name_es": "Fondos en Máquina Asistida",
+      "name_en": "Machine Assisted Dips",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dip_machine",
+      "body_part": "upper_arms",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "assisted-pull-ups",
+      "name_es": "Dominadas Asistidas",
+      "name_en": "Assisted Pull Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "assisted_pullup_machine",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "forearm_flexors",
+        "posterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "back-extension",
+      "name_es": "Extensión de Espalda",
+      "name_en": "Back Extension",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "erector_spinae"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "ball-leg-curl",
+      "name_es": "Curl de Piernas con Pelota de Estabilidad",
+      "name_en": "Stability Ball Leg Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "stability_ball",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius",
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "ball-pike",
+      "name_es": "Pike con Pelota",
+      "name_en": "Ball Pike",
+      "category": "strength",
+      "met": 6,
+      "equipment": "stability_ball",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "obliques",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "hip_flexors",
+        "serratus_anterior"
+      ]
+    },
+    {
+      "id": "band-assisted-pull-ups",
+      "name_es": "Dominadas Asistidas con Banda",
+      "name_en": "Band Assisted Pull Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "resistance_band",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "forearm_flexors",
+        "posterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "band-pull-apart",
+      "name_es": "Separación de Banda Elástica",
+      "name_en": "Band Pull Apart",
+      "category": "strength",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "banded-adductor-stretch",
+      "name_es": "Estiramiento de Aductores con Banda",
+      "name_en": "Banded Adductor Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "adductors"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "banded-ankle-stretch",
+      "name_es": "Estiramiento de Tobillo con Banda",
+      "name_en": "Banded Ankle Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius"
+      ],
+      "secondary_muscles": [
+        "soleus"
+      ]
+    },
+    {
+      "id": "banded-calf-stretch",
+      "name_es": "Estiramiento de Pantorrilla con Banda",
+      "name_en": "Banded Calf Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius"
+      ],
+      "secondary_muscles": [
+        "soleus"
+      ]
+    },
+    {
+      "id": "banded-chest-stretch",
+      "name_es": "Estiramiento de Pecho con Banda",
+      "name_en": "Banded Chest Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "chest",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "banded-clamshell",
+      "name_es": "Almeja con Banda",
+      "name_en": "Banded Clamshell",
+      "category": "strength",
+      "met": 5,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_medius"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "banded-figure-4-stretch",
+      "name_es": "Estiramiento Figura 4 con Banda",
+      "name_en": "Banded Figure-4 Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius"
+      ]
+    },
+    {
+      "id": "banded-fire-hydrant",
+      "name_es": "Hidrante de Fuego con Banda",
+      "name_en": "Banded Fire Hydrant",
+      "category": "strength",
+      "met": 5,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_medius"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "banded-glute-bridge",
+      "name_es": "Puente de Glúteos con Banda",
+      "name_en": "Banded Glute Bridge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "banded-good-morning",
+      "name_es": "Buenos Días con Banda",
+      "name_en": "Banded Good Morning",
+      "category": "strength",
+      "met": 6,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae"
+      ]
+    },
+    {
+      "id": "banded-hamstring-stretch",
+      "name_es": "Estiramiento de Isquiotibiales con Banda",
+      "name_en": "Banded Hamstring Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius"
+      ]
+    },
+    {
+      "id": "banded-hip-thrust",
+      "name_es": "Empuje de Cadera con Banda",
+      "name_en": "Banded Hip Thrust",
+      "category": "strength",
+      "met": 6,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "banded-it-band-stretch",
+      "name_es": "Estiramiento de Banda Iliotibial con Banda",
+      "name_en": "Banded IT-Band Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "abductors"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "gluteus_medius"
+      ]
+    },
+    {
+      "id": "banded-kneeling-hip-thrust",
+      "name_es": "Empuje de Cadera Arrodillado con Banda",
+      "name_en": "Banded Kneeling Hip Thrust",
+      "category": "strength",
+      "met": 6,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "banded-lat-stretch",
+      "name_es": "Estiramiento de Dorsales con Banda",
+      "name_en": "Banded Lat Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "banded-lateral-walk",
+      "name_es": "Caminata Lateral con Banda",
+      "name_en": "Banded Lateral Walk",
+      "category": "strength",
+      "met": 6,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_medius"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "banded-rear-delt-stretch",
+      "name_es": "Estiramiento de Deltoides Posterior con Banda",
+      "name_en": "Banded Rear Delt Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "banded-romanian-deadlift",
+      "name_es": "Peso Muerto Rumano con Banda",
+      "name_en": "Banded Romanian Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae"
+      ]
+    },
+    {
+      "id": "banded-seated-hip-abduction",
+      "name_es": "Abducción de Cadera Sentado con Banda",
+      "name_en": "Banded Seated Hip Abduction",
+      "category": "strength",
+      "met": 5,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_medius"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "banded-shoulder-stretch",
+      "name_es": "Estiramiento de Hombros con Banda",
+      "name_en": "Banded Shoulder Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "banded-squat",
+      "name_es": "Sentadilla con Banda",
+      "name_en": "Banded Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "banded-standing-curl",
+      "name_es": "Curl de Pierna de Pie con Banda",
+      "name_en": "Banded Standing Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius"
+      ]
+    },
+    {
+      "id": "banded-standing-hip-abduction",
+      "name_es": "Abducción de Cadera de Pie con Banda",
+      "name_en": "Banded Standing Hip Abduction",
+      "category": "strength",
+      "met": 5,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_medius"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "banded-standing-hip-adduction",
+      "name_es": "Aducción de Cadera de Pie con Banda",
+      "name_en": "Banded Standing Hip Adduction",
+      "category": "strength",
+      "met": 5,
+      "equipment": "loop_band",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "adductors"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "banded-triceps-stretch",
+      "name_es": "Estiramiento de Tríceps con Banda",
+      "name_en": "Banded Triceps Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "resistance_band",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "latissimus_dorsi"
+      ]
+    },
+    {
+      "id": "barbell-ab-rollout",
+      "name_es": "Rueda Abdominal con Barra",
+      "name_en": "Barbell Ab Rollout",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "latissimus_dorsi",
+        "obliques",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "barbell-calf-raise",
+      "name_es": "Elevación de Talones con Barra",
+      "name_en": "Barbell Calf Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius"
+      ],
+      "secondary_muscles": [
+        "soleus"
+      ]
+    },
+    {
+      "id": "barbell-curl",
+      "name_es": "Curl con Barra",
+      "name_en": "Barbell Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "barbell-front-raise",
+      "name_es": "Elevación Frontal con Barra",
+      "name_en": "Barbell Front Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "lateral_deltoid",
+        "pectoralis_major",
+        "serratus_anterior"
+      ]
+    },
+    {
+      "id": "barbell-glute-bridge",
+      "name_es": "Puente de Glúteos con Barra",
+      "name_en": "Barbell Glute Bridge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "barbell-lunge",
+      "name_es": "Zancada con Barra",
+      "name_en": "Barbell Lunge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "barbell-overhead-extension",
+      "name_es": "Extensión de Barra por Encima de la Cabeza",
+      "name_en": "Barbell Overhead Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "barbell-preacher-curl",
+      "name_es": "Curl Predicador con Barra",
+      "name_en": "Barbell Preacher Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "barbell-pullover",
+      "name_es": "Pullover con Barra",
+      "name_en": "Barbell Pullover",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "barbell-rear-delt-row",
+      "name_es": "Remo con Barra para Deltoides Posterior",
+      "name_en": "Barbell Rear Delt Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "barbell-reverse-lunge",
+      "name_es": "Zancada Inversa con Barra",
+      "name_en": "Barbell Reverse Lunge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "barbell-row",
+      "name_es": "Remo con Barra Inclinado",
+      "name_en": "Bent-Over Barbell Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "battle-ropes",
+      "name_es": "Cuerdas de Batalla",
+      "name_en": "Battle Ropes",
+      "category": "cardio",
+      "met": 10.3,
+      "equipment": "battle_rope",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid",
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "quadriceps",
+        "rectus_abdominis",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "behind-the-back-barbell-shrug",
+      "name_es": "Encogimiento de Hombros con Barra Detrás de la Espalda",
+      "name_en": "Behind the Back Barbell Shrug",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "behind-the-neck-lat-pulldown",
+      "name_es": "Jalón al Cuello Detrás de la Cabeza",
+      "name_en": "Behind-the-Neck Lat Pulldown",
+      "category": "strength",
+      "met": 6,
+      "equipment": "lat_pulldown_machine",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid",
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "behind-the-neck-press",
+      "name_es": "Press Detrás del Cuello",
+      "name_en": "Behind the Neck Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "bench-adductor-stretch",
+      "name_es": "Estiramiento de Aductores en Banco",
+      "name_en": "Bench Adductor Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "adductors"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "bench-ankle-stretch",
+      "name_es": "Estiramiento de Tobillo en Banco",
+      "name_en": "Bench Ankle Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius"
+      ],
+      "secondary_muscles": [
+        "soleus"
+      ]
+    },
+    {
+      "id": "bench-bulgarian-split-stretch",
+      "name_es": "Estiramiento Búlgaro en Banco",
+      "name_en": "Bench Bulgarian Split Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hip_flexors",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "bench-calf-stretch",
+      "name_es": "Estiramiento de Pantorrilla en Banco",
+      "name_en": "Bench Calf Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius"
+      ],
+      "secondary_muscles": [
+        "soleus"
+      ]
+    },
+    {
+      "id": "bench-chest-stretch",
+      "name_es": "Estiramiento de Pecho en Banco",
+      "name_en": "Bench Chest Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "chest",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "bench-childs-pose",
+      "name_es": "Postura del Niño en Banco",
+      "name_en": "Bench Child's Pose",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "bench-couch-stretch",
+      "name_es": "Estiramiento Couch en Banco",
+      "name_en": "Bench Couch Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hip_flexors",
+        "quadriceps"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "bench-dips",
+      "name_es": "Fondos en Banco",
+      "name_en": "Bench Dips",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_arms",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "bench-figure-4-glute-stretch",
+      "name_es": "Estiramiento Figura 4 de Glúteos en Banco",
+      "name_en": "Bench Figure-4 Glute Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius"
+      ]
+    },
+    {
+      "id": "bench-hamstring-stretch",
+      "name_es": "Estiramiento de Isquiotibiales en Banco",
+      "name_en": "Bench Hamstring Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae"
+      ]
+    },
+    {
+      "id": "bench-lat-stretch",
+      "name_es": "Estiramiento de Dorsales en Banco",
+      "name_en": "Bench Lat Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "flat_bench",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "bench-leg-pull-in",
+      "name_es": "Encogimiento de Piernas en Banco",
+      "name_en": "Bench Leg Pull-In",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "hip_flexors",
+        "obliques"
+      ]
+    },
+    {
+      "id": "bench-press",
+      "name_es": "Press de Banca con Barra",
+      "name_en": "Barbell Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "bench-pull",
+      "name_es": "Remo en Banco",
+      "name_en": "Bench Pull",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "bent-arm-barbell-pullover",
+      "name_es": "Pullover con Barra y Brazos Flexionados",
+      "name_en": "Bent Arm Barbell Pullover",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "bent-arm-ez-bar-pullover",
+      "name_es": "Pullover con Barra Z y Brazos Flexionados",
+      "name_en": "Bent-Arm EZ-Bar Pullover",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid",
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "bent-over-db-row",
+      "name_es": "Remo con Mancuernas Inclinado",
+      "name_en": "Bent-Over Dumbbell Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "bent-over-ez-bar-row",
+      "name_es": "Remo con Barra Z Inclinado",
+      "name_en": "Bent-Over EZ-Bar Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "bicep-curl",
+      "name_es": "Curl de Bíceps con Mancuernas",
+      "name_en": "Dumbbell Bicep Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "bicycle-crunch",
+      "name_es": "Crunch de Bicicleta",
+      "name_en": "Bicycle Crunch",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "obliques",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "hip_flexors"
+      ]
+    },
+    {
+      "id": "bird-dog-hold",
+      "name_es": "Bird-Dog Isométrico",
+      "name_en": "Bird Dog Hold",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "erector_spinae",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "obliques",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "bodyweight-calf-raise",
+      "name_es": "Elevación de Talones con Peso Corporal",
+      "name_en": "Bodyweight Calf Raise",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gastrocnemius"
+      ],
+      "secondary_muscles": [
+        "soleus"
+      ]
+    },
+    {
+      "id": "bodyweight-good-morning",
+      "name_es": "Buenos Días con Peso Corporal",
+      "name_en": "Bodyweight Good Morning",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "erector_spinae",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "bodyweight-lateral-raise",
+      "name_es": "Elevación Lateral con Peso Corporal",
+      "name_en": "Bodyweight Lateral Raise",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "bodyweight-overhead-press",
+      "name_es": "Press por Encima de la Cabeza con Peso Corporal",
+      "name_en": "Bodyweight Overhead Press",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "bodyweight-squat",
+      "name_es": "Sentadilla con Peso Corporal",
+      "name_en": "Bodyweight Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "box-jump",
+      "name_es": "Salto al Cajón",
+      "name_en": "Box Jump",
+      "category": "plyometrics",
+      "met": 7,
+      "equipment": "plyo_box",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius",
+        "hamstrings",
+        "soleus"
+      ]
+    },
+    {
+      "id": "box-squat",
+      "name_es": "Sentadilla en Caja",
+      "name_en": "Box Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "bulgarian-split-squat",
+      "name_es": "Sentadilla Búlgara",
+      "name_en": "Bulgarian Split Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "burpees",
+      "name_es": "Burpees",
+      "name_en": "Burpees",
+      "category": "cardio",
+      "met": 8,
+      "equipment": "",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "pectoralis_major",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "rectus_abdominis",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "butterfly-stretch",
+      "name_es": "Estiramiento de Mariposa",
+      "name_en": "Butterfly Stretch",
+      "category": "stretching",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "adductors"
+      ],
+      "secondary_muscles": [
+        "hip_flexors"
+      ]
+    },
+    {
+      "id": "cable-bent-over-row",
+      "name_es": "Remo Inclinado con Cable",
+      "name_en": "Cable Bent-Over Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "cable-chest-press",
+      "name_es": "Press de Pecho con Cable",
+      "name_en": "Cable Chest Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "cable-crunch",
+      "name_es": "Crunch con Cable",
+      "name_en": "Cable Crunch",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "cable-curl",
+      "name_es": "Curl con Cable",
+      "name_en": "Cable Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "cable-external-rotation",
+      "name_es": "Rotación Externa con Cable",
+      "name_en": "Cable External Rotation",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "cable-fly",
+      "name_es": "Aperturas con Cable",
+      "name_en": "Cable Fly",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "chest",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "cable-front-raise",
+      "name_es": "Elevación Frontal con Cable",
+      "name_en": "Cable Front Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "lateral_deltoid",
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "cable-hammer-curl",
+      "name_es": "Curl de Martillo en Cable",
+      "name_en": "Cable Hammer Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii",
+        "brachialis",
+        "brachioradialis"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "cable-kickback",
+      "name_es": "Patada Trasera de Glúteos en Cable",
+      "name_en": "Cable Glute Kickback",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "cable-lateral-raise",
+      "name_es": "Elevación Lateral en Polea",
+      "name_en": "Cable Lateral Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "cable-tricep-kickback",
+      "name_es": "Patada de Tríceps con Cable",
+      "name_en": "Cable Tricep Kickback",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "cable-upright-row",
+      "name_es": "Remo al Mentón con Cable",
+      "name_en": "Cable Upright Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "biceps_brachii"
+      ]
+    },
+    {
+      "id": "cable-wrist-curl",
+      "name_es": "Curl de Muñeca con Cable",
+      "name_en": "Cable Wrist Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "lower_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "forearm_flexors"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "captains-chair-knee-raise",
+      "name_es": "Elevación de Rodillas en Silla Romana",
+      "name_en": "Captain's Chair Knee Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "captains-chair-leg-raise",
+      "name_es": "Elevación de Piernas en Silla Romana",
+      "name_en": "Captain's Chair Leg Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "cheat-curl",
+      "name_es": "Curl con Impulso",
+      "name_en": "Cheat Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "brachioradialis",
+        "erector_spinae"
+      ]
+    },
+    {
+      "id": "chest-press-machine",
+      "name_es": "Press de Pecho en Máquina",
+      "name_en": "Machine Chest Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "chest_press_machine",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "chest-supported-db-row",
+      "name_es": "Remo con Mancuernas con Apoyo en el Pecho",
+      "name_en": "Chest-Supported Dumbbell Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "chest-supported-dumbbell-shrug",
+      "name_es": "Encogimiento de Hombros con Mancuernas y Apoyo en el Pecho",
+      "name_en": "Chest Supported Dumbbell Shrug",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "chest-supported-kettlebell-row",
+      "name_es": "Remo con Kettlebell Apoyado en el Pecho",
+      "name_en": "Chest-Supported Kettlebell Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "chin-tuck-hold",
+      "name_es": "Retracción de Mentón Sostenida",
+      "name_en": "Chin Tuck Hold",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "chin-ups",
+      "name_es": "Dominadas en Supinación",
+      "name_en": "Chin-Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii",
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "clamshells",
+      "name_es": "Almejas",
+      "name_en": "Clamshells",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "abductors",
+        "gluteus_medius"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "clap-push-ups",
+      "name_es": "Flexiones con Palmada",
+      "name_en": "Clap Push-Ups",
+      "category": "strength",
+      "met": 7,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "clean",
+      "name_es": "Clean",
+      "name_en": "Clean",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "barbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "erector_spinae",
+        "hamstrings",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "clean-and-jerk",
+      "name_es": "Clean and Jerk",
+      "name_en": "Clean and Jerk",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "barbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "close-grip-barbell-curl",
+      "name_es": "Curl de Barra con Agarre Cerrado",
+      "name_en": "Close-Grip Barbell Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "brachioradialis"
+      ]
+    },
+    {
+      "id": "close-grip-bench-press",
+      "name_es": "Press de Banca con Agarre Cerrado",
+      "name_en": "Close-Grip Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "close-grip-db-bench-press",
+      "name_es": "Press de Banca con Mancuernas y Agarre Cerrado",
+      "name_en": "Close-Grip Dumbbell Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "close-grip-ez-bar-bench-press",
+      "name_es": "Press de Banca con Barra Z y Agarre Cerrado",
+      "name_en": "Close-Grip EZ-Bar Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "upper_arms",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "close-grip-incline-bench",
+      "name_es": "Press de Banca Inclinado con Agarre Cerrado",
+      "name_en": "Close-Grip Incline Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "close-grip-pull-ups",
+      "name_es": "Dominadas con Agarre Cerrado",
+      "name_en": "Close-Grip Pull-Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii",
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "cocoons",
+      "name_es": "Cocoons",
+      "name_en": "Cocoons",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "hip_flexors",
+        "obliques"
+      ]
+    },
+    {
+      "id": "concentration-curl",
+      "name_es": "Curl de Concentración",
+      "name_en": "Concentration Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "cross-body-crunch",
+      "name_es": "Crunch Cruzado",
+      "name_en": "Cross-Body Crunch",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "obliques"
+      ],
+      "secondary_muscles": [
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "cross-body-hammer-curl",
+      "name_es": "Curl Martillo Cruzado",
+      "name_en": "Cross Body Hammer Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "brachialis",
+        "brachioradialis"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "crunches",
+      "name_es": "Crunches",
+      "name_en": "Crunches",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques"
+      ]
+    },
+    {
+      "id": "db-bench-press",
+      "name_es": "Press de Banca con Mancuernas",
+      "name_en": "Dumbbell Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "db-fly",
+      "name_es": "Aperturas con Mancuernas",
+      "name_en": "Dumbbell Fly",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "chest",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "db-lunge",
+      "name_es": "Zancada con Mancuernas",
+      "name_en": "Dumbbell Lunge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "db-pullover",
+      "name_es": "Pullover con Mancuerna",
+      "name_en": "Dumbbell Pullover",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "db-reverse-curl",
+      "name_es": "Curl Inverso con Mancuernas",
+      "name_en": "Dumbbell Reverse Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "brachialis",
+        "forearm_extensors"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii"
+      ]
+    },
+    {
+      "id": "db-shrug",
+      "name_es": "Encogimiento de Hombros con Mancuernas",
+      "name_en": "Dumbbell Shrug",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "db-skull-crusher",
+      "name_es": "Skull Crusher con Mancuernas",
+      "name_en": "Dumbbell Skull Crusher",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "dead-bug",
+      "name_es": "Dead Bug",
+      "name_en": "Dead Bug",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis",
+        "transverse_abdominis"
+      ],
+      "secondary_muscles": [
+        "hip_flexors"
+      ]
+    },
+    {
+      "id": "dead-hang",
+      "name_es": "Colgado Pasivo",
+      "name_en": "Dead Hang",
+      "category": "strength",
+      "met": 4.5,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "forearm_flexors"
+      ],
+      "secondary_muscles": [
+        "latissimus_dorsi",
+        "rectus_abdominis",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "deadlift",
+      "name_es": "Peso Muerto con Barra",
+      "name_en": "Barbell Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "quadriceps",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "decline-bench-press",
+      "name_es": "Press de Banca Declinado",
+      "name_en": "Decline Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "decline-bench-press-barbell",
+      "name_es": "Press de Banca Declinado con Barra",
+      "name_en": "Decline Barbell Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "decline-bench-press-ez-bar",
+      "name_es": "Press de Banca Declinado con Barra Z",
+      "name_en": "Decline EZ-Bar Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "decline-db-fly",
+      "name_es": "Aperturas con Mancuernas en Banco Declinado",
+      "name_en": "Decline Dumbbell Fly",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "chest",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "decline-push-up",
+      "name_es": "Flexión Declinada",
+      "name_en": "Decline Push-Up",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "deficit-deadlift",
+      "name_es": "Peso Muerto en Déficit",
+      "name_en": "Deficit Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "latissimus_dorsi",
+        "quadriceps",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "deficit-push-ups",
+      "name_es": "Flexiones en Déficit",
+      "name_en": "Deficit Push Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "diamond-push-ups",
+      "name_es": "Flexiones en Diamante",
+      "name_en": "Diamond Push Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "serratus_anterior"
+      ]
+    },
+    {
+      "id": "dips",
+      "name_es": "Fondos para Pecho",
+      "name_en": "Chest Dips",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dip_station",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "double-kettlebell-bicep-curl",
+      "name_es": "Curl de Bíceps con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Bicep Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "double-kettlebell-clean",
+      "name_es": "Clean con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Clean",
+      "category": "strength",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "erector_spinae",
+        "forearm_flexors",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "double-kettlebell-dead-clean",
+      "name_es": "Dead Clean con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Dead Clean",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "forearm_flexors",
+        "quadriceps",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "double-kettlebell-dead-split-snatch",
+      "name_es": "Dead Split Snatch con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Dead Split Snatch",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings",
+        "quadriceps",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "double-kettlebell-jerk",
+      "name_es": "Jerk con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Jerk",
+      "category": "strength",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "double-kettlebell-overhead-press",
+      "name_es": "Press por Encima de la Cabeza con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Overhead Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "rectus_abdominis",
+        "serratus_anterior",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "double-kettlebell-push-press",
+      "name_es": "Push Press con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Push Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "lateral_deltoid",
+        "quadriceps",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "double-kettlebell-row",
+      "name_es": "Remo con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "erector_spinae",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "double-kettlebell-split-jerk",
+      "name_es": "Split Jerk con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Split Jerk",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "double-kettlebell-swing-snatch",
+      "name_es": "Swing Snatch con Dos Pesas Rusas",
+      "name_en": "Double Kettlebell Swing Snatch",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "erector_spinae",
+        "forearm_flexors",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "drag-curl",
+      "name_es": "Drag Curl",
+      "name_en": "Drag Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "dragon-flag",
+      "name_es": "Dragon Flag",
+      "name_en": "Dragon Flag",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hip_flexors",
+        "obliques",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "dumbbell-bench-pull",
+      "name_es": "Remo en Banco con Mancuernas",
+      "name_en": "Dumbbell Bench Pull",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "dumbbell-calf-raise",
+      "name_es": "Elevación de Talones con Mancuernas",
+      "name_en": "Dumbbell Calf Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius",
+        "soleus"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "dumbbell-deadlift",
+      "name_es": "Peso Muerto con Mancuernas",
+      "name_en": "Dumbbell Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "latissimus_dorsi",
+        "quadriceps",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "dumbbell-farmers-walk",
+      "name_es": "Caminata del Granjero con Mancuernas",
+      "name_en": "Dumbbell Farmer's Walk",
+      "category": "strength",
+      "met": 5.5,
+      "equipment": "dumbbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "forearm_flexors",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "obliques",
+        "quadriceps",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "dumbbell-floor-press",
+      "name_es": "Press de Suelo con Mancuernas",
+      "name_en": "Dumbbell Floor Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "dumbbell-front-raise",
+      "name_es": "Elevación Frontal con Mancuernas",
+      "name_en": "Dumbbell Front Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "lateral_deltoid"
+      ]
+    },
+    {
+      "id": "dumbbell-front-squat",
+      "name_es": "Sentadilla Frontal con Mancuernas",
+      "name_en": "Dumbbell Front Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "dumbbell-hip-thrust",
+      "name_es": "Empuje de Cadera con Mancuerna",
+      "name_en": "Dumbbell Hip Thrust",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "dumbbell-pistol-squat",
+      "name_es": "Sentadilla Pistola con Mancuerna",
+      "name_en": "Dumbbell Pistol Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "dumbbell-push-press",
+      "name_es": "Press de Empuje con Mancuernas",
+      "name_en": "Dumbbell Push Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "lateral_deltoid",
+        "quadriceps",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "dumbbell-reverse-fly",
+      "name_es": "Pájaro Invertido con Mancuernas",
+      "name_en": "Dumbbell Reverse Fly",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "dumbbell-romanian-deadlift",
+      "name_es": "Peso Muerto Rumano con Mancuernas",
+      "name_en": "Dumbbell Romanian Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "dumbbell-shoulder-press",
+      "name_es": "Press de Hombros con Mancuernas",
+      "name_en": "Dumbbell Shoulder Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "dumbbell-side-bend",
+      "name_es": "Flexión Lateral con Mancuerna",
+      "name_en": "Dumbbell Side Bend",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "obliques"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "quadratus_lumborum",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "dumbbell-snatch",
+      "name_es": "Snatch con Mancuerna",
+      "name_en": "Dumbbell Snatch",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "dumbbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "gluteus_maximus",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "dumbbell-split-squat",
+      "name_es": "Sentadilla en Postura Dividida con Mancuernas",
+      "name_en": "Dumbbell Split Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "dumbbell-tricep-extension",
+      "name_es": "Extensión de Tríceps con Mancuerna",
+      "name_en": "Dumbbell Tricep Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "dumbbell-upright-row",
+      "name_es": "Remo al Mentón con Mancuernas",
+      "name_en": "Dumbbell Upright Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "biceps_brachii",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "dumbbell-windmill",
+      "name_es": "Molino con Mancuerna",
+      "name_en": "Dumbbell Windmill",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid",
+        "obliques"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "dumbbell-wrist-curl",
+      "name_es": "Curl de Muñeca con Mancuerna",
+      "name_en": "Dumbbell Wrist Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "lower_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "forearm_flexors"
+      ],
+      "secondary_muscles": [
+        "brachioradialis"
+      ]
+    },
+    {
+      "id": "ez-bar-curl",
+      "name_es": "Curl con Barra Z",
+      "name_en": "EZ-Bar Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "ez_bar",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "brachioradialis"
+      ]
+    },
+    {
+      "id": "ez-bar-front-raise",
+      "name_es": "Elevación Frontal con Barra Z",
+      "name_en": "EZ-Bar Front Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "ez_bar",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior"
+      ]
+    },
+    {
+      "id": "ez-bar-overhead-extension",
+      "name_es": "Extensión de Tríceps por Encima de la Cabeza con Barra Z",
+      "name_en": "EZ-Bar Overhead Tricep Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "ez_bar",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "ez-bar-pullover",
+      "name_es": "Pullover con Barra EZ",
+      "name_en": "EZ Bar Pullover",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "ez-bar-reverse-curl",
+      "name_es": "Curl Inverso con Barra Z",
+      "name_en": "EZ-Bar Reverse Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "ez_bar",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "brachialis",
+        "forearm_extensors"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii"
+      ]
+    },
+    {
+      "id": "ez-bar-reverse-grip-row",
+      "name_es": "Remo con Barra EZ y Agarre Supino",
+      "name_en": "EZ Bar Reverse Grip Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii",
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid",
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "ez-bar-romanian-deadlift",
+      "name_es": "Peso Muerto Rumano con Barra Z",
+      "name_en": "EZ-Bar Romanian Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "forearm_flexors",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "ez-bar-shrug",
+      "name_es": "Encogimiento de Hombros con Barra Z",
+      "name_en": "EZ-Bar Shrug",
+      "category": "strength",
+      "met": 5,
+      "equipment": "ez_bar",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "ez-bar-spider-curl",
+      "name_es": "Spider Curl con Barra Z",
+      "name_en": "EZ Bar Spider Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "ez_bar",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "brachioradialis"
+      ]
+    },
+    {
+      "id": "ez-bar-upright-row",
+      "name_es": "Remo al Mentón con Barra Z",
+      "name_en": "EZ-Bar Upright Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "biceps_brachii"
+      ]
+    },
+    {
+      "id": "face-pull",
+      "name_es": "Face Pull en Polea",
+      "name_en": "Cable Face Pull",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "trapezius"
+      ]
+    },
+    {
+      "id": "floor-ez-bar-press",
+      "name_es": "Press en Suelo con Barra Z",
+      "name_en": "Floor EZ-Bar Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "floor-kettlebell-pullover",
+      "name_es": "Pullover con Pesa Rusa en Suelo",
+      "name_en": "Floor Kettlebell Pullover",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "floor-press",
+      "name_es": "Press en Suelo",
+      "name_en": "Floor Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "flutter-kicks",
+      "name_es": "Flutter Kicks",
+      "name_en": "Flutter Kicks",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "front-lever",
+      "name_es": "Front Lever",
+      "name_en": "Front Lever",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "biceps_brachii",
+        "erector_spinae",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "front-squat",
+      "name_es": "Sentadilla Frontal",
+      "name_en": "Front Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "glute-bridge",
+      "name_es": "Puente de Glúteos",
+      "name_en": "Glute Bridge",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "glute-kickback",
+      "name_es": "Patada de Glúteo",
+      "name_en": "Glute Kickback",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "goblet-squat",
+      "name_es": "Sentadilla Goblet",
+      "name_en": "Goblet Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "good-morning",
+      "name_es": "Buenos Días",
+      "name_en": "Good Morning",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "hack-squat",
+      "name_es": "Hack Squat",
+      "name_en": "Hack Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "hack_squat",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "hack-squat-calf-raise",
+      "name_es": "Elevación de Talones en Máquina Hack Squat",
+      "name_en": "Hack Squat Calf Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "hack_squat",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius",
+        "soleus"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "hammer-curl",
+      "name_es": "Curl de Martillo con Mancuernas",
+      "name_en": "Dumbbell Hammer Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii",
+        "brachialis"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "handstand-push-ups",
+      "name_es": "Flexiones en Pino",
+      "name_en": "Handstand Push Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "lateral_deltoid",
+        "rectus_abdominis",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "hang-clean",
+      "name_es": "Cargada desde Colgante",
+      "name_en": "Hang Clean",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "barbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "erector_spinae",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "hang-power-clean",
+      "name_es": "Power Clean desde Colgante",
+      "name_en": "Hang Power Clean",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "barbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "hanging-knee-raise",
+      "name_es": "Elevación de Rodillas Colgado",
+      "name_en": "Hanging Knee Raise",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "obliques"
+      ]
+    },
+    {
+      "id": "hanging-leg-raise",
+      "name_es": "Elevación de Piernas Colgado",
+      "name_en": "Hanging Leg Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "pull_up_bar",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques"
+      ]
+    },
+    {
+      "id": "hanging-pike",
+      "name_es": "Pike Colgado",
+      "name_en": "Hanging Pike",
+      "category": "strength",
+      "met": 4.5,
+      "equipment": "pull_up_bar",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "hip_flexors",
+        "latissimus_dorsi"
+      ]
+    },
+    {
+      "id": "heel-elevated-squat",
+      "name_es": "Sentadilla con Talones Elevados",
+      "name_en": "Heel-Elevated Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "adductors",
+        "erector_spinae",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "hex-bar-deadlift",
+      "name_es": "Peso Muerto con Barra Hexagonal",
+      "name_en": "Hex Bar Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "trap_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "hamstrings",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "high-plank",
+      "name_es": "Plancha Alta",
+      "name_en": "High Plank",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis",
+        "transverse_abdominis"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "obliques"
+      ]
+    },
+    {
+      "id": "hip-abduction",
+      "name_es": "Abducción de Cadera en Máquina",
+      "name_en": "Machine Hip Abduction",
+      "category": "strength",
+      "met": 5,
+      "equipment": "hip_abduction_machine",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_medius"
+      ],
+      "secondary_muscles": [
+        "abductors"
+      ]
+    },
+    {
+      "id": "hip-adduction",
+      "name_es": "Aducción de cadera",
+      "name_en": "Hip Adduction",
+      "category": "strength",
+      "met": 5,
+      "equipment": "hip_adduction_machine",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "adductors"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "hip-thrust",
+      "name_es": "Hip thrust con barra",
+      "name_en": "Barbell Hip Thrust",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "gluteus_medius"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "horizontal-leg-press",
+      "name_es": "Prensa de piernas horizontal",
+      "name_en": "Horizontal Leg Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "leg_press",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "incline-bench-ez-bar-press",
+      "name_es": "Press en banco inclinado con barra Z",
+      "name_en": "Incline EZ-Bar Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "ez_bar",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "incline-bench-press",
+      "name_es": "Press en banco inclinado con barra",
+      "name_en": "Incline Barbell Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "incline-db-curl",
+      "name_es": "Curl con mancuernas en banco inclinado",
+      "name_en": "Incline Dumbbell Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "incline-db-press",
+      "name_es": "Press con mancuernas en banco inclinado",
+      "name_en": "Incline Dumbbell Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "incline-dumbbell-fly",
+      "name_es": "Apertura con mancuernas en banco inclinado",
+      "name_en": "Incline Dumbbell Fly",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "chest",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "biceps_brachii"
+      ]
+    },
+    {
+      "id": "incline-hammer-curl",
+      "name_es": "Curl martillo en banco inclinado",
+      "name_en": "Incline Hammer Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii",
+        "brachialis"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "incline-push-ups",
+      "name_es": "Push-up inclinado",
+      "name_en": "Incline Push-Up",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "inverted-row",
+      "name_es": "Remo invertido",
+      "name_en": "Inverted Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "isometric-neck-side",
+      "name_es": "Flexión Lateral Isométrica de Cuello",
+      "name_en": "Isometric Neck Lateral Flexion",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "jackknife-sit-up",
+      "name_es": "Abdominal navaja",
+      "name_en": "Jackknife Sit-Up",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "hip_flexors",
+        "obliques"
+      ]
+    },
+    {
+      "id": "jump-rope",
+      "name_es": "Saltar la Cuerda",
+      "name_en": "Jump Rope",
+      "category": "cardio",
+      "met": 11.8,
+      "equipment": "jump_rope",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius",
+        "soleus"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "jump-squat",
+      "name_es": "Sentadilla con Salto",
+      "name_en": "Jump Squat",
+      "category": "plyometrics",
+      "met": 7,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "jumping-jacks",
+      "name_es": "Saltos de Tijera",
+      "name_en": "Jumping Jacks",
+      "category": "cardio",
+      "met": 8,
+      "equipment": "",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gastrocnemius",
+        "gluteus_medius",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "abductors",
+        "quadriceps",
+        "soleus"
+      ]
+    },
+    {
+      "id": "kettlebell-bulgarian-split-squat",
+      "name_es": "Sentadilla Búlgara con Kettlebell",
+      "name_en": "Kettlebell Bulgarian Split Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "kettlebell-close-grip-floor-press",
+      "name_es": "Press de Suelo con Agarre Cerrado con Pesa Rusa",
+      "name_en": "Kettlebell Close-Grip Floor Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_arms",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "kettlebell-deadlift",
+      "name_es": "Peso muerto con pesa rusa",
+      "name_en": "Kettlebell Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "kettlebell-farmers-walk",
+      "name_es": "Paseo del Granjero con Pesa Rusa",
+      "name_en": "Kettlebell Farmer's Walk",
+      "category": "strongman",
+      "met": 5.5,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "forearm_flexors",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "quadriceps",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "kettlebell-floor-press",
+      "name_es": "Press de suelo con pesas rusas",
+      "name_en": "Kettlebell Floor Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "kettlebell-goblet-lunge",
+      "name_es": "Zancada Goblet con Kettlebell",
+      "name_en": "Kettlebell Goblet Lunge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "kettlebell-halo",
+      "name_es": "Halo con pesa rusa",
+      "name_en": "Kettlebell Halo",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "kettlebell-hammer-curl",
+      "name_es": "Curl martillo con pesa rusa",
+      "name_en": "Kettlebell Hammer Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii",
+        "brachialis"
+      ],
+      "secondary_muscles": [
+        "brachioradialis"
+      ]
+    },
+    {
+      "id": "kettlebell-hip-thrust",
+      "name_es": "Empuje de Cadera con Kettlebell",
+      "name_en": "Kettlebell Hip Thrust",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "kettlebell-lunge-press",
+      "name_es": "Zancada con press de pesa rusa",
+      "name_en": "Kettlebell Lunge Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "rectus_abdominis",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "kettlebell-offset-reverse-lunge-and-press",
+      "name_es": "Zancada inversa con press desequilibrado de pesa rusa",
+      "name_en": "Kettlebell Offset Reverse Lunge and Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "obliques",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "kettlebell-overhead-tricep-extension",
+      "name_es": "Extensión de tríceps por encima de la cabeza con pesa rusa",
+      "name_en": "Kettlebell Overhead Tricep Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "kettlebell-pistol-squat",
+      "name_es": "Sentadilla pistola con pesa rusa",
+      "name_en": "Kettlebell Pistol Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "kettlebell-pullover",
+      "name_es": "Pullover con pesa rusa",
+      "name_en": "Kettlebell Pullover",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "kettlebell-reverse-lunge",
+      "name_es": "Zancada Inversa con Kettlebell",
+      "name_en": "Kettlebell Reverse Lunge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings",
+        "obliques"
+      ]
+    },
+    {
+      "id": "kettlebell-rotational-lunge",
+      "name_es": "Zancada rotacional con pesa rusa",
+      "name_en": "Kettlebell Rotational Lunge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings",
+        "obliques"
+      ]
+    },
+    {
+      "id": "kettlebell-russian-twist",
+      "name_es": "Giro ruso con pesa rusa",
+      "name_en": "Kettlebell Russian Twist",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "obliques"
+      ],
+      "secondary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "kettlebell-shrug",
+      "name_es": "Encogimiento de Hombros con Kettlebell",
+      "name_en": "Kettlebell Shrug",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "kettlebell-single-leg-deadlift",
+      "name_es": "Peso muerto a una pierna con pesa rusa",
+      "name_en": "Kettlebell Single Leg Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius"
+      ]
+    },
+    {
+      "id": "kettlebell-skull-crusher",
+      "name_es": "Skull crusher con pesa rusa",
+      "name_en": "Kettlebell Skull Crusher",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "kettlebell-sumo-deadlift",
+      "name_es": "Peso muerto sumo con pesa rusa",
+      "name_en": "Kettlebell Sumo Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "adductors",
+        "erector_spinae",
+        "hamstrings",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "kettlebell-sumo-high-pull",
+      "name_es": "Jalón sumo al mentón con pesa rusa",
+      "name_en": "Kettlebell Sumo High Pull",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "hamstrings",
+        "lateral_deltoid",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "kettlebell-swing",
+      "name_es": "Swing con pesa rusa",
+      "name_en": "Kettlebell Swing",
+      "category": "strength",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "kettlebell-swing-clean",
+      "name_es": "Swing y cargada con pesa rusa",
+      "name_en": "Kettlebell Swing Clean",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "erector_spinae",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "kettlebell-turkish-get-ups",
+      "name_es": "Levantamiento Turco con Kettlebell",
+      "name_en": "Kettlebell Turkish Get Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "gluteus_maximus",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "quadriceps",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "kettlebell-windmills",
+      "name_es": "Molino de Viento con Pesa Rusa",
+      "name_en": "Kettlebell Windmills",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "obliques"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "knee-push-ups",
+      "name_es": "Push-Up en Rodillas",
+      "name_en": "Knee Push Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "rectus_abdominis",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "kneeling-cable-row",
+      "name_es": "Remo en Polea Arrodillado",
+      "name_en": "Kneeling Cable Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "l-sit",
+      "name_es": "L-Sit",
+      "name_en": "L Sit",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dip_station",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "latissimus_dorsi",
+        "quadriceps",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "landmine-press",
+      "name_es": "Press Landmine",
+      "name_en": "Landmine Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "lat-pulldown",
+      "name_es": "Jalón al Pecho",
+      "name_en": "Lat Pulldown",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "lateral-raise",
+      "name_es": "Elevación Lateral con Mancuernas",
+      "name_en": "Dumbbell Lateral Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "leg-curl",
+      "name_es": "Curl de Piernas Tumbado",
+      "name_en": "Lying Leg Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "leg_curl",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius"
+      ]
+    },
+    {
+      "id": "leg-extension",
+      "name_es": "Extensión de Piernas",
+      "name_en": "Leg Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "leg_extension",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "quadriceps"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "leg-press",
+      "name_es": "Prensa de Piernas",
+      "name_en": "Leg Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "leg_press",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "lunge",
+      "name_es": "Zancada",
+      "name_en": "Lunge",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "lying-leg-raise",
+      "name_es": "Elevación de Piernas Acostado",
+      "name_en": "Lying Leg Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "lying-tricep-extension",
+      "name_es": "Extensión de Tríceps Tumbado",
+      "name_en": "Lying Tricep Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "machine-bicep-curl",
+      "name_es": "Curl de Bíceps en Máquina",
+      "name_en": "Machine Bicep Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "bicep_curl_machine",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "machine-calf-raise",
+      "name_es": "Elevación de Pantorrillas en Máquina",
+      "name_en": "Machine Calf Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "standing_calf_raise_machine",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius",
+        "soleus"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "machine-preacher-curl",
+      "name_es": "Curl en Máquina de Predicador",
+      "name_en": "Machine Preacher Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "preacher_curl_machine",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "machine-shoulder-press",
+      "name_es": "Press de Hombros en Máquina",
+      "name_en": "Machine Shoulder Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "shoulder_press_machine",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "medicine-ball-slam",
+      "name_es": "Golpe con Balón Medicinal",
+      "name_en": "Medicine Ball Slam",
+      "category": "strength",
+      "met": 6,
+      "equipment": "slam_ball",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "latissimus_dorsi",
+        "obliques"
+      ]
+    },
+    {
+      "id": "mountain-climbers",
+      "name_es": "Mountain Climbers",
+      "name_en": "Mountain Climbers",
+      "category": "cardio",
+      "met": 8,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "muscle-snatch",
+      "name_es": "Muscle Snatch",
+      "name_en": "Muscle Snatch",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "barbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "muscle-ups",
+      "name_es": "Muscle-Ups",
+      "name_en": "Muscle Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "biceps_brachii",
+        "pectoralis_major"
+      ]
+    },
+    {
+      "id": "negative-pull-ups",
+      "name_es": "Dominadas Negativas",
+      "name_en": "Negative Pull Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "forearm_flexors",
+        "posterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "neutral-grip-pull-ups",
+      "name_es": "Dominadas en Agarre Neutro",
+      "name_en": "Neutral Grip Pull Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "brachialis",
+        "forearm_flexors",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "nordic-hamstring-curl",
+      "name_es": "Curl Nórdico de Isquiotibiales",
+      "name_en": "Nordic Hamstring Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "glute_ham_developer",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius",
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "ohp",
+      "name_es": "Press Militar con Barra",
+      "name_en": "Barbell Overhead Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "one-arm-dumbbell-push-press",
+      "name_es": "Push Press con Mancuerna a Un Brazo",
+      "name_en": "One-Arm Dumbbell Push Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "lateral_deltoid",
+        "obliques",
+        "quadriceps",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "one-arm-dumbbell-swing",
+      "name_es": "Swing con Mancuerna a un Brazo",
+      "name_en": "One-Arm Dumbbell Swing",
+      "category": "strength",
+      "met": 8,
+      "equipment": "dumbbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "forearm_flexors",
+        "lateral_deltoid"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-bicep-curl",
+      "name_es": "Curl de Bíceps con Pesa Rusa a Un Brazo",
+      "name_en": "One Arm Kettlebell Bicep Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-bottoms-up-press",
+      "name_es": "Press Strict con Pesa Rusa Invertida a Un Brazo",
+      "name_en": "One-Arm Kettlebell Bottoms-Up Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "lateral_deltoid",
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-floor-glute-bridge-press",
+      "name_es": "Press en Puente de Glúteos en Suelo con Pesa Rusa a Un Brazo",
+      "name_en": "One Arm Kettlebell Floor Glute Bridge Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "hamstrings",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-floor-press",
+      "name_es": "Press en Suelo con Pesa Rusa a Un Brazo",
+      "name_en": "One Arm Kettlebell Floor Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-front-squat",
+      "name_es": "Sentadilla Frontal con Pesa Rusa a Un Brazo",
+      "name_en": "One Arm Kettlebell Front Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings",
+        "obliques"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-push-press",
+      "name_es": "Push Press con Pesa Rusa a Un Brazo",
+      "name_en": "One Arm Kettlebell Push Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "quadriceps",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-row",
+      "name_es": "Remo con Pesa Rusa a Un Brazo",
+      "name_en": "One Arm Kettlebell Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-shoulder-press",
+      "name_es": "Press de Hombro con Pesa Rusa a Un Brazo",
+      "name_en": "One Arm Kettlebell Shoulder Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-swing",
+      "name_es": "Swing con Pesa Rusa a Un Brazo",
+      "name_en": "One Arm Kettlebell Swing",
+      "category": "strength",
+      "met": 8,
+      "equipment": "kettlebell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "erector_spinae",
+        "obliques"
+      ]
+    },
+    {
+      "id": "one-arm-kettlebell-tricep-kickback",
+      "name_es": "Extensión de Tríceps a Un Brazo con Pesa Rusa",
+      "name_en": "One-Arm Kettlebell Tricep Kickback",
+      "category": "strength",
+      "met": 5,
+      "equipment": "kettlebell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "one-arm-landmine-press",
+      "name_es": "Press Landmine con Un Brazo",
+      "name_en": "One-Arm Landmine Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "one-arm-lat-pulldown",
+      "name_es": "Jalón al Pecho con Un Brazo",
+      "name_en": "One-Arm Lat Pulldown",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "one-arm-single-leg-dumbbell-romanian-deadlift",
+      "name_es": "Peso Muerto Rumano a Una Pierna con Mancuerna a Un Brazo",
+      "name_en": "One-Arm Single-Leg Dumbbell Romanian Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "forearm_flexors",
+        "gluteus_medius",
+        "obliques"
+      ]
+    },
+    {
+      "id": "one-arm-single-leg-kettlebell-romanian-deadlift",
+      "name_es": "Peso Muerto Rumano a Una Pierna con Pesa Rusa a Un Brazo",
+      "name_en": "One-Arm Single-Leg Kettlebell Romanian Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "kettlebell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "forearm_flexors",
+        "gluteus_medius",
+        "obliques"
+      ]
+    },
+    {
+      "id": "overhead-squat",
+      "name_es": "Sentadilla con Barra en Alto",
+      "name_en": "Overhead Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "lateral_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "overhead-tricep-extension",
+      "name_es": "Extensión de Tríceps por Encima de la Cabeza",
+      "name_en": "Overhead Tricep Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "pause-deadlift",
+      "name_es": "Peso Muerto con Pausa",
+      "name_en": "Pause Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "quadriceps",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "pause-squat",
+      "name_es": "Sentadilla con Pausa",
+      "name_en": "Pause Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "paused-bench-press",
+      "name_es": "Press de Banca con Pausa",
+      "name_en": "Paused Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "paused-incline-bench-press",
+      "name_es": "Press Inclinado con Pausa",
+      "name_en": "Paused Incline Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "pec-deck",
+      "name_es": "Pec Deck",
+      "name_en": "Pec Deck",
+      "category": "strength",
+      "met": 5,
+      "equipment": "pec_deck",
+      "body_part": "chest",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "serratus_anterior"
+      ]
+    },
+    {
+      "id": "pendlay-row",
+      "name_es": "Remo Pendlay",
+      "name_en": "Pendlay Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "erector_spinae",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "pike-push-ups",
+      "name_es": "Flexiones en Pica",
+      "name_en": "Pike Push Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "pistol-squat",
+      "name_es": "Sentadilla a una Pierna (Pistol)",
+      "name_en": "Pistol Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings",
+        "hip_flexors"
+      ]
+    },
+    {
+      "id": "planche",
+      "name_es": "Plancha Calisténica",
+      "name_en": "Planche",
+      "category": "strength",
+      "met": 6,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "plank",
+      "name_es": "Plancha",
+      "name_en": "Plank",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis",
+        "transverse_abdominis"
+      ],
+      "secondary_muscles": [
+        "erector_spinae"
+      ]
+    },
+    {
+      "id": "plate-pinch",
+      "name_es": "Agarre de Discos",
+      "name_en": "Plate Pinch",
+      "category": "strength",
+      "met": 5,
+      "equipment": "plates",
+      "body_part": "lower_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "forearm_flexors"
+      ],
+      "secondary_muscles": [
+        "trapezius"
+      ]
+    },
+    {
+      "id": "preacher-curl",
+      "name_es": "Curl en Banco Scott",
+      "name_en": "Preacher Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "ez_bar",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "pseudo-planche-push-ups",
+      "name_es": "Push-Ups de Pseudo Plancha",
+      "name_en": "Pseudo Planche Push Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "pull-up",
+      "name_es": "Dominada",
+      "name_en": "Pull-Up",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "push-jerk",
+      "name_es": "Jerk de Empuje",
+      "name_en": "Push Jerk",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "barbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "quadriceps",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "push-press",
+      "name_es": "Press de Empuje",
+      "name_en": "Push Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "quadriceps",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "push-up",
+      "name_es": "Push-Up",
+      "name_en": "Push-Up",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "rack-pull",
+      "name_es": "Rack Pull",
+      "name_en": "Rack Pull",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "hamstrings",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "forearms",
+        "latissimus_dorsi"
+      ]
+    },
+    {
+      "id": "rear-delt-fly",
+      "name_es": "Apertura de Deltoides Posterior",
+      "name_en": "Rear Delt Fly",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "trapezius"
+      ]
+    },
+    {
+      "id": "reverse-crunches",
+      "name_es": "Crunches Inversos",
+      "name_en": "Reverse Crunches",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "hip_flexors",
+        "obliques",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "reverse-curl",
+      "name_es": "Curl Inverso",
+      "name_en": "Reverse Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "brachialis",
+        "forearm_extensors"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii"
+      ]
+    },
+    {
+      "id": "reverse-grip-bent-over-row",
+      "name_es": "Remo Inclinado con Agarre Invertido",
+      "name_en": "Reverse Grip Bent Over Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "erector_spinae",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "reverse-lunge",
+      "name_es": "Zancada Inversa",
+      "name_en": "Reverse Lunge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "reverse-plank",
+      "name_es": "Plancha Inversa",
+      "name_en": "Reverse Plank",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "posterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "ring-dead-hang",
+      "name_es": "Cuelgue Estático en Anillas",
+      "name_en": "Ring Dead Hang",
+      "category": "strength",
+      "met": 4.5,
+      "equipment": "rings",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "forearm_flexors"
+      ],
+      "secondary_muscles": [
+        "latissimus_dorsi",
+        "rectus_abdominis",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "ring-dips",
+      "name_es": "Fondos en Anillas",
+      "name_en": "Ring Dips",
+      "category": "strength",
+      "met": 6,
+      "equipment": "rings",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major",
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "ring-face-pull",
+      "name_es": "Face Pull en Anillas",
+      "name_en": "Ring Face Pull",
+      "category": "strength",
+      "met": 6,
+      "equipment": "rings",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "trapezius"
+      ]
+    },
+    {
+      "id": "rings-inverted-row",
+      "name_es": "Remo Invertido en Anillas",
+      "name_en": "Rings Inverted Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "rings",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "forearm_flexors",
+        "posterior_deltoid",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "romanian-deadlift",
+      "name_es": "Peso Muerto Rumano",
+      "name_en": "Romanian Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae"
+      ]
+    },
+    {
+      "id": "rope-climb",
+      "name_es": "Trepa de Cuerda",
+      "name_en": "Rope Climb",
+      "category": "strength",
+      "met": 6,
+      "equipment": "climbing_rope",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "forearm_flexors",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "russian-twist",
+      "name_es": "Giro Ruso",
+      "name_en": "Russian Twist",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "obliques",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "hip_flexors"
+      ]
+    },
+    {
+      "id": "scapular-pull-ups",
+      "name_es": "Dominadas Escapulares",
+      "name_en": "Scapular Pull Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "seated-barbell-overhead-press",
+      "name_es": "Press de Barra sobre la Cabeza Sentado",
+      "name_en": "Seated Barbell Overhead Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid"
+      ],
+      "secondary_muscles": [
+        "lateral_deltoid",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "seated-calf-raise",
+      "name_es": "Elevación de Talones Sentado",
+      "name_en": "Seated Calf Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "seated_calf_raise_machine",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "soleus"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius"
+      ]
+    },
+    {
+      "id": "seated-db-press",
+      "name_es": "Press de Hombro con Mancuernas Sentado",
+      "name_en": "Seated Dumbbell Shoulder Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "seated-dumbbell-curl",
+      "name_es": "Curl con Mancuernas Sentado",
+      "name_en": "Seated Dumbbell Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "brachioradialis"
+      ]
+    },
+    {
+      "id": "seated-dumbbell-lateral-raise",
+      "name_es": "Elevación Lateral con Mancuerna Sentado",
+      "name_en": "Seated Dumbbell Lateral Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "seated-dumbbell-tricep-extension",
+      "name_es": "Extensión de Tríceps con Mancuerna Sentado",
+      "name_en": "Seated Dumbbell Tricep Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    },
+    {
+      "id": "seated-leg-curl",
+      "name_es": "Curl de Piernas Sentado",
+      "name_en": "Seated Leg Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "leg_curl",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius"
+      ]
+    },
+    {
+      "id": "seated-smith-machine-shoulder-press",
+      "name_es": "Press de Hombros en Máquina Smith Sentado",
+      "name_en": "Seated Smith Machine Shoulder Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "shrug",
+      "name_es": "Encogimiento con Barra",
+      "name_en": "Barbell Shrug",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "side-lunge",
+      "name_es": "Zancada Lateral",
+      "name_en": "Side Lunge",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings",
+        "hip_flexors"
+      ]
+    },
+    {
+      "id": "side-lying-hip-abduction",
+      "name_es": "Abducción de Cadera Acostado de Lado",
+      "name_en": "Side-Lying Hip Abduction",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "abductors",
+        "gluteus_medius"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "side-lying-hip-adduction",
+      "name_es": "Aducción de Cadera Acostado de Lado",
+      "name_en": "Side Lying Hip Adduction",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "adductors"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "side-plank",
+      "name_es": "Plancha Lateral",
+      "name_en": "Side Plank",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "obliques",
+        "transverse_abdominis"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "single-arm-db-row",
+      "name_es": "Remo con Mancuerna a Un Brazo",
+      "name_en": "Single-Arm Dumbbell Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "single-arm-dumbbell-overhead-tricep-extension",
+      "name_es": "Extensión de Tríceps sobre la Cabeza con Mancuerna a Un Brazo",
+      "name_en": "Single-Arm Dumbbell Overhead Tricep Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": [
+        "obliques"
+      ]
+    },
+    {
+      "id": "single-leg-glute-bridge",
+      "name_es": "Puente de Glúteo a Una Pierna",
+      "name_en": "Single Leg Glute Bridge",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "single-leg-lying-leg-curl",
+      "name_es": "Curl de Pierna Tumbado a Una Pierna",
+      "name_en": "Single Leg Lying Leg Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "leg_curl",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius"
+      ]
+    },
+    {
+      "id": "single-leg-romanian-deadlift",
+      "name_es": "Peso Muerto Rumano a Una Pierna",
+      "name_en": "Single Leg Romanian Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "dumbbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius"
+      ]
+    },
+    {
+      "id": "sit-ups",
+      "name_es": "Abdominales",
+      "name_en": "Sit-Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques"
+      ]
+    },
+    {
+      "id": "skull-crusher",
+      "name_es": "Skull Crusher",
+      "name_en": "Skull Crusher",
+      "category": "strength",
+      "met": 5,
+      "equipment": "barbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "sled-row",
+      "name_es": "Remo con Trineo",
+      "name_en": "Sled Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "sled",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "gluteus_maximus",
+        "posterior_deltoid",
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "smith-machine-bench-press",
+      "name_es": "Press de Banca en Máquina Smith",
+      "name_en": "Smith Machine Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "smith-machine-bent-over-row",
+      "name_es": "Remo Inclinado en Máquina Smith",
+      "name_en": "Smith Machine Bent Over Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "erector_spinae",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "smith-machine-bulgarian-split",
+      "name_es": "Sentadilla Búlgara en Máquina Smith",
+      "name_en": "Smith Machine Bulgarian Split Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "smith-machine-calf-raise",
+      "name_es": "Elevación de Talón en Máquina Smith",
+      "name_en": "Smith Machine Calf Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "smith_machine",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius"
+      ],
+      "secondary_muscles": [
+        "soleus"
+      ]
+    },
+    {
+      "id": "smith-machine-incline-bench-press",
+      "name_es": "Press Inclinado en Máquina Smith",
+      "name_en": "Smith Machine Incline Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "smith-machine-rdl",
+      "name_es": "Peso Muerto Rumano en Máquina Smith",
+      "name_en": "Smith Machine Romanian Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "smith-machine-reverse-grip-bent-over-row",
+      "name_es": "Remo Inclinado con Agarre Inverso en Máquina Smith",
+      "name_en": "Smith Machine Reverse Grip Bent Over Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii",
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "smith-machine-shoulder-press",
+      "name_es": "Press de Hombros en Máquina Smith",
+      "name_en": "Smith Machine Shoulder Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "lateral_deltoid"
+      ],
+      "secondary_muscles": [
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "smith-machine-shrug",
+      "name_es": "Encogimiento de Hombros en Máquina Smith",
+      "name_en": "Smith Machine Shrug",
+      "category": "strength",
+      "met": 5,
+      "equipment": "smith_machine",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors"
+      ]
+    },
+    {
+      "id": "smith-machine-squat",
+      "name_es": "Sentadilla en Máquina Smith",
+      "name_en": "Smith Machine Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "smith_machine",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "snatch",
+      "name_es": "Arrancada",
+      "name_en": "Snatch",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "barbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings",
+        "lateral_deltoid"
+      ]
+    },
+    {
+      "id": "spider-curl",
+      "name_es": "Curl Araña",
+      "name_en": "Spider Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis"
+      ]
+    },
+    {
+      "id": "split-jerk",
+      "name_es": "Jerk con Tijera",
+      "name_en": "Split Jerk",
+      "category": "olympic",
+      "met": 8,
+      "equipment": "barbell",
+      "body_part": "full_body",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "split-squat",
+      "name_es": "Sentadilla en Tijera",
+      "name_en": "Split Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "spoto-press",
+      "name_es": "Press Spoto",
+      "name_en": "Spoto Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "squat",
+      "name_es": "Sentadilla Trasera con Barra",
+      "name_en": "Barbell Back Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "stability-ball-hip-bridge",
+      "name_es": "Puente de Cadera con Balón de Estabilidad",
+      "name_en": "Stability Ball Hip Bridge",
+      "category": "strength",
+      "met": 5,
+      "equipment": "stability_ball",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings",
+        "rectus_abdominis"
+      ]
+    },
+    {
+      "id": "stability-ball-knee-tuck",
+      "name_es": "Encogimiento de Rodillas con Balón de Estabilidad",
+      "name_en": "Stability Ball Knee Tuck",
+      "category": "strength",
+      "met": 6,
+      "equipment": "stability_ball",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "hip_flexors",
+        "obliques",
+        "serratus_anterior"
+      ]
+    },
+    {
+      "id": "stability-ball-push-up",
+      "name_es": "Push-Up con Balón de Estabilidad",
+      "name_en": "Stability Ball Push-Up",
+      "category": "strength",
+      "met": 6,
+      "equipment": "stability_ball",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "rectus_abdominis",
+        "serratus_anterior",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "standing-calf-raise",
+      "name_es": "Elevación de Talones de Pie",
+      "name_en": "Standing Calf Raise",
+      "category": "strength",
+      "met": 5,
+      "equipment": "standing_calf_raise_machine",
+      "body_part": "lower_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gastrocnemius"
+      ],
+      "secondary_muscles": [
+        "soleus"
+      ]
+    },
+    {
+      "id": "step-ups",
+      "name_es": "Step Ups",
+      "name_en": "Step Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "stiff-leg-deadlift",
+      "name_es": "Peso Muerto con Piernas Rígidas",
+      "name_en": "Stiff Leg Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "straight-arm-pulldown",
+      "name_es": "Jalón con Brazos Rectos",
+      "name_en": "Straight-Arm Pulldown",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "sumo-deadlift",
+      "name_es": "Peso Muerto Sumo",
+      "name_en": "Sumo Deadlift",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "sumo-squat",
+      "name_es": "Sentadilla Sumo",
+      "name_en": "Sumo Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "erector_spinae",
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "superman",
+      "name_es": "Superman",
+      "name_en": "Superman",
+      "category": "strength",
+      "met": 3.5,
+      "equipment": "",
+      "body_part": "back",
+      "mechanic": "isolation",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "svend-press",
+      "name_es": "Press Svend",
+      "name_en": "Svend Press",
+      "category": "strength",
+      "met": 5,
+      "equipment": "plates",
+      "body_part": "chest",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "t-bar-row",
+      "name_es": "Remo en T",
+      "name_en": "T-Bar Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "erector_spinae",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "thoracic-bridge",
+      "name_es": "Puente Torácico",
+      "name_en": "Thoracic Bridge",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "erector_spinae",
+        "gluteus_maximus"
+      ],
+      "secondary_muscles": [
+        "posterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "thruster",
+      "name_es": "Thruster",
+      "name_en": "Thruster",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "anterior_deltoid",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_maximus",
+        "trapezius",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "toes-to-bar",
+      "name_es": "Toes to Bar",
+      "name_en": "Toes to Bar",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "forearm_flexors",
+        "latissimus_dorsi",
+        "obliques"
+      ]
+    },
+    {
+      "id": "tricep-kickback",
+      "name_es": "Patada de Tríceps con Mancuerna",
+      "name_en": "Dumbbell Tricep Kickback",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "tricep-pushdown",
+      "name_es": "Jalón de Tríceps en Cable",
+      "name_en": "Cable Tricep Pushdown",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "trx-bicep-curl",
+      "name_es": "Curl de Bíceps TRX",
+      "name_en": "TRX Bicep Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "suspension_trainer",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "biceps_brachii"
+      ],
+      "secondary_muscles": [
+        "brachialis",
+        "brachioradialis"
+      ]
+    },
+    {
+      "id": "trx-chest-press",
+      "name_es": "Press de Pecho con TRX",
+      "name_en": "TRX Chest Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "suspension_trainer",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "rectus_abdominis",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "trx-face-pull",
+      "name_es": "Face Pull con TRX",
+      "name_en": "TRX Face Pull",
+      "category": "strength",
+      "met": 6,
+      "equipment": "suspension_trainer",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "trapezius"
+      ]
+    },
+    {
+      "id": "trx-hamstring-curl",
+      "name_es": "Curl de Isquiotibiales con TRX",
+      "name_en": "TRX Hamstring Curl",
+      "category": "strength",
+      "met": 5,
+      "equipment": "suspension_trainer",
+      "body_part": "upper_legs",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "hamstrings"
+      ],
+      "secondary_muscles": [
+        "gastrocnemius",
+        "gluteus_maximus"
+      ]
+    },
+    {
+      "id": "trx-lunge",
+      "name_es": "Zancada TRX",
+      "name_en": "TRX Lunge",
+      "category": "strength",
+      "met": 6,
+      "equipment": "suspension_trainer",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "trx-pistol-squat",
+      "name_es": "Sentadilla Pistola con TRX",
+      "name_en": "TRX Pistol Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "suspension_trainer",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "trx-plank",
+      "name_es": "Plancha en TRX",
+      "name_en": "TRX Plank",
+      "category": "strength",
+      "met": 6,
+      "equipment": "suspension_trainer",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "rectus_abdominis",
+        "transverse_abdominis"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "obliques"
+      ]
+    },
+    {
+      "id": "trx-row",
+      "name_es": "Remo TRX",
+      "name_en": "TRX Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "suspension_trainer",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "trx-side-plank",
+      "name_es": "Plancha Lateral en TRX",
+      "name_en": "TRX Side Plank",
+      "category": "strength",
+      "met": 6,
+      "equipment": "suspension_trainer",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "obliques",
+        "transverse_abdominis"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "lateral_deltoid"
+      ]
+    },
+    {
+      "id": "trx-squat",
+      "name_es": "Sentadilla TRX",
+      "name_en": "TRX Squat",
+      "category": "strength",
+      "met": 6,
+      "equipment": "suspension_trainer",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "trx-tricep-extension",
+      "name_es": "Extensión de Tríceps TRX",
+      "name_en": "TRX Triceps Extension",
+      "category": "strength",
+      "met": 5,
+      "equipment": "suspension_trainer",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "trx-y-fly",
+      "name_es": "TRX Y-Fly",
+      "name_en": "TRX Y-Fly",
+      "category": "strength",
+      "met": 5,
+      "equipment": "suspension_trainer",
+      "body_part": "shoulders",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "posterior_deltoid",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "lateral_deltoid",
+        "rhomboids"
+      ]
+    },
+    {
+      "id": "upright-row",
+      "name_es": "Remo al Mentón con Barra",
+      "name_en": "Barbell Upright Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "shoulders",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "lateral_deltoid",
+        "trapezius"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "biceps_brachii"
+      ]
+    },
+    {
+      "id": "v-bar-lat-pulldown",
+      "name_es": "Jalón al Pecho con Barra en V",
+      "name_en": "V-Bar Lat Pulldown",
+      "category": "strength",
+      "met": 6,
+      "equipment": "lat_pulldown_machine",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "v-bar-tricep-pushdown",
+      "name_es": "Extensión de Tríceps en Polea con Barra en V",
+      "name_en": "V-Bar Tricep Pushdown",
+      "category": "strength",
+      "met": 5,
+      "equipment": "cable",
+      "body_part": "upper_arms",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "triceps_brachii"
+      ],
+      "secondary_muscles": []
+    },
+    {
+      "id": "v-sit",
+      "name_es": "Posición en V",
+      "name_en": "V-Sit",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "quadriceps"
+      ]
+    },
+    {
+      "id": "v-ups",
+      "name_es": "V-Ups",
+      "name_en": "V Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "core",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "hip_flexors",
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques",
+        "transverse_abdominis"
+      ]
+    },
+    {
+      "id": "walking-lunge",
+      "name_es": "Zancada Caminando",
+      "name_en": "Walking Lunge",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "gluteus_medius",
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "wall-push-ups",
+      "name_es": "Push-Ups en Pared",
+      "name_en": "Wall Push Ups",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "wall-sit",
+      "name_es": "Sentadilla en Pared",
+      "name_en": "Wall Sit",
+      "category": "strength",
+      "met": 5,
+      "equipment": "",
+      "body_part": "upper_legs",
+      "mechanic": "compound",
+      "is_bodyweight": true,
+      "primary_muscles": [
+        "gluteus_maximus",
+        "quadriceps"
+      ],
+      "secondary_muscles": [
+        "hamstrings"
+      ]
+    },
+    {
+      "id": "weighted-wall-crunch",
+      "name_es": "Crunch en Pared con Peso",
+      "name_en": "Weighted Wall Crunch",
+      "category": "strength",
+      "met": 5,
+      "equipment": "dumbbell",
+      "body_part": "core",
+      "mechanic": "isolation",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "rectus_abdominis"
+      ],
+      "secondary_muscles": [
+        "obliques"
+      ]
+    },
+    {
+      "id": "wide-grip-bench-press",
+      "name_es": "Press de Banca en Agarre Ancho",
+      "name_en": "Wide-Grip Bench Press",
+      "category": "strength",
+      "met": 6,
+      "equipment": "barbell",
+      "body_part": "chest",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "pectoralis_major"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid",
+        "triceps_brachii"
+      ]
+    },
+    {
+      "id": "wide-grip-pull-ups",
+      "name_es": "Dominadas en Agarre Ancho",
+      "name_en": "Wide Grip Pull Ups",
+      "category": "strength",
+      "met": 6,
+      "equipment": "pull_up_bar",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid",
+        "rhomboids",
+        "trapezius"
+      ]
+    },
+    {
+      "id": "wide-grip-seated-cable-row",
+      "name_es": "Remo en Polea Sentado en Agarre Ancho",
+      "name_en": "Wide Grip Seated Cable Row",
+      "category": "strength",
+      "met": 6,
+      "equipment": "cable",
+      "body_part": "back",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "latissimus_dorsi",
+        "rhomboids"
+      ],
+      "secondary_muscles": [
+        "biceps_brachii",
+        "posterior_deltoid"
+      ]
+    },
+    {
+      "id": "wrist-roller",
+      "name_es": "Rodillo de Muñeca",
+      "name_en": "Wrist Roller",
+      "category": "strength",
+      "met": 6,
+      "equipment": "wrist_roller",
+      "body_part": "lower_arms",
+      "mechanic": "compound",
+      "is_bodyweight": false,
+      "primary_muscles": [
+        "forearm_extensors",
+        "forearm_flexors"
+      ],
+      "secondary_muscles": [
+        "anterior_deltoid"
+      ]
+    }
+  ]
+}

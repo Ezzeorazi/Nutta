@@ -8,7 +8,7 @@ App **mobile-first** para registrar alimentación y ejercicio: calorías, prote�
 
 - **Onboarding** con cálculo automático de metas (Mifflin-St Jeor → TDEE → macros).
 - **Comidas**: búsqueda en [Open Food Facts](https://world.openfoodfacts.org/) y escaneo de código de barras.
-- **Ejercicio**: actividades con valores MET, calorías quemadas según tu peso.
+- **Ejercicio**: actividades con valores MET, calorías quemadas según tu peso, y catálogo de +400 ejercicios ([RepDB](https://repdb.co)) para el chat y el registro de fuerza.
 - **Dashboard**: anillo de calorías (in/out) y barras de macros.
 - **Historial** de 7 días con gráficos (calorías netas y macros).
 - **PWA** instalable con soporte offline y dark mode.
@@ -27,7 +27,14 @@ App **mobile-first** para registrar alimentación y ejercicio: calorías, prote�
 npm install
 npm run dev      # http://localhost:3000
 npm run build    # build de producción
+
+npm run data:exercises   # regenera el catálogo de ejercicios (RepDB)
 ```
+
+## Créditos
+
+- Datos de alimentos: [Open Food Facts](https://world.openfoodfacts.org/).
+- **Exercise data by [RepDB](https://repdb.co)** — catálogo de ejercicios usado en el chat, el registro de fuerza y el autocompletado del Gym.
 
 ## Notas
 

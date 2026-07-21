@@ -20,6 +20,7 @@ import {
   usedExercises,
 } from "@/lib/gym";
 import { COMMON_LIFTS, type StrengthSet } from "@/lib/types";
+import exerciseNames from "@/data/exercise-names.json";
 
 const shortDate = (iso: string) => {
   const d = new Date(`${iso}T00:00:00`);
@@ -55,8 +56,10 @@ export default function GymTab({
   );
 
   const used = useMemo(() => usedExercises(strengthSets), [strengthSets]);
+  // Historial y comunes primero (lo más relevante), luego el catálogo canónico
+  // de RepDB (400 ejercicios) para autocompletar con nombres consistentes.
   const options = useMemo(
-    () => [...new Set([...used, ...COMMON_LIFTS])],
+    () => [...new Set([...used, ...COMMON_LIFTS, ...exerciseNames])],
     [used],
   );
 
@@ -286,6 +289,19 @@ export default function GymTab({
           </div>
         </section>
       )}
+
+      {/* Atribución obligatoria del dataset de ejercicios (licencia RepDB). */}
+      <p className="mt-2 text-center text-[11px] text-muted">
+        Exercise data by{" "}
+        <a
+          href="https://repdb.co"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline"
+        >
+          RepDB (repdb.co)
+        </a>
+      </p>
     </main>
   );
 }
