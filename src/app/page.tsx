@@ -80,32 +80,37 @@ export default function Home() {
   const [sending, setSending] = useState(false);
   const [editProfile, setEditProfile] = useState(false);
   const [memoryOpen, setMemoryOpen] = useState(false);
+  // Día que se está mirando en el tab Hoy (hoy por defecto; se puede navegar).
+  const [viewDate, setViewDate] = useState(today);
 
   // --- Derivados del día ---
   // El día de un registro se toma del createdAt LOCAL (con fallback a date):
   // así se corrigen registros viejos mal-fechados por el bug de UTC.
   const dayOf = (e: { date: string; createdAt?: number }) =>
     e.createdAt ? localDateFromMs(e.createdAt) : e.date;
-  const todayFoods = foods.filter((f) => dayOf(f) === today);
-  const todayEx = exercises.filter((e) => dayOf(e) === today);
+  // Registros del día VISTO (tab Hoy).
+  const viewFoods = foods.filter((f) => dayOf(f) === viewDate);
+  const viewEx = exercises.filter((e) => dayOf(e) === viewDate);
+  const viewMetrics = metrics.find((m) => m.date === viewDate);
+  // HOY real: el chat siempre registra en el día de hoy.
   const todayMetrics = metrics.find((m) => m.date === today);
   const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
 
   const totals = useMemo(() => {
     const t = { calories: 0, protein: 0, carbs: 0, fat: 0, burned: 0 };
-    for (const f of todayFoods) {
+    for (const f of viewFoods) {
       t.calories += f.calories;
       t.protein += f.protein;
       t.carbs += f.carbs;
       t.fat += f.fat;
     }
-    for (const e of todayEx) t.burned += e.caloriesBurned;
+    for (const e of viewEx) t.burned += e.caloriesBurned;
     return t;
-  }, [todayFoods, todayEx]);
+  }, [viewFoods, viewEx]);
 
   const score = useMemo(
-    () => dailyScore(todayFoods, todayEx, goals, todayMetrics),
-    [todayFoods, todayEx, goals, todayMetrics],
+    () => dailyScore(viewFoods, viewEx, goals, viewMetrics),
+    [viewFoods, viewEx, goals, viewMetrics],
   );
   const insights = useMemo(
     () => buildInsights(foods, exercises, goals, today),
@@ -313,9 +318,9 @@ export default function Home() {
           score={score}
           totals={totals}
           goals={goals}
-          todayMetrics={todayMetrics}
-          todayFoods={todayFoods}
-          todayEx={todayEx}
+          todayMetrics={viewMetrics}
+          todayFoods={viewFoods}
+          todayEx={viewEx}
           foods={foods}
           favorites={favorites}
           recipes={recipes}
@@ -323,6 +328,8 @@ export default function Home() {
           supplementLogs={supplementLogs}
           insights={insights}
           today={today}
+          viewDate={viewDate}
+          setViewDate={setViewDate}
           onEditProfile={() => setEditProfile(true)}
           onSignOut={() => db.auth.signOut()}
           addFood={addFood}

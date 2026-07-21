@@ -35,6 +35,23 @@ type Totals = {
   burned: number;
 };
 
+/** Corre una fecha YYYY-MM-DD `delta` días (local). */
+const shiftISO = (iso: string, delta: number) => {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() + delta);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+const dayLabel = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString("es-AR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+
 export default function HoyTab({
   weight,
   score,
@@ -50,6 +67,8 @@ export default function HoyTab({
   supplementLogs,
   insights,
   today,
+  viewDate,
+  setViewDate,
   onEditProfile,
   onSignOut,
   addFood,
@@ -79,6 +98,8 @@ export default function HoyTab({
   supplementLogs: SupplementLog[];
   insights: Insight[];
   today: string;
+  viewDate: string;
+  setViewDate: (d: string) => void;
   onEditProfile: () => void;
   onSignOut: () => void;
   addFood: (e: FoodEntry) => void;
@@ -100,6 +121,7 @@ export default function HoyTab({
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
   const [recipesOpen, setRecipesOpen] = useState(false);
+  const isToday = viewDate === today;
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
@@ -108,13 +130,27 @@ export default function HoyTab({
           <h1 className="text-2xl font-bold">
             Nut<span className="text-primary">ta</span>
           </h1>
-          <p className="text-sm text-muted">
-            {new Date().toLocaleDateString("es-AR", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
-          </p>
+          {/* Navegador de días: consultar días anteriores */}
+          <div className="mt-1 flex items-center gap-1">
+            <button
+              onClick={() => setViewDate(shiftISO(viewDate, -1))}
+              className="rounded-md px-1.5 text-lg leading-none text-muted active:scale-90"
+              aria-label="Día anterior"
+            >
+              ‹
+            </button>
+            <span className="min-w-26 text-center text-sm capitalize text-muted">
+              {isToday ? "Hoy" : dayLabel(viewDate)}
+            </span>
+            <button
+              onClick={() => setViewDate(shiftISO(viewDate, 1))}
+              disabled={isToday}
+              className="rounded-md px-1.5 text-lg leading-none text-muted active:scale-90 disabled:opacity-30"
+              aria-label="Día siguiente"
+            >
+              ›
+            </button>
+          </div>
         </div>
         <button
           onClick={onEditProfile}
@@ -155,23 +191,28 @@ export default function HoyTab({
         </div>
       </section>
 
-      <WellbeingCard
-        metrics={todayMetrics}
-        onSetWater={(l) => setMetric(today, { water: l })}
-        onSetSleep={(h) => setMetric(today, { sleepHours: h })}
-        onSetSteps={(n) => setMetric(today, { steps: n })}
-      />
+      {/* Bienestar, suplementos e insights: solo el día de hoy */}
+      {isToday && (
+        <>
+          <WellbeingCard
+            metrics={todayMetrics}
+            onSetWater={(l) => setMetric(today, { water: l })}
+            onSetSleep={(h) => setMetric(today, { sleepHours: h })}
+            onSetSteps={(n) => setMetric(today, { steps: n })}
+          />
 
-      <SupplementsCard
-        supplements={supplements}
-        logs={supplementLogs}
-        today={today}
-        onAdd={addSupplement}
-        onRemove={removeSupplement}
-        onToggle={toggleSupplement}
-      />
+          <SupplementsCard
+            supplements={supplements}
+            logs={supplementLogs}
+            today={today}
+            onAdd={addSupplement}
+            onRemove={removeSupplement}
+            onToggle={toggleSupplement}
+          />
 
-      <InsightsCard insights={insights} />
+          <InsightsCard insights={insights} />
+        </>
+      )}
 
       <Timeline
         foods={todayFoods}
@@ -180,33 +221,35 @@ export default function HoyTab({
         onRemoveExercise={removeExercise}
       />
 
-      {/* Agregar manualmente (el chat es la vía principal) */}
-      <section className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="mb-3 text-sm font-semibold text-muted">Agregar</h2>
-        <div className="flex flex-wrap gap-2">
-          {MEALS.map((m) => (
+      {/* Agregar manualmente (solo hoy; el chat es la vía principal) */}
+      {isToday && (
+        <section className="rounded-2xl border border-border bg-card p-4">
+          <h2 className="mb-3 text-sm font-semibold text-muted">Agregar</h2>
+          <div className="flex flex-wrap gap-2">
+            {MEALS.map((m) => (
+              <button
+                key={m.key}
+                onClick={() => setFoodOpen(m.key)}
+                className="rounded-full border border-border px-3 py-1.5 text-sm transition active:scale-95 hover:border-primary"
+              >
+                + {m.label}
+              </button>
+            ))}
             <button
-              key={m.key}
-              onClick={() => setFoodOpen(m.key)}
+              onClick={() => setExOpen(true)}
+              className="rounded-full border border-border px-3 py-1.5 text-sm text-accent transition active:scale-95 hover:border-accent"
+            >
+              + Ejercicio
+            </button>
+            <button
+              onClick={() => setRecipesOpen(true)}
               className="rounded-full border border-border px-3 py-1.5 text-sm transition active:scale-95 hover:border-primary"
             >
-              + {m.label}
+              🍲 Recetas
             </button>
-          ))}
-          <button
-            onClick={() => setExOpen(true)}
-            className="rounded-full border border-border px-3 py-1.5 text-sm text-accent transition active:scale-95 hover:border-accent"
-          >
-            + Ejercicio
-          </button>
-          <button
-            onClick={() => setRecipesOpen(true)}
-            className="rounded-full border border-border px-3 py-1.5 text-sm transition active:scale-95 hover:border-primary"
-          >
-            🍲 Recetas
-          </button>
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       <button
         onClick={onSignOut}
