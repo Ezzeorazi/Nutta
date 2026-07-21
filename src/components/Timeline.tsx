@@ -37,6 +37,7 @@ const timeFmt = (ms: number) =>
   new Date(ms).toLocaleTimeString("es-AR", {
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false, // 24h: evita el "p. m." que se partía en dos líneas
   });
 
 const minuteFromMs = (ms: number) => {
@@ -101,8 +102,8 @@ export default function Timeline({
         {events.map((ev, i) => (
           <li key={ev.key} className="group flex gap-3">
             {/* Riel con hora y punto */}
-            <div className="flex w-12 shrink-0 flex-col items-end pt-0.5">
-              <span className="text-[11px] tabular-nums text-muted">
+            <div className="flex w-14 shrink-0 flex-col items-end pt-0.5">
+              <span className="whitespace-nowrap text-[11px] tabular-nums text-muted">
                 {ev.timeLabel ?? ev.fallbackLabel}
               </span>
             </div>
@@ -117,7 +118,7 @@ export default function Timeline({
               )}
             </div>
             {/* Contenido */}
-            <div className="mb-3 flex flex-1 items-center justify-between gap-2">
+            <div className="mb-3 flex min-w-0 flex-1 items-center justify-between gap-2">
               <div className="flex min-w-0 items-center gap-2">
                 <span className="text-xl leading-none">{ev.emoji}</span>
                 <div className="min-w-0">

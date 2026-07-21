@@ -232,6 +232,19 @@ export const DEFAULT_GOALS: Goals = {
   fat: 65,
 };
 
+/** Fecha (YYYY-MM-DD) de un instante en la zona horaria LOCAL del usuario. */
+export function localDateFromMs(ms: number): string {
+  const d = new Date(ms);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * Fecha de hoy en LOCAL (no UTC). Ojo: `toISOString()` devuelve UTC, lo que
+ * a la noche adelantaba el día y mezclaba registros de días distintos.
+ */
 export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localDateFromMs(Date.now());
 }

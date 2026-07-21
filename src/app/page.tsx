@@ -19,6 +19,7 @@ import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
 import { useNutta } from "@/lib/useNutta";
 import {
   DEFAULT_GOALS,
+  localDateFromMs,
   todayISO,
   type ExerciseEntry,
   type FoodEntry,
@@ -81,8 +82,12 @@ export default function Home() {
   const [memoryOpen, setMemoryOpen] = useState(false);
 
   // --- Derivados del día ---
-  const todayFoods = foods.filter((f) => f.date === today);
-  const todayEx = exercises.filter((e) => e.date === today);
+  // El día de un registro se toma del createdAt LOCAL (con fallback a date):
+  // así se corrigen registros viejos mal-fechados por el bug de UTC.
+  const dayOf = (e: { date: string; createdAt?: number }) =>
+    e.createdAt ? localDateFromMs(e.createdAt) : e.date;
+  const todayFoods = foods.filter((f) => dayOf(f) === today);
+  const todayEx = exercises.filter((e) => dayOf(e) === today);
   const todayMetrics = metrics.find((m) => m.date === today);
   const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
 
