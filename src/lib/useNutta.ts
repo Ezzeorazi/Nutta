@@ -93,7 +93,9 @@ export function useNutta() {
     .sort((a, b) => a.date.localeCompare(b.date));
   const metrics = (
     (data?.metrics ?? []) as unknown as (DailyMetrics & { owner: string })[]
-  ).filter((m) => m.owner === owner);
+  )
+    .filter((m) => m.owner === owner)
+    .map((m) => (m.createdAt ? { ...m, date: localDateFromMs(m.createdAt) } : m));
   const measures = (
     (data?.measures ?? []) as unknown as (MeasureEntry & { owner: string })[]
   )
@@ -108,7 +110,9 @@ export function useNutta() {
     (data?.supplementLogs ?? []) as unknown as (SupplementLog & {
       owner: string;
     })[]
-  ).filter((s) => s.owner === owner);
+  )
+    .filter((s) => s.owner === owner)
+    .map((s) => (s.createdAt ? { ...s, date: localDateFromMs(s.createdAt) } : s));
   const strengthSets = (
     (data?.strengthSets ?? []) as unknown as (StrengthSet & {
       owner: string;
@@ -553,7 +557,12 @@ export function useNutta() {
       db.transact(db.tx.supplementLogs[existing.id].delete());
     } else {
       db.transact(
-        db.tx.supplementLogs[id()].update({ owner: user.id, supId, date }),
+        db.tx.supplementLogs[id()].update({
+          owner: user.id,
+          supId,
+          date,
+          createdAt: Date.now(),
+        }),
       );
     }
   };
@@ -569,7 +578,12 @@ export function useNutta() {
       | undefined;
     const mid = existing?.id ?? id();
     db.transact(
-      db.tx.metrics[mid].update({ owner: user.id, date, ...patch }),
+      db.tx.metrics[mid].update({
+        owner: user.id,
+        date,
+        ...(existing ? {} : { createdAt: Date.now() }),
+        ...patch,
+      }),
     );
   };
 

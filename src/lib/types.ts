@@ -132,6 +132,7 @@ export type SupplementLog = {
   id: string;
   supId: string;
   date: string;
+  createdAt?: number; // epoch ms
 };
 
 /** Suplementos comunes para alta rápida. */
@@ -153,6 +154,7 @@ export type DailyMetrics = {
   sleepHours?: number;
   sleepQuality?: number; // 1-5
   steps?: number;
+  createdAt?: number; // epoch ms
 };
 
 /** Meta diaria de hidratación (litros). */

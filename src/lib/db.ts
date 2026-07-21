@@ -74,6 +74,7 @@ const schema = i.schema({
       sleepHours: i.number().optional(),
       sleepQuality: i.number().optional(), // 1-5
       steps: i.number().optional(),
+      createdAt: i.number().optional(), // epoch ms (para derivar el día local)
     }),
     // Metas personalizadas del usuario (peso, levantamiento, medida).
     customGoals: i.entity({
@@ -132,6 +133,7 @@ const schema = i.schema({
       owner: i.string().indexed(),
       supId: i.string().indexed(),
       date: i.string().indexed(),
+      createdAt: i.number().optional(), // epoch ms (para derivar el día local)
     }),
   },
 });
