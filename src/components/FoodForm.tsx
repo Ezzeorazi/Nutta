@@ -56,6 +56,8 @@ export default function FoodForm({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<FoodProduct[]>([]);
   const [loading, setLoading] = useState(false);
+  const [down, setDown] = useState(false); // OFF no respondió (503/HTML)
+  const [estimating, setEstimating] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanMsg, setScanMsg] = useState<string | null>(null);
   const label = MEALS.find((m) => m.key === meal)?.label ?? "";
@@ -136,14 +138,22 @@ export default function FoodForm({
             fields: "code,product_name,product_name_es,brands,nutriments",
           }).toString();
         const res = await fetch(url, { signal: ctrl.signal });
+        const ct = res.headers.get("content-type") ?? "";
+        // OFF suele responder 503/HTML cuando está saturado: no es "sin
+        // resultados", es que el servicio no está disponible.
+        if (!res.ok || !ct.includes("json")) throw new Error("OFF no disponible");
         const data = (await res.json()) as { products?: OffProduct[] };
         const products = (data.products ?? [])
           .map(normalizeProduct)
           .filter((p): p is FoodProduct => p !== null)
           .slice(0, 15);
         setResults(products);
+        setDown(false);
       } catch {
-        if (!ctrl.signal.aborted) setResults([]);
+        if (!ctrl.signal.aborted) {
+          setResults([]);
+          setDown(true);
+        }
       } finally {
         if (!ctrl.signal.aborted) setLoading(false);
       }
@@ -160,6 +170,26 @@ export default function FoodForm({
     setF({ name: p.name, qty: String(qty), ...scale(p.per100, qty) });
     setQuery("");
     setResults([]);
+  };
+
+  // Fallback cuando OFF no tiene (o está caído): la IA estima los macros/100g.
+  const estimateWithAI = async () => {
+    const name = query.trim();
+    if (!name || estimating) return;
+    setEstimating(true);
+    try {
+      const res = await fetch("/api/foods/estimate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = (await res.json()) as { product?: FoodProduct };
+      if (data.product) selectProduct(data.product);
+    } catch {
+      // silencioso: siempre queda la carga manual
+    } finally {
+      setEstimating(false);
+    }
   };
 
   const lookupBarcode = async (code: string) => {
@@ -263,6 +293,25 @@ export default function FoodForm({
           </button>
         </div>
         {scanMsg && <p className="-mt-2 text-xs text-accent">{scanMsg}</p>}
+
+        {/* OFF sin resultados o caído → estimar con IA (como el chat). */}
+        {query.trim().length >= 2 && !loading && results.length === 0 && (
+          <div className="-mt-1 flex flex-col gap-1.5 rounded-xl border border-dashed border-border p-2.5">
+            <p className="text-xs text-muted">
+              {down
+                ? "Open Food Facts no responde ahora."
+                : `Sin resultados para “${query.trim()}” en Open Food Facts.`}
+            </p>
+            <button
+              type="button"
+              onClick={estimateWithAI}
+              disabled={estimating}
+              className="self-start rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent active:scale-95 disabled:opacity-50"
+            >
+              {estimating ? "Estimando…" : `🤖 Estimar “${query.trim()}” con IA`}
+            </button>
+          </div>
+        )}
 
         {/* Favoritos y recientes (acceso rápido) */}
         {query.trim() === "" && (favorites.length > 0 || recents.length > 0) && (

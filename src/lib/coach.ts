@@ -146,6 +146,41 @@ Mensaje: "${input.message}"`,
   return object;
 }
 
+/** Estimación nutricional de un alimento, POR 100 g (o 100 ml si es líquido). */
+export const foodEstimateSchema = z.object({
+  name: z
+    .string()
+    .describe("Nombre normalizado del alimento en español (ej. 'Naranja')"),
+  isLiquid: z
+    .boolean()
+    .describe("true si se mide en ml (bebidas, aceites, leche); false si en g"),
+  calories: z.number().describe("Calorías por 100 g (o 100 ml)"),
+  protein: z.number().describe("Proteínas en g por 100 g (o 100 ml)"),
+  carbs: z.number().describe("Carbohidratos en g por 100 g (o 100 ml)"),
+  fat: z.number().describe("Grasas en g por 100 g (o 100 ml)"),
+});
+
+export type FoodEstimate = z.infer<typeof foodEstimateSchema>;
+
+export const FOOD_ESTIMATE_SYSTEM = `Sos una base nutricional. Te dan el nombre de un alimento y devolvés sus valores nutricionales PROMEDIO del alimento genérico, SIEMPRE por 100 g (o por 100 ml si es líquido).
+
+Reglas:
+- Valores realistas del alimento crudo/común (ej. Naranja: ~47 kcal, 0.9 prot, 12 carb, 0.1 grasa por 100 g).
+- Si es una bebida/líquido/aceite, usá 100 ml y poné isLiquid=true.
+- Números planos, sin unidades. NO expliques nada.
+- Si el nombre es ambiguo, asumí la versión más común en Argentina.`;
+
+/** Estima los macros por 100 g/ml de un alimento a partir de su nombre. */
+export async function estimateFood(name: string): Promise<FoodEstimate> {
+  const { object } = await generateObject({
+    model: groq(COACH_MODEL),
+    schema: foodEstimateSchema,
+    system: FOOD_ESTIMATE_SYSTEM,
+    prompt: `Alimento: "${name}"`,
+  });
+  return object;
+}
+
 export const COACH_ANALYSIS_SYSTEM = `Sos Nutta, entrenador personal. Analizás los datos reales de la semana del usuario y le hablás DIRECTO, como un coach de verdad: sin rodeos, concreto y motivador pero honesto. Español rioplatense (de vos), 4-6 frases como máximo.
 
 Estructura: 1) destacá lo que hizo bien, 2) marcá sin vueltas lo que está fallando, 3) cerrá con 1-2 acciones claras para la semana que viene. NO inventes datos que no estén en el resumen. Nada de listas largas ni palabrería de ChatGPT.`;
