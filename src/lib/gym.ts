@@ -1,8 +1,17 @@
 import type { StrengthSet } from "@/lib/types";
 import exerciseGroups from "@/data/exercise-groups.json";
+import exerciseByGroup from "@/data/exercise-by-group.json";
 
 /** Mapa nombre_normalizado → grupo muscular (precalculado del dataset RepDB). */
 const GROUP_MAP = exerciseGroups as Record<string, string>;
+
+/** Mapa grupo → ejercicios sugeridos (priorizados del dataset RepDB). */
+const BY_GROUP = exerciseByGroup as Record<string, string[]>;
+
+/** Ejercicios sugeridos para un grupo (los N mejores). */
+export function groupExercises(group: string, n = 3): string[] {
+  return (BY_GROUP[group] ?? []).slice(0, n);
+}
 
 const normName = (s: string) =>
   s
@@ -142,6 +151,40 @@ export function muscleRecommendation(
   return `${yPart}Hoy te conviene ${pick}.`;
 }
 
+/**
+ * Grupo que conviene entrenar hoy (el menos reciente), o null si hoy ya
+ * entrenaste algo o no hay historial. Mismo criterio que muscleRecommendation.
+ */
+export function recommendedGroup(
+  sets: StrengthSet[],
+  today: string,
+): string | null {
+  if (sets.length === 0) return null;
+  const lastByGroup = new Map<string, string>();
+  let anyToday = false;
+  for (const s of sets) {
+    for (const g of groupsOf(s.exercise)) {
+      const prev = lastByGroup.get(g);
+      if (!prev || s.date > prev) lastByGroup.set(g, s.date);
+      if (s.date === today) anyToday = true;
+    }
+  }
+  if (anyToday) return null;
+
+  const groups = MUSCLE_LIFTS.map((m) => m.group);
+  let pick = groups[0];
+  let maxGap = -1;
+  for (const g of groups) {
+    const last = lastByGroup.get(g);
+    const gap = last ? dayDiff(today, last) : 999;
+    if (gap > maxGap) {
+      maxGap = gap;
+      pick = g;
+    }
+  }
+  return pick;
+}
+
 /** Objetivo de días de fuerza por semana (dispara los días de recuperación). */
 export const GYM_DAYS_GOAL = 5;
 
@@ -212,10 +255,15 @@ export function dailyRoutineSuggestion(
 
   const rec = muscleRecommendation(strengthSets, today);
   const prefix = `Vas ${strengthDays}/${goal} días esta semana. `;
+  const group = recommendedGroup(strengthSets, today);
+  const exs = group ? groupExercises(group, 3) : [];
+  const tail = exs.length ? ` Probá: ${exs.join(", ")}.` : "";
   return {
     key,
     tone: "train",
-    text: rec ? prefix + rec : prefix + "Arrancá tu primer día de la semana 💪",
+    text:
+      (rec ? prefix + rec : prefix + "Arrancá tu primer día de la semana 💪") +
+      tail,
   };
 }
 

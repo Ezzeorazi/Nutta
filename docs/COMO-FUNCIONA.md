@@ -98,12 +98,17 @@ Los **5 tabs**:
 
 ### Comidas y ejercicio (alta manual, además del chat)
 - **Comidas**: búsqueda en Open Food Facts (desde el navegador) + escaneo de código de barras; los macros se escalan por gramos. Formularios en [`FoodForm.tsx`](../src/components/FoodForm.tsx).
+- **Estimación con IA (fallback)**: cuando OFF no tiene el alimento **o está caído** (responde 503/HTML, cosa frecuente), el buscador avisa y ofrece un botón **"🤖 Estimar con IA"** que pide los macros por 100 g y rellena el form (los escala por cantidad igual que un producto). Motor en [`coach.ts`](../src/lib/coach.ts) (`estimateFood`), vía [`/api/foods/estimate`](../src/app/api/foods/estimate/route.ts).
 - **Ejercicio (cardio)**: actividades con valores **MET** (`MET × peso × horas`) en [`ExerciseForm.tsx`](../src/components/ExerciseForm.tsx) y [`src/lib/exercises.ts`](../src/lib/exercises.ts).
 - Onboarding y metas (Mifflin-St Jeor → TDEE → macros) en [`src/lib/nutrition.ts`](../src/lib/nutrition.ts).
 
 ### Gym — entrenamiento de fuerza (tab Gym)
 - Alta rápida estilo Strong: ejercicio (con **autocompletado** de tu historial + los 400 nombres de RepDB), reps y peso; calcula **volumen** (reps × peso), marca **PR** 🏆 y grafica la **progresión** por ejercicio.
-- Recomendación de qué entrenar hoy según los grupos musculares recientes ("ayer pecho, hoy espalda").
+- **Sugerencia del día** (`dailyRoutineSuggestion`): según cuántos días de fuerza llevás en la semana (objetivo `GYM_DAYS_GOAL`, hoy **5**), te dice qué toca hoy con un banner descartable (✕, por jornada, guardado en `localStorage`):
+  - Vas por debajo del objetivo → el **grupo que te falta** + 3 ejercicios concretos del catálogo (*"Hoy te conviene espalda. Probá: Peso Muerto con Barra, Remo con Barra Inclinado…"*).
+  - Ya cumpliste los 5 días → 🧘 **recuperación activa** (cardio suave + core/movilidad).
+  - Ya entrenaste hoy → ✅ confirmación.
+- Los grupos musculares se detectan con los **músculos reales** del dataset (mapa `exercise-groups.json`), con fallback a regex para nombres libres. Los ejercicios sugeridos por grupo salen de `exercise-by-group.json` (priorizados: compuestos + pesos libres + básicos icónicos, con variedad).
 - Desde el chat, frases como *"press banca 4x8 con 60"* se cargan como series de fuerza y se normalizan al nombre canónico de RepDB.
 - Lógica en [`src/lib/gym.ts`](../src/lib/gym.ts); catálogo y matcher en [`src/lib/exerciseDb.ts`](../src/lib/exerciseDb.ts); UI en [`GymTab.tsx`](../src/components/GymTab.tsx).
 
@@ -140,7 +145,7 @@ Los **5 tabs**:
 
 ## 6. Arquitectura de la IA
 
-- **Dos endpoints** (Vercel Functions, server-side): `/api/chat` (parseo de mensaje → registros, `generateObject`) y `/api/coach` (análisis semanal, `generateText`).
+- **Tres endpoints** (Vercel Functions, server-side): `/api/chat` (parseo de mensaje → registros, `generateObject`), `/api/coach` (análisis semanal, `generateText`) y `/api/foods/estimate` (macros de un alimento por 100 g, `generateObject`).
 - Toda la lógica de IA vive en [`src/lib/coach.ts`](../src/lib/coach.ts) (server-only; importa `@ai-sdk/groq`). El armado de contexto es puro y client-safe en [`src/lib/coachContext.ts`](../src/lib/coachContext.ts).
 - `page.tsx` **nunca** importa `coach.ts` → el bundle del cliente no arrastra el SDK de IA.
 - **Post-proceso determinístico**: la salida de la IA pasa por [`coachEnrich.ts`](../src/lib/coachEnrich.ts) (nombres canónicos + calorías por MET real desde el catálogo RepDB). Es código puro y client-safe; el dataset no se le pasa al modelo.
@@ -185,7 +190,9 @@ src/
 │  └─ api/
 │     ├─ chat/            Coach IA: mensaje → registros (generateObject)
 │     ├─ coach/           Coach IA: análisis semanal (generateText)
-│     └─ foods/barcode/   Producto por código de barras
+│     └─ foods/
+│        ├─ barcode/      Producto por código de barras (OFF)
+│        └─ estimate/     Estimación IA de macros por 100 g
 ├─ components/
 │  ├─ Chat.tsx            Chat estilo WhatsApp + voz + botones 🧠/📊
 │  ├─ HoyTab.tsx          Tab "Hoy" (score, macros, bienestar, timeline…)
@@ -201,9 +208,11 @@ src/
 │  ├─ GymTab.tsx          Tab "Gym" (fuerza, PR, volumen, progresión)
 │  ├─ FoodForm/ExerciseForm/Sheet, History, BottomNav, BarcodeScanner…
 │  └─ Login.tsx / Onboarding.tsx
-├─ data/
-│  ├─ exercises.json       Catálogo RepDB adelgazado (server)
-│  └─ exercise-names.json  Solo nombres (autocompletado del cliente)
+├─ data/                   Generados por scripts/build-exercises.mjs (RepDB)
+│  ├─ exercises.json       Catálogo adelgazado (server)
+│  ├─ exercise-names.json  Solo nombres (autocompletado del cliente)
+│  ├─ exercise-groups.json Nombre → grupo muscular (recomendación)
+│  └─ exercise-by-group.json  Grupo → ejercicios sugeridos (rutina)
 └─ lib/
    ├─ db.ts               Cliente y esquema de InstantDB
    ├─ useNutta.ts         Hook central de datos (query + mutaciones)

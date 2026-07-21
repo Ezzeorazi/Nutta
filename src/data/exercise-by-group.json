@@ -1,0 +1,62 @@
+{
+  "core": [
+    "Plancha Inversa",
+    "Plancha",
+    "Plancha Alta",
+    "Plancha Lateral",
+    "Rueda Abdominal con Barra",
+    "Giro ruso con pesa rusa",
+    "Plancha en TRX",
+    "Toes to Bar"
+  ],
+  "espalda": [
+    "Peso Muerto con Barra",
+    "Remo con Barra Inclinado",
+    "Remo con Mancuerna a Un Brazo",
+    "Remo con Mancuernas con Apoyo en el Pecho",
+    "Remo en Banco",
+    "Remo en T",
+    "Remo Inclinado con Agarre Invertido",
+    "Remo invertido"
+  ],
+  "pecho": [
+    "Press de Banca con Barra",
+    "Fondos para Pecho",
+    "Press con mancuernas en banco inclinado",
+    "Press de Suelo con Mancuernas",
+    "Press en banco inclinado con barra",
+    "Press Spoto",
+    "Pullover con Mancuerna",
+    "Press de Pecho con Cable"
+  ],
+  "hombros": [
+    "Press de Hombro con Mancuernas Sentado",
+    "Press de Hombros con Mancuernas",
+    "Press Militar con Barra",
+    "Remo al Mentón con Barra",
+    "Remo con Barra para Deltoides Posterior",
+    "Jalón sumo al mentón con pesa rusa",
+    "Press Arnold",
+    "Press de Barra sobre la Cabeza Sentado"
+  ],
+  "brazos": [
+    "Press de Banca con Agarre Cerrado",
+    "Fondos en Banco",
+    "Press de Suelo con Agarre Cerrado con Pesa Rusa",
+    "Curl de Bíceps con Mancuernas",
+    "Fondos en Máquina Asistida",
+    "Jalón de Tríceps en Cable",
+    "Curl Araña",
+    "Curl con Impulso"
+  ],
+  "piernas": [
+    "Hip thrust con barra",
+    "Peso Muerto Rumano",
+    "Sentadilla Búlgara",
+    "Sentadilla con Barra en Alto",
+    "Sentadilla con Pausa",
+    "Sentadilla con Talones Elevados",
+    "Sentadilla en Caja",
+    "Sentadilla en Postura Dividida con Mancuernas"
+  ]
+}

@@ -23,6 +23,69 @@ const NAMES_FILE = join(OUT_DIR, "exercise-names.json");
 // Mapa nombre_normalizado → grupo muscular (para la recomendación del Gym sin
 // cargar los 181KB del dataset completo en el cliente).
 const GROUPS_FILE = join(OUT_DIR, "exercise-groups.json");
+// Mapa grupo → ejercicios priorizados (para sugerir en la rutina del Gym).
+const BYGROUP_FILE = join(OUT_DIR, "exercise-by-group.json");
+
+// body_part del dataset → grupo de la app (más limpio que el primer músculo).
+const BODYPART_TO_GROUP = {
+  chest: "pecho",
+  back: "espalda",
+  shoulders: "hombros",
+  upper_arms: "brazos",
+  lower_arms: "brazos",
+  upper_legs: "piernas",
+  lower_legs: "piernas",
+  core: "core",
+  // full_body: se omite en las sugerencias por grupo.
+};
+
+// Puntaje del equipo (favorece pesos libres y máquinas comunes; penaliza
+// bandas/cuerdas/pelotas/exóticos).
+const EQUIP_SCORE = {
+  barbell: 3,
+  dumbbell: 3,
+  cable: 2,
+  ez_bar: 2,
+  trap_bar: 2,
+  kettlebell: 2,
+  pull_up_bar: 2,
+  smith_machine: 1.5,
+  dip_station: 1.5,
+  leg_press: 1.5,
+  hack_squat: 1.5,
+  lat_pulldown_machine: 1.5,
+  leg_curl: 1.5,
+  leg_extension: 1.5,
+  pec_deck: 1.5,
+  chest_press_machine: 1.5,
+  shoulder_press_machine: 1.5,
+  preacher_curl_machine: 1.5,
+  bicep_curl_machine: 1.5,
+  standing_calf_raise_machine: 1.5,
+  seated_calf_raise_machine: 1.5,
+  "": 1, // peso corporal
+  flat_bench: 1,
+  plates: 1,
+};
+
+// Ejercicios "icónicos" (el dataset no trae popularidad): les damos un empujón
+// para que asomen en el top de cada grupo.
+const STAPLE_RE =
+  /(sentadilla|press de banca|press banca|peso muerto|dominad|remo|press militar|press de hombro|jal[oó]n|hip thrust|prensa|zancada|curl de b[ií]ceps|fondos|elevaciones laterales|plancha)/;
+
+// Puntaje para ordenar por "primero los básicos/populares".
+const rankExercise = (ex) => {
+  let s = 0;
+  if (ex.mechanic === "compound") s += 4;
+  const eq = EQUIP_SCORE[ex.equipment || ""];
+  s += eq === undefined ? -1 : eq; // equipo exótico penaliza
+  if (ex.difficulty === "intermediate") s += 1.5;
+  else if (ex.difficulty === "beginner") s += 1;
+  else if (ex.difficulty === "advanced") s -= 1.5;
+  else s += 1;
+  if (STAPLE_RE.test(norm(ex.name_es || ""))) s += 3;
+  return s;
+};
 
 // Código de músculo → grupo de la app (espejo de MUSCLE_TO_GROUP en
 // src/lib/exerciseDb.ts; mantener ambos en sync).
@@ -122,13 +185,53 @@ async function main() {
     if (g) groups[norm(e.name_es)] = g;
   }
 
+  // { grupo: [name_es, ...] } — solo ejercicios de fuerza, agrupados por
+  // body_part y priorizados; hasta 8 por grupo (raw `list` trae `difficulty`).
+  const byGroupRaw = {};
+  for (const ex of list) {
+    if (ex.category !== "strength") continue;
+    const g = BODYPART_TO_GROUP[ex.body_part];
+    if (!g) continue;
+    (byGroupRaw[g] ??= []).push(ex);
+  }
+  const STOP = new Set(["de", "del", "la", "el", "los", "las", "con", "en", "a", "y", "una", "un"]);
+  // "movimiento base" = primeras 2 palabras significativas (para dar variedad).
+  const stem = (name) =>
+    norm(name)
+      .split(" ")
+      .filter((t) => t.length > 1 && !STOP.has(t))
+      .slice(0, 2)
+      .join(" ");
+
+  const byGroup = {};
+  for (const [g, arr] of Object.entries(byGroupRaw)) {
+    const sorted = arr.sort(
+      (a, b) =>
+        rankExercise(b) - rankExercise(a) ||
+        (a.name_es || "").localeCompare(b.name_es || "", "es"),
+    );
+    // dedupe por movimiento base: un solo representante por stem.
+    const seen = new Set();
+    const picked = [];
+    for (const e of sorted) {
+      const s = stem(e.name_es || e.name_en || e.id);
+      if (seen.has(s)) continue;
+      seen.add(s);
+      picked.push(e.name_es || e.name_en || e.id);
+      if (picked.length >= 8) break;
+    }
+    byGroup[g] = picked;
+  }
+
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(OUT_FILE, JSON.stringify(out, null, 2) + "\n", "utf8");
   await writeFile(NAMES_FILE, JSON.stringify(names, null, 2) + "\n", "utf8");
   await writeFile(GROUPS_FILE, JSON.stringify(groups, null, 2) + "\n", "utf8");
+  await writeFile(BYGROUP_FILE, JSON.stringify(byGroup, null, 2) + "\n", "utf8");
   console.log(`OK: ${slimmed.length} ejercicios → ${OUT_FILE}`);
   console.log(`OK: ${names.length} nombres → ${NAMES_FILE}`);
   console.log(`OK: ${Object.keys(groups).length} grupos → ${GROUPS_FILE}`);
+  console.log(`OK: ${Object.keys(byGroup).length} listas → ${BYGROUP_FILE}`);
 }
 
 main().catch((err) => {
