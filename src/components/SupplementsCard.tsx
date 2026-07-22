@@ -48,7 +48,7 @@ export default function SupplementsCard({
           <h2 className="font-semibold">💊 Suplementos</h2>
           {supplements.length > 0 && (
             <span className="text-xs text-muted tabular-nums">
-              {doneCount}/{supplements.length} hoy
+              {doneCount}/{supplements.length}
             </span>
           )}
         </div>

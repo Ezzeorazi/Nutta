@@ -219,21 +219,18 @@ export default function HoyTab({
         onSetSteps={(n) => setMetric(viewDate, { steps: n })}
       />
 
-      {/* Suplementos e insights: solo el día de hoy (estado "de hoy") */}
-      {isToday && (
-        <>
-          <SupplementsCard
-            supplements={supplements}
-            logs={supplementLogs}
-            today={today}
-            onAdd={addSupplement}
-            onRemove={removeSupplement}
-            onToggle={toggleSupplement}
-          />
+      {/* Suplementos: cualquier día (permite completar/corregir días pasados) */}
+      <SupplementsCard
+        supplements={supplements}
+        logs={supplementLogs}
+        today={viewDate}
+        onAdd={addSupplement}
+        onRemove={removeSupplement}
+        onToggle={toggleSupplement}
+      />
 
-          <InsightsCard insights={insights} />
-        </>
-      )}
+      {/* Insights: solo el día de hoy (mira el estado actual) */}
+      {isToday && <InsightsCard insights={insights} />}
 
       <Timeline
         foods={todayFoods}

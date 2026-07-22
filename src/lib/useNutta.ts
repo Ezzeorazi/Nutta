@@ -575,7 +575,9 @@ export function useNutta() {
           owner: user.id,
           supId,
           date,
-          createdAt: Date.now(),
+          // Anclado al día: el `date` efectivo del log se deriva del createdAt,
+          // así marcar un suplemento en un día pasado no salta a hoy.
+          createdAt: startOfLocalDayMs(date),
         }),
       );
     }

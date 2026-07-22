@@ -98,10 +98,10 @@ Los **5 tabs**:
 
 ### Completar días pasados (backfill)
 - El chat siempre registra en **hoy**, pero si te olvidaste de cargar algo podés completar días anteriores desde el alta manual:
-  - **Tab Hoy** → flechas **‹ ›** hasta el día → sección "Agregar a \<fecha\>" (comida / ejercicio / recetas) y la tarjeta de **Bienestar** (agua/sueño/pasos).
+  - **Tab Hoy** → flechas **‹ ›** hasta el día → sección "Agregar a \<fecha\>" (comida / ejercicio / recetas), la tarjeta de **Bienestar** (agua/sueño/pasos) y el checklist de **Suplementos**.
   - **Tab Gym** → flechas **‹ ›** hasta el día → aparece el formulario de alta de series.
 - **Cómo cae en el día correcto**: el día efectivo de un registro se deriva de su `createdAt`, no del campo `date` (arrastre del bug histórico de UTC). Por eso, al dar de alta en un día pasado, el `createdAt` se **ancla al mediodía local** de ese día (`startOfLocalDayMs` en [`types.ts`](../src/lib/types.ts)); en el Gym se le suma **1 min por serie** ya cargada para preservar el orden de la sesión.
-- Suplementos e insights quedan **solo en hoy** (son estado del día actual). No hay edición directa de un registro: se **borra y se vuelve a cargar**.
+- Solo los **insights** quedan atados a hoy (miran el estado actual). No hay edición directa de un registro: se **borra y se vuelve a cargar**.
 
 ### Comidas y ejercicio (alta manual, además del chat)
 - **Comidas**: búsqueda en Open Food Facts (desde el navegador) + escaneo de código de barras; los macros se escalan por gramos. Formularios en [`FoodForm.tsx`](../src/components/FoodForm.tsx).
