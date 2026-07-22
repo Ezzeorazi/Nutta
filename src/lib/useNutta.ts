@@ -487,12 +487,18 @@ export function useNutta() {
   const removeSupplement = (sid: string) =>
     db.transact(db.tx.supplements[sid].delete());
 
-  /** Registra una serie de fuerza. Devuelve el id creado (para deshacer). */
+  /**
+   * Registra una serie de fuerza. Devuelve el id creado (para deshacer).
+   * El `date` efectivo y el ORDEN de las series se derivan del `createdAt`:
+   * para hoy es Date.now(); para un día pasado, el llamador pasa un timestamp
+   * anclado a ese día (mediodía + offset por serie) para no saltar a hoy.
+   */
   const addSet = (
     exercise: string,
     reps: number,
     weight: number,
     date: string,
+    createdAt?: number,
   ) => {
     if (!user || !exercise.trim() || !(reps > 0)) return null;
     const sid = id();
@@ -503,8 +509,7 @@ export function useNutta() {
         exercise: exercise.trim(),
         reps,
         weight: weight || 0,
-        // Date.now() (no mediodía): preserva el orden de las series en la sesión.
-        createdAt: Date.now(),
+        createdAt: createdAt ?? Date.now(),
       }),
     );
     return sid;

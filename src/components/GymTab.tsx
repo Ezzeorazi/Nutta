@@ -19,7 +19,11 @@ import {
   totalVolume,
   usedExercises,
 } from "@/lib/gym";
-import { COMMON_LIFTS, type StrengthSet } from "@/lib/types";
+import {
+  COMMON_LIFTS,
+  startOfLocalDayMs,
+  type StrengthSet,
+} from "@/lib/types";
 import exerciseNames from "@/data/exercise-names.json";
 
 const shortDate = (iso: string) => {
@@ -54,7 +58,13 @@ export default function GymTab({
   strengthSets: StrengthSet[];
   exercises?: { date: string }[];
   today: string;
-  onAddSet: (exercise: string, reps: number, weight: number, date: string) => void;
+  onAddSet: (
+    exercise: string,
+    reps: number,
+    weight: number,
+    date: string,
+    createdAt?: number,
+  ) => void;
   onRemoveSet: (id: string) => void;
 }) {
   const [exercise, setExercise] = useState("");
@@ -120,7 +130,12 @@ export default function GymTab({
   const canAdd = exercise.trim() !== "" && Number(reps) > 0;
   const submit = () => {
     if (!canAdd) return;
-    onAddSet(exercise.trim(), Number(reps), Number(weight) || 0, today);
+    // Para un día pasado se ancla el createdAt al mediodía de ese día + 1 min por
+    // serie ya cargada: cae en el día correcto y preserva el orden de la sesión.
+    const createdAt = isToday
+      ? undefined
+      : startOfLocalDayMs(viewDate) + daySets.length * 60_000;
+    onAddSet(exercise.trim(), Number(reps), Number(weight) || 0, viewDate, createdAt);
     setReps("");
     // se mantienen ejercicio y peso para cargar la próxima serie rápido
   };
@@ -192,9 +207,13 @@ export default function GymTab({
         </div>
       )}
 
-      {/* Alta de serie (solo el día de hoy) */}
-      {isToday && (
+      {/* Alta de serie (hoy o un día pasado que estés completando) */}
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
+        {!isToday && (
+          <p className="text-xs font-medium text-accent">
+            Cargando series en {longDate(viewDate)}
+          </p>
+        )}
         <input
           className={inputCls}
           list="lift-options"
@@ -239,14 +258,13 @@ export default function GymTab({
           Dejá el peso en 0 para ejercicios con peso corporal.
         </p>
       </section>
-      )}
 
       {/* Sesión del día */}
       {groups.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted">
           {isToday
             ? "Todavía no cargaste series hoy. Sumá tu primera serie arriba 💪"
-            : "No entrenaste este día."}
+            : "No hay series este día. Si te lo olvidaste, cargalas arriba 💪"}
         </p>
       ) : (
         <section className="flex flex-col gap-3">
