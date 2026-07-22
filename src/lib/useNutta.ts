@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db, id } from "@/lib/db";
 import { downscaleImage } from "@/lib/image";
-import { localDateFromMs } from "@/lib/types";
+import { localDateFromMs, startOfLocalDayMs } from "@/lib/types";
 import type { Profile } from "@/lib/nutrition";
 import type {
   BodyPart,
@@ -308,10 +308,12 @@ export function useNutta() {
     else db.transact(db.tx.profiles[id()].update({ owner: user.id, ...p }));
   };
 
+  /** Agrega un alimento. Devuelve el id creado (para deshacer). */
   const addFood = (entry: FoodEntry) => {
-    if (!user) return;
+    if (!user) return null;
+    const fid = id();
     db.transact(
-      db.tx.foods[id()].update({
+      db.tx.foods[fid].update({
         owner: user.id,
         date: entry.date,
         meal: entry.meal,
@@ -324,6 +326,7 @@ export function useNutta() {
         createdAt: entry.createdAt ?? Date.now(),
       }),
     );
+    return fid;
   };
   const removeFood = (fid: string) => db.transact(db.tx.foods[fid].delete());
 
@@ -363,10 +366,12 @@ export function useNutta() {
   const removeRecipe = (rid: string) =>
     db.transact(db.tx.recipes[rid].delete());
 
+  /** Agrega un ejercicio de cardio. Devuelve el id creado (para deshacer). */
   const addExercise = (entry: ExerciseEntry) => {
-    if (!user) return;
+    if (!user) return null;
+    const eid = id();
     db.transact(
-      db.tx.exercises[id()].update({
+      db.tx.exercises[eid].update({
         owner: user.id,
         date: entry.date,
         name: entry.name,
@@ -375,6 +380,7 @@ export function useNutta() {
         createdAt: entry.createdAt ?? Date.now(),
       }),
     );
+    return eid;
   };
   const removeExercise = (eid: string) =>
     db.transact(db.tx.exercises[eid].delete());
@@ -481,24 +487,27 @@ export function useNutta() {
   const removeSupplement = (sid: string) =>
     db.transact(db.tx.supplements[sid].delete());
 
-  /** Registra una serie de fuerza. */
+  /** Registra una serie de fuerza. Devuelve el id creado (para deshacer). */
   const addSet = (
     exercise: string,
     reps: number,
     weight: number,
     date: string,
   ) => {
-    if (!user || !exercise.trim() || !(reps > 0)) return;
+    if (!user || !exercise.trim() || !(reps > 0)) return null;
+    const sid = id();
     db.transact(
-      db.tx.strengthSets[id()].update({
+      db.tx.strengthSets[sid].update({
         owner: user.id,
         date,
         exercise: exercise.trim(),
         reps,
         weight: weight || 0,
+        // Date.now() (no mediodía): preserva el orden de las series en la sesión.
         createdAt: Date.now(),
       }),
     );
+    return sid;
   };
   const removeSet = (sid: string) =>
     db.transact(db.tx.strengthSets[sid].delete());
@@ -581,7 +590,9 @@ export function useNutta() {
       db.tx.metrics[mid].update({
         owner: user.id,
         date,
-        ...(existing ? {} : { createdAt: Date.now() }),
+        // createdAt anclado al día: el `date` efectivo se deriva de él, así una
+        // métrica cargada para un día pasado no salta a hoy.
+        ...(existing ? {} : { createdAt: startOfLocalDayMs(date) }),
         ...patch,
       }),
     );

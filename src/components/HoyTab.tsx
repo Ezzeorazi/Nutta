@@ -15,6 +15,7 @@ import type { Insight } from "@/lib/insights";
 import type { DailyScore } from "@/lib/score";
 import {
   MEALS,
+  startOfLocalDayMs,
   type DailyMetrics,
   type ExerciseEntry,
   type FavoriteFood,
@@ -25,6 +26,7 @@ import {
   type Supplement,
   type SupplementLog,
 } from "@/lib/types";
+import { waterGoalL } from "@/lib/nutrition";
 import { uid } from "@/components/Sheet";
 
 type Totals = {
@@ -66,6 +68,7 @@ export default function HoyTab({
   supplements,
   supplementLogs,
   insights,
+  streak,
   today,
   viewDate,
   setViewDate,
@@ -97,6 +100,7 @@ export default function HoyTab({
   supplements: Supplement[];
   supplementLogs: SupplementLog[];
   insights: Insight[];
+  streak: number;
   today: string;
   viewDate: string;
   setViewDate: (d: string) => void;
@@ -122,6 +126,10 @@ export default function HoyTab({
   const [exOpen, setExOpen] = useState(false);
   const [recipesOpen, setRecipesOpen] = useState(false);
   const isToday = viewDate === today;
+  const waterGoal = waterGoalL(weight);
+  // Timestamp del día que se está viendo: hoy usa el instante real (preserva el
+  // orden del timeline); un día pasado se ancla al mediodía para no saltar a hoy.
+  const stamp = () => (isToday ? Date.now() : startOfLocalDayMs(viewDate));
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
@@ -152,13 +160,23 @@ export default function HoyTab({
             </button>
           </div>
         </div>
-        <button
-          onClick={onEditProfile}
-          className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-lg font-bold text-primary active:scale-95"
-          aria-label="Editar perfil"
-        >
-          N
-        </button>
+        <div className="flex items-center gap-2">
+          {streak > 0 && (
+            <span
+              className="flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-sm font-semibold text-accent tabular-nums"
+              title={`Racha de entrenamiento: ${streak} ${streak === 1 ? "día" : "días"}`}
+            >
+              🔥 {streak}
+            </span>
+          )}
+          <button
+            onClick={onEditProfile}
+            className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-lg font-bold text-primary active:scale-95"
+            aria-label="Editar perfil"
+          >
+            N
+          </button>
+        </div>
       </header>
 
       <ScoreCard data={score} />
@@ -191,16 +209,19 @@ export default function HoyTab({
         </div>
       </section>
 
-      {/* Bienestar, suplementos e insights: solo el día de hoy */}
+      {/* Bienestar: cualquier día (permite completar/corregir días pasados) */}
+      <WellbeingCard
+        key={viewDate}
+        metrics={todayMetrics}
+        waterGoal={waterGoal}
+        onSetWater={(l) => setMetric(viewDate, { water: l })}
+        onSetSleep={(h) => setMetric(viewDate, { sleepHours: h })}
+        onSetSteps={(n) => setMetric(viewDate, { steps: n })}
+      />
+
+      {/* Suplementos e insights: solo el día de hoy (estado "de hoy") */}
       {isToday && (
         <>
-          <WellbeingCard
-            metrics={todayMetrics}
-            onSetWater={(l) => setMetric(today, { water: l })}
-            onSetSleep={(h) => setMetric(today, { sleepHours: h })}
-            onSetSteps={(n) => setMetric(today, { steps: n })}
-          />
-
           <SupplementsCard
             supplements={supplements}
             logs={supplementLogs}
@@ -221,10 +242,11 @@ export default function HoyTab({
         onRemoveExercise={removeExercise}
       />
 
-      {/* Agregar manualmente (solo hoy; el chat es la vía principal) */}
-      {isToday && (
-        <section className="rounded-2xl border border-border bg-card p-4">
-          <h2 className="mb-3 text-sm font-semibold text-muted">Agregar</h2>
+      {/* Agregar manualmente (cualquier día; el chat es la vía principal para hoy) */}
+      <section className="rounded-2xl border border-border bg-card p-4">
+          <h2 className="mb-3 text-sm font-semibold text-muted">
+            Agregar{isToday ? "" : ` a ${dayLabel(viewDate)}`}
+          </h2>
           <div className="flex flex-wrap gap-2">
             {MEALS.map((m) => (
               <button
@@ -249,7 +271,6 @@ export default function HoyTab({
             </button>
           </div>
         </section>
-      )}
 
       <button
         onClick={onSignOut}
@@ -265,7 +286,7 @@ export default function HoyTab({
           favorites={favorites}
           onClose={() => setFoodOpen(null)}
           onAdd={(entry) => {
-            addFood(entry);
+            addFood({ ...entry, date: viewDate, createdAt: stamp() });
             setFoodOpen(null);
           }}
           onAddFavorite={addFavorite}
@@ -277,7 +298,7 @@ export default function HoyTab({
           weight={weight}
           onClose={() => setExOpen(false)}
           onAdd={(entry) => {
-            addExercise(entry);
+            addExercise({ ...entry, date: viewDate, createdAt: stamp() });
             setExOpen(false);
           }}
         />
@@ -290,7 +311,13 @@ export default function HoyTab({
           onRemove={removeRecipe}
           onLog={(items, meal) => {
             for (const it of items) {
-              addFood({ id: uid(), date: today, meal, ...it });
+              addFood({
+                id: uid(),
+                date: viewDate,
+                meal,
+                createdAt: stamp(),
+                ...it,
+              });
             }
           }}
         />

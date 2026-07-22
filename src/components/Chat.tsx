@@ -38,12 +38,16 @@ export default function Chat({
   onSend,
   onOpenMemory,
   onAnalyze,
+  onUndo,
+  canUndo = false,
   sending = false,
 }: {
   messages: ChatMessage[];
   onSend: (text: string) => void;
   onOpenMemory?: () => void;
   onAnalyze?: () => void;
+  onUndo?: () => void;
+  canUndo?: boolean;
   sending?: boolean;
 }) {
   const [text, setText] = useState("");
@@ -179,6 +183,16 @@ export default function Chat({
             <div className="flex items-center gap-1 rounded-2xl rounded-bl-md border border-border bg-card px-3.5 py-3">
               <Dot /> <Dot delay="150ms" /> <Dot delay="300ms" />
             </div>
+          </div>
+        )}
+        {canUndo && !sending && onUndo && (
+          <div className="flex justify-start pl-1">
+            <button
+              onClick={onUndo}
+              className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-accent active:scale-95 hover:border-accent"
+            >
+              ↩️ Deshacer registro
+            </button>
           </div>
         )}
         <div ref={endRef} />

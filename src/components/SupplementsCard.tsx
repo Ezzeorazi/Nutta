@@ -96,7 +96,7 @@ export default function SupplementsCard({
                       <span className="ml-2 text-xs text-muted">
                         {s.dose}
                         {s.dose && s.time ? " · " : ""}
-                        {s.time ? `🔔 ${s.time}` : ""}
+                        {s.time ? `🕗 ${s.time}` : ""}
                       </span>
                     )}
                   </span>
@@ -156,7 +156,7 @@ export default function SupplementsCard({
               className={`${inputCls} shrink-0`}
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              aria-label="Horario de recordatorio"
+              aria-label="Horario (referencia visual)"
             />
             <button
               onClick={submit}

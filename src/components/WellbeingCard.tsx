@@ -7,11 +7,13 @@ const fmtL = (n: number) => (Math.round(n * 100) / 100).toString();
 
 export default function WellbeingCard({
   metrics,
+  waterGoal = WATER_GOAL_L,
   onSetWater,
   onSetSleep,
   onSetSteps,
 }: {
   metrics?: DailyMetrics;
+  waterGoal?: number;
   onSetWater: (liters: number) => void;
   onSetSleep: (hours: number) => void;
   onSetSteps: (steps: number) => void;
@@ -22,7 +24,7 @@ export default function WellbeingCard({
   const [sleepInput, setSleepInput] = useState(sleep != null ? String(sleep) : "");
   const [stepsInput, setStepsInput] = useState(steps ? String(steps) : "");
 
-  const pct = Math.min(1, water / WATER_GOAL_L);
+  const pct = Math.min(1, water / waterGoal);
   const stepsPct = Math.min(1, steps / STEPS_GOAL);
   const addWater = (delta: number) =>
     onSetWater(Math.max(0, Math.round((water + delta) * 100) / 100));
@@ -34,7 +36,7 @@ export default function WellbeingCard({
         <div className="mb-2 flex items-baseline justify-between">
           <h3 className="font-semibold">💧 Agua</h3>
           <span className="text-xs text-muted tabular-nums">
-            {fmtL(water)} / {WATER_GOAL_L} L
+            {fmtL(water)} / {fmtL(waterGoal)} L
           </span>
         </div>
         <div className="mb-3 h-2 overflow-hidden rounded-full bg-border">
@@ -58,7 +60,9 @@ export default function WellbeingCard({
           </button>
           {water > 0 && (
             <button
-              onClick={() => onSetWater(0)}
+              onClick={() => {
+                if (confirm("¿Resetear el agua de este día?")) onSetWater(0);
+              }}
               className="ml-auto rounded-full px-2 py-1.5 text-xs text-muted active:scale-95"
             >
               reset

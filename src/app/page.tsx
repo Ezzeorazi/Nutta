@@ -12,10 +12,12 @@ import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
 import { uid } from "@/components/Sheet";
 import { db } from "@/lib/db";
-import { computeGoals } from "@/lib/nutrition";
+import { computeGoals, waterGoalL } from "@/lib/nutrition";
 import { dailyScore } from "@/lib/score";
 import { buildInsights } from "@/lib/insights";
+import { streakFromDates } from "@/lib/achievements";
 import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
+import { emojiForExercise, emojiForFood } from "@/lib/emoji";
 import { useNutta } from "@/lib/useNutta";
 import {
   DEFAULT_GOALS,
@@ -25,6 +27,12 @@ import {
   type FoodEntry,
   type MemoryKind,
 } from "@/lib/types";
+
+/** Registros creados en un turno del chat (para poder deshacerlos). */
+type ChatBatch = { foods: string[]; exercises: string[]; sets: string[] };
+const emptyBatch = (): ChatBatch => ({ foods: [], exercises: [], sets: [] });
+const batchSize = (b: ChatBatch) =>
+  b.foods.length + b.exercises.length + b.sets.length;
 
 export default function Home() {
   const today = todayISO();
@@ -80,6 +88,8 @@ export default function Home() {
   const [sending, setSending] = useState(false);
   const [editProfile, setEditProfile] = useState(false);
   const [memoryOpen, setMemoryOpen] = useState(false);
+  // Último lote registrado por el chat (para el botón "Deshacer").
+  const [lastBatch, setLastBatch] = useState<ChatBatch | null>(null);
   // Día que se está mirando en el tab Hoy (hoy por defecto; se puede navegar).
   const [viewDate, setViewDate] = useState(today);
 
@@ -108,14 +118,22 @@ export default function Home() {
     return t;
   }, [viewFoods, viewEx]);
 
+  const waterGoal = profile ? waterGoalL(profile.weight) : undefined;
   const score = useMemo(
-    () => dailyScore(viewFoods, viewEx, goals, viewMetrics),
-    [viewFoods, viewEx, goals, viewMetrics],
+    () => dailyScore(viewFoods, viewEx, goals, viewMetrics, waterGoal),
+    [viewFoods, viewEx, goals, viewMetrics, waterGoal],
   );
   const insights = useMemo(
     () => buildInsights(foods, exercises, goals, today),
     [foods, exercises, goals, today],
   );
+  // Racha de entrenamiento (días con cardio o fuerza) para mostrar en Hoy.
+  const trainStreak = useMemo(() => {
+    const days = new Set<string>();
+    for (const e of exercises) days.add(e.date);
+    for (const s of strengthSets) days.add(s.date);
+    return streakFromDates(days, today).current;
+  }, [exercises, strengthSets, today]);
 
   // --- Coach IA ---
 
@@ -123,6 +141,7 @@ export default function Home() {
   const sendChat = async (text: string) => {
     if (!profile) return;
     addMessage("user", text);
+    setLastBatch(null); // el lote anterior deja de ser "deshacible"
     setSending(true);
     try {
       const res = await fetch("/api/chat", {
@@ -154,8 +173,10 @@ export default function Home() {
         error?: string;
       };
       if (!res.ok) throw new Error(data?.error ?? "error");
+      const batch = emptyBatch();
+      const logged: string[] = []; // líneas del resumen "Registrado"
       for (const f of data.foods ?? []) {
-        addFood({
+        const fid = addFood({
           id: uid(),
           date: today,
           meal: f.meal,
@@ -166,37 +187,62 @@ export default function Home() {
           carbs: f.carbs,
           fat: f.fat,
         });
+        if (fid) batch.foods.push(fid);
+        logged.push(
+          `${emojiForFood(f.name)} ${f.name} · ${Math.round(f.calories)} kcal · ${Math.round(f.protein)} g P`,
+        );
       }
       for (const e of data.exercises ?? []) {
-        addExercise({
+        const eid = addExercise({
           id: uid(),
           date: today,
           name: e.name,
           minutes: e.minutes,
           caloriesBurned: e.caloriesBurned,
         });
+        if (eid) batch.exercises.push(eid);
+        logged.push(
+          `${emojiForExercise(e.name)} ${e.name} · ${e.minutes} min · ${Math.round(e.caloriesBurned)} kcal`,
+        );
       }
       if (typeof data.bodyweight === "number" && data.bodyweight > 0) {
         addWeight(data.bodyweight, today);
+        logged.push(`⚖️ Peso · ${data.bodyweight} kg`);
       }
       for (const st of data.strength ?? []) {
         const n = Math.min(20, Math.max(1, Math.round(st.sets) || 1));
         for (let i = 0; i < n; i++) {
-          addSet(st.exercise, st.reps, st.weight, today);
+          const sid = addSet(st.exercise, st.reps, st.weight, today);
+          if (sid) batch.sets.push(sid);
         }
+        logged.push(
+          `🏋️ ${st.exercise} · ${n}×${st.reps}${st.weight ? ` · ${st.weight} kg` : ""}`,
+        );
       }
       // Métricas de bienestar en un solo upsert (evita filas duplicadas).
       const patch: { water?: number; sleepHours?: number; steps?: number } = {};
-      if (data.water && data.water > 0)
+      if (data.water && data.water > 0) {
         patch.water = (todayMetrics?.water ?? 0) + data.water;
-      if (data.sleepHours && data.sleepHours > 0)
+        logged.push(`💧 Agua · +${data.water} L`);
+      }
+      if (data.sleepHours && data.sleepHours > 0) {
         patch.sleepHours = data.sleepHours;
-      if (data.steps && data.steps > 0) patch.steps = data.steps;
+        logged.push(`😴 Sueño · ${data.sleepHours} h`);
+      }
+      if (data.steps && data.steps > 0) {
+        patch.steps = data.steps;
+        logged.push(`👣 Pasos · ${data.steps.toLocaleString("es-AR")}`);
+      }
       if (Object.keys(patch).length) setMetric(today, patch);
       for (const r of data.remember ?? []) {
         if (r?.text?.trim()) addMemory(r.kind, r.text);
       }
-      addMessage("assistant", data.reply || "Listo ✅");
+      const summary = logged.length
+        ? `${data.reply || "Listo ✅"}\n\n📝 Registrado:\n${logged.join("\n")}`
+        : data.reply || "Listo ✅";
+      addMessage("assistant", summary);
+      // Solo se puede deshacer lo que tiene id propio (comidas, cardio, series).
+      setLastBatch(batchSize(batch) > 0 ? batch : null);
     } catch {
       addMessage(
         "assistant",
@@ -207,10 +253,21 @@ export default function Home() {
     }
   };
 
+  // Deshace el último lote que registró el chat.
+  const undoLastBatch = () => {
+    if (!lastBatch) return;
+    for (const id of lastBatch.foods) removeFood(id);
+    for (const id of lastBatch.exercises) removeExercise(id);
+    for (const id of lastBatch.sets) removeSet(id);
+    setLastBatch(null);
+    addMessage("assistant", "Listo, deshice ese registro ↩️");
+  };
+
   // Pide al coach un análisis de la última semana y lo publica en el chat.
   const runWeeklyAnalysis = async () => {
     if (!profile || sending) return;
     setTab("chat");
+    setLastBatch(null);
     addMessage("user", "📊 Analizá mi semana");
     setSending(true);
     try {
@@ -239,8 +296,10 @@ export default function Home() {
   };
 
   const splash = (
-    <div className="flex flex-1 items-center justify-center text-3xl font-bold">
-      Nut<span className="text-primary">ta</span>
+    <div className="flex flex-1 items-center justify-center">
+      <div className="animate-pulse text-3xl font-bold">
+        Nut<span className="text-primary">ta</span>
+      </div>
     </div>
   );
 
@@ -272,6 +331,8 @@ export default function Home() {
           sending={sending}
           onOpenMemory={() => setMemoryOpen(true)}
           onAnalyze={runWeeklyAnalysis}
+          canUndo={!!lastBatch}
+          onUndo={undoLastBatch}
         />
       ) : tab === "gym" ? (
         <GymTab
@@ -327,6 +388,7 @@ export default function Home() {
           supplements={supplements}
           supplementLogs={supplementLogs}
           insights={insights}
+          streak={trainStreak}
           today={today}
           viewDate={viewDate}
           setViewDate={setViewDate}

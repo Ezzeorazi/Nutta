@@ -56,6 +56,7 @@ export function dailyScore(
   exercises: ExerciseEntry[],
   goals: Goals,
   metrics?: Pick<DailyMetrics, "water" | "sleepHours">,
+  waterGoal: number = WATER_GOAL_L,
 ): DailyScore {
   const protein = foods.reduce((s, f) => s + f.protein, 0);
   const calories = foods.reduce((s, f) => s + f.calories, 0);
@@ -95,7 +96,7 @@ export function dailyScore(
     factors.push({
       label: "Agua",
       weight: 10,
-      ratio: clamp(metrics!.water! / WATER_GOAL_L, 0, 1),
+      ratio: clamp(metrics!.water! / waterGoal, 0, 1),
     });
   }
 
@@ -129,7 +130,7 @@ export function dailyScore(
   if (hasSleep && metrics!.sleepHours! < 6) {
     tips.push(`Dormiste poco (${metrics!.sleepHours} h); apuntá a 7-8.`);
   }
-  if (hasWater && metrics!.water! < WATER_GOAL_L * 0.6) {
+  if (hasWater && metrics!.water! < waterGoal * 0.6) {
     tips.push("Tomá más agua para llegar a tu meta.");
   }
   if (!hasSleep && !hasWater) {

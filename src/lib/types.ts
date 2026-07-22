@@ -250,3 +250,13 @@ export function localDateFromMs(ms: number): string {
 export function todayISO(): string {
   return localDateFromMs(Date.now());
 }
+
+/**
+ * Timestamp (epoch ms) anclado al MEDIODÍA local de una fecha YYYY-MM-DD.
+ * Se usa al dar de alta registros en un día distinto de hoy: como el `date`
+ * efectivo se deriva de `localDateFromMs(createdAt)`, un `createdAt` de mediodía
+ * garantiza que el registro caiga en el día pretendido (sin cruzar husos).
+ */
+export function startOfLocalDayMs(iso: string): number {
+  return new Date(`${iso}T12:00:00`).getTime();
+}

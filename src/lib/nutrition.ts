@@ -51,6 +51,15 @@ export function mifflinStJeor(p: Profile): number {
   return p.sex === "masculino" ? base + 5 : base - 161;
 }
 
+/**
+ * Meta diaria de hidratación (litros) escalada al peso (~35 ml/kg), con un
+ * piso de 2 L. Redondeada a 0.1 L. Un dato que un entrenador ajusta por persona.
+ */
+export function waterGoalL(weightKg: number): number {
+  if (!(weightKg > 0)) return 2.5;
+  return Math.max(2, Math.round(weightKg * 0.035 * 10) / 10);
+}
+
 /** Calcula metas diarias de calorías y macros a partir del perfil. */
 export function computeGoals(p: Profile): Goals {
   const activity = ACTIVITIES.find((a) => a.key === p.activity) ?? ACTIVITIES[2];
