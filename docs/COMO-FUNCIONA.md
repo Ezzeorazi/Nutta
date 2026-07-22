@@ -58,9 +58,9 @@ CHAT (principal) ◄─► Hoy ◄─► Gym ◄─► Progreso ◄─► Histor
 La **primera vez** que iniciás sesión, los datos que tuvieras guardados localmente (de antes de la nube) se **suben automáticamente** a tu cuenta.
 
 Los **5 tabs**:
-- **💬 Chat** — hablás y la IA registra. Es la pantalla de inicio.
-- **🍽️ Hoy** — resumen del día: score, calorías/macros, bienestar, suplementos, insights y timeline.
-- **🏋️ Gym** — entrenamiento de fuerza: series/reps/peso, PR, volumen y progresión.
+- **💬 Chat** — hablás y la IA registra. Es la pantalla de inicio. Confirma con un resumen de lo registrado y permite **deshacer** el último alta.
+- **🍽️ Hoy** — resumen del día: score, calorías/macros, bienestar, suplementos, insights y timeline. Con las flechas **‹ ›** navegás a días anteriores y podés **completarlos** (ver §4).
+- **🏋️ Gym** — entrenamiento de fuerza: series/reps/peso, PR, volumen y progresión. También permite **cargar series de un día pasado**.
 - **📈 Progreso** — peso (con meta y predicción), medidas, fotos y metas personalizadas.
 - **📊 Historial** — gráficos de los últimos 7/30 días, rachas y logros, y exportación.
 
@@ -72,7 +72,7 @@ Los **5 tabs**:
 - Escribís (o dictás con el 🎙️) en lenguaje natural; el mensaje va al endpoint [`/api/chat`](../src/app/api/chat/route.ts).
 - La IA (Groq) devuelve **salida estructurada** (`generateObject` con un esquema Zod): la respuesta del coach + los registros detectados (comidas con macros, ejercicios, peso, agua, sueño, pasos) + hechos nuevos para recordar.
 - Antes de responder, un **post-proceso determinístico** ([`src/lib/coachEnrich.ts`](../src/lib/coachEnrich.ts)) "snapea" los ejercicios detectados contra el catálogo de RepDB: **normaliza el nombre** al canónico (evita duplicados de PR/volumen) y **recalcula las calorías con el MET real**. Esto es código, no IA: el dataset **nunca** entra al prompt.
-- El cliente persiste todo en InstantDB y muestra la respuesta como en un chat.
+- El cliente persiste todo en InstantDB y muestra la respuesta como en un chat, con un resumen **📝 Registrado** (qué se guardó, con kcal/proteína) y un botón **↩️ Deshacer** que borra ese último lote si la IA interpretó mal.
 - Lógica de la IA en [`src/lib/coach.ts`](../src/lib/coach.ts); orquestación en [`src/app/page.tsx`](../src/app/page.tsx); UI en [`Chat.tsx`](../src/components/Chat.tsx).
 
 ### Memoria del usuario ("hice lo de siempre")
@@ -96,6 +96,13 @@ Los **5 tabs**:
 ### Coach IA — análisis semanal
 - Botón 📊 en el chat: arma un resumen de los últimos 7 días y la IA responde como entrenador (directo, concreto), vía [`/api/coach`](../src/app/api/coach/route.ts).
 
+### Completar días pasados (backfill)
+- El chat siempre registra en **hoy**, pero si te olvidaste de cargar algo podés completar días anteriores desde el alta manual:
+  - **Tab Hoy** → flechas **‹ ›** hasta el día → sección "Agregar a \<fecha\>" (comida / ejercicio / recetas) y la tarjeta de **Bienestar** (agua/sueño/pasos).
+  - **Tab Gym** → flechas **‹ ›** hasta el día → aparece el formulario de alta de series.
+- **Cómo cae en el día correcto**: el día efectivo de un registro se deriva de su `createdAt`, no del campo `date` (arrastre del bug histórico de UTC). Por eso, al dar de alta en un día pasado, el `createdAt` se **ancla al mediodía local** de ese día (`startOfLocalDayMs` en [`types.ts`](../src/lib/types.ts)); en el Gym se le suma **1 min por serie** ya cargada para preservar el orden de la sesión.
+- Suplementos e insights quedan **solo en hoy** (son estado del día actual). No hay edición directa de un registro: se **borra y se vuelve a cargar**.
+
 ### Comidas y ejercicio (alta manual, además del chat)
 - **Comidas**: búsqueda en Open Food Facts (desde el navegador) + escaneo de código de barras; los macros se escalan por gramos. Formularios en [`FoodForm.tsx`](../src/components/FoodForm.tsx).
 - **Estimación con IA (fallback)**: cuando OFF no tiene el alimento **o está caído** (responde 503/HTML, cosa frecuente), el buscador avisa y ofrece un botón **"🤖 Estimar con IA"** que pide los macros por 100 g y rellena el form (los escala por cantidad igual que un producto). Motor en [`coach.ts`](../src/lib/coach.ts) (`estimateFood`), vía [`/api/foods/estimate`](../src/app/api/foods/estimate/route.ts).
@@ -104,6 +111,7 @@ Los **5 tabs**:
 
 ### Gym — entrenamiento de fuerza (tab Gym)
 - Alta rápida estilo Strong: ejercicio (con **autocompletado** de tu historial + los 400 nombres de RepDB), reps y peso; calcula **volumen** (reps × peso), marca **PR** 🏆 y grafica la **progresión** por ejercicio.
+- El navegador de días (**‹ ›**) permite mirar sesiones anteriores y **cargar series en un día pasado** (ver §4, "Completar días pasados").
 - **Sugerencia del día** (`dailyRoutineSuggestion`): según cuántos días de fuerza llevás en la semana (objetivo `GYM_DAYS_GOAL`, hoy **5**), te dice qué toca hoy con un banner descartable (✕, por jornada, guardado en `localStorage`):
   - Vas por debajo del objetivo → el **grupo que te falta** + 3 ejercicios concretos del catálogo (*"Hoy te conviene espalda. Probá: Peso Muerto con Barra, Remo con Barra Inclinado…"*).
   - Ya cumpliste los 5 días → 🧘 **recuperación activa** (cardio suave + core/movilidad).
@@ -122,8 +130,8 @@ Los **5 tabs**:
 - **Medidas**: cintura, pecho, brazo, muslo y pantorrilla, con gráfico por parte. En [`MeasuresPanel.tsx`](../src/components/MeasuresPanel.tsx).
 
 ### Bienestar y suplementos (tab Hoy)
-- **Agua** (botones rápidos), **sueño** (horas) y **pasos**, con barras de progreso. En [`WellbeingCard.tsx`](../src/components/WellbeingCard.tsx).
-- **Suplementos**: lista propia con checklist diario y horario. En [`SupplementsCard.tsx`](../src/components/SupplementsCard.tsx).
+- **Agua** (botones rápidos), **sueño** (horas) y **pasos**, con barras de progreso. La **meta de agua se escala al peso** (~35 ml/kg, piso 2 L) y también cuenta en el score. Se puede registrar en días pasados. En [`WellbeingCard.tsx`](../src/components/WellbeingCard.tsx).
+- **Suplementos**: lista propia con checklist diario y horario (**referencia visual**, sin notificación). En [`SupplementsCard.tsx`](../src/components/SupplementsCard.tsx).
 
 ### Historial (últimos 7 días)
 - Promedios + gráfico de calorías netas por día (con línea de meta) + gráfico de macros. En [`History.tsx`](../src/components/History.tsx) y [`src/lib/analytics.ts`](../src/lib/analytics.ts).
