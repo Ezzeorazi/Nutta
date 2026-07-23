@@ -27,6 +27,8 @@ import type {
   MeasureEntry,
   PhotoEntry,
   StrengthSet,
+  Supplement,
+  SupplementLog,
   WeightEntry,
 } from "@/lib/types";
 
@@ -40,6 +42,8 @@ type Props = {
   measures: MeasureEntry[];
   customGoals: CustomGoal[];
   photos: Pick<PhotoEntry, "id">[];
+  supplements: Supplement[];
+  supplementLogs: SupplementLog[];
   targetWeight?: number;
   today: string;
 };
@@ -54,13 +58,15 @@ export default function History({
   measures,
   customGoals,
   photos,
+  supplements,
+  supplementLogs,
   targetWeight,
   today,
 }: Props) {
   const [days, setDays] = useState<7 | 30>(7);
   const stats = useMemo(
-    () => lastNDays(foods, exercises, days),
-    [foods, exercises, days],
+    () => lastNDays(foods, exercises, days, supplements, supplementLogs),
+    [foods, exercises, days, supplements, supplementLogs],
   );
   const avg = useMemo(() => averages(stats), [stats]);
   const xKey = days === 7 ? "label" : "dm";

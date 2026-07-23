@@ -472,7 +472,14 @@ export function useNutta() {
   const removeMeasure = (mid: string) =>
     db.transact(db.tx.measures[mid].delete());
 
-  const addSupplement = (name: string, dose?: string, time?: string) => {
+  const addSupplement = (
+    name: string,
+    dose?: string,
+    time?: string,
+    defaultQty?: number,
+    unit?: string,
+    protein?: number,
+  ) => {
     if (!user || !name.trim()) return;
     db.transact(
       db.tx.supplements[id()].update({
@@ -480,6 +487,9 @@ export function useNutta() {
         name: name.trim(),
         ...(dose?.trim() ? { dose: dose.trim() } : {}),
         ...(time?.trim() ? { time: time.trim() } : {}),
+        ...(defaultQty && defaultQty > 0 ? { defaultQty } : {}),
+        ...(unit?.trim() ? { unit: unit.trim() } : {}),
+        ...(protein && protein > 0 ? { protein } : {}),
         createdAt: Date.now(),
       }),
     );
@@ -561,7 +571,7 @@ export function useNutta() {
     void db.storage.delete(path).catch(() => {});
   };
 
-  /** Marca/desmarca un suplemento como tomado en un día. */
+  /** Marca/desmarca un suplemento como tomado en un día (cantidad = la habitual). */
   const toggleSupplement = (supId: string, date: string) => {
     if (!user) return;
     const existing = supplementLogs.find(
@@ -570,13 +580,41 @@ export function useNutta() {
     if (existing) {
       db.transact(db.tx.supplementLogs[existing.id].delete());
     } else {
+      const sup = supplements.find((s) => s.id === supId);
       db.transact(
         db.tx.supplementLogs[id()].update({
           owner: user.id,
           supId,
           date,
+          ...(sup?.defaultQty ? { qty: sup.defaultQty } : {}),
           // Anclado al día: el `date` efectivo del log se deriva del createdAt,
           // así marcar un suplemento en un día pasado no salta a hoy.
+          createdAt: startOfLocalDayMs(date),
+        }),
+      );
+    }
+  };
+
+  /** Ajusta la cantidad tomada ese día (ej. 2 vs 3 cápsulas). 0 desmarca. */
+  const setSupplementQty = (supId: string, date: string, qty: number) => {
+    if (!user) return;
+    const existing = supplementLogs.find(
+      (l) => l.supId === supId && l.date === date,
+    ) as (SupplementLog & { id: string }) | undefined;
+    const q = Math.max(0, Math.round(qty));
+    if (q === 0) {
+      if (existing) db.transact(db.tx.supplementLogs[existing.id].delete());
+      return;
+    }
+    if (existing) {
+      db.transact(db.tx.supplementLogs[existing.id].update({ qty: q }));
+    } else {
+      db.transact(
+        db.tx.supplementLogs[id()].update({
+          owner: user.id,
+          supId,
+          date,
+          qty: q,
           createdAt: startOfLocalDayMs(date),
         }),
       );
@@ -648,6 +686,7 @@ export function useNutta() {
     addSupplement,
     removeSupplement,
     toggleSupplement,
+    setSupplementQty,
     addSet,
     removeSet,
     addGoal,

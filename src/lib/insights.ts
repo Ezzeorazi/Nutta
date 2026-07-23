@@ -1,4 +1,11 @@
-import type { ExerciseEntry, FoodEntry, Goals } from "@/lib/types";
+import { dailySupplementProtein } from "@/lib/supplements";
+import type {
+  ExerciseEntry,
+  FoodEntry,
+  Goals,
+  Supplement,
+  SupplementLog,
+} from "@/lib/types";
 
 export type InsightTone = "good" | "warn" | "info";
 export type Insight = { emoji: string; text: string; tone: InsightTone };
@@ -45,6 +52,8 @@ export function buildInsights(
   exercises: ExerciseEntry[],
   goals: Goals,
   today: string,
+  supplements: Supplement[] = [],
+  supplementLogs: SupplementLog[] = [],
 ): Insight[] {
   const out: Insight[] = [];
   const exDates = new Set(exercises.map((e) => e.date));
@@ -99,6 +108,13 @@ export function buildInsights(
   for (const f of foods) {
     if (dayDiff(today, f.date) < 0 || dayDiff(today, f.date) > 6) continue;
     proteinByDay.set(f.date, (proteinByDay.get(f.date) ?? 0) + f.protein);
+  }
+  for (let i = 0; i <= 6; i++) {
+    const date = isoOffset(today, -i);
+    const supProtein = dailySupplementProtein(supplements, supplementLogs, date);
+    if (supProtein > 0) {
+      proteinByDay.set(date, (proteinByDay.get(date) ?? 0) + supProtein);
+    }
   }
   if (proteinByDay.size >= 2) {
     const avg =

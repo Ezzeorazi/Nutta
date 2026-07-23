@@ -126,6 +126,9 @@ const schema = i.schema({
       name: i.string(),
       dose: i.string().optional(),
       time: i.string().optional(), // "HH:MM" para recordatorio
+      defaultQty: i.number().optional(), // cantidad habitual por toma (ej. 5, 30, 2)
+      unit: i.string().optional(), // ej. "g", "cápsulas"
+      protein: i.number().optional(), // g de proteína que aporta `defaultQty` unidades
       createdAt: i.number(),
     }),
     // Registro de toma de un suplemento en un día (presencia = tomado).
@@ -133,6 +136,7 @@ const schema = i.schema({
       owner: i.string().indexed(),
       supId: i.string().indexed(),
       date: i.string().indexed(),
+      qty: i.number().optional(), // cantidad real tomada ese día (si difiere de defaultQty)
       createdAt: i.number().optional(), // epoch ms (para derivar el día local)
     }),
   },

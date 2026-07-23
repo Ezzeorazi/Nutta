@@ -57,8 +57,9 @@ export function dailyScore(
   goals: Goals,
   metrics?: Pick<DailyMetrics, "water" | "sleepHours">,
   waterGoal: number = WATER_GOAL_L,
+  extraProtein = 0, // proteína de suplementos (ej. proteína en polvo)
 ): DailyScore {
-  const protein = foods.reduce((s, f) => s + f.protein, 0);
+  const protein = foods.reduce((s, f) => s + f.protein, 0) + extraProtein;
   const calories = foods.reduce((s, f) => s + f.calories, 0);
   const carbs = foods.reduce((s, f) => s + f.carbs, 0);
   const fat = foods.reduce((s, f) => s + f.fat, 0);

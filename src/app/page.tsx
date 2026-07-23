@@ -18,6 +18,7 @@ import { buildInsights } from "@/lib/insights";
 import { streakFromDates } from "@/lib/achievements";
 import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
+import { dailySupplementProtein } from "@/lib/supplements";
 import { useNutta } from "@/lib/useNutta";
 import {
   DEFAULT_GOALS,
@@ -76,6 +77,7 @@ export default function Home() {
     addSupplement,
     removeSupplement,
     toggleSupplement,
+    setSupplementQty,
     addSet,
     removeSet,
     addGoal,
@@ -106,6 +108,12 @@ export default function Home() {
   const todayMetrics = metrics.find((m) => m.date === today);
   const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
 
+  // Proteína aportada por suplementos (ej. proteína en polvo, colágeno) el día visto.
+  const viewSupplementProtein = useMemo(
+    () => dailySupplementProtein(supplements, supplementLogs, viewDate),
+    [supplements, supplementLogs, viewDate],
+  );
+
   const totals = useMemo(() => {
     const t = { calories: 0, protein: 0, carbs: 0, fat: 0, burned: 0 };
     for (const f of viewFoods) {
@@ -115,17 +123,26 @@ export default function Home() {
       t.fat += f.fat;
     }
     for (const e of viewEx) t.burned += e.caloriesBurned;
+    t.protein += viewSupplementProtein;
     return t;
-  }, [viewFoods, viewEx]);
+  }, [viewFoods, viewEx, viewSupplementProtein]);
 
   const waterGoal = profile ? waterGoalL(profile.weight) : undefined;
   const score = useMemo(
-    () => dailyScore(viewFoods, viewEx, goals, viewMetrics, waterGoal),
-    [viewFoods, viewEx, goals, viewMetrics, waterGoal],
+    () =>
+      dailyScore(
+        viewFoods,
+        viewEx,
+        goals,
+        viewMetrics,
+        waterGoal,
+        viewSupplementProtein,
+      ),
+    [viewFoods, viewEx, goals, viewMetrics, waterGoal, viewSupplementProtein],
   );
   const insights = useMemo(
-    () => buildInsights(foods, exercises, goals, today),
-    [foods, exercises, goals, today],
+    () => buildInsights(foods, exercises, goals, today, supplements, supplementLogs),
+    [foods, exercises, goals, today, supplements, supplementLogs],
   );
   // Racha de entrenamiento (días con cardio o fuerza) para mostrar en Hoy.
   const trainStreak = useMemo(() => {
@@ -370,6 +387,8 @@ export default function Home() {
           measures={measures}
           customGoals={customGoals}
           photos={photos}
+          supplements={supplements}
+          supplementLogs={supplementLogs}
           targetWeight={targetWeight}
           today={today}
         />
@@ -406,6 +425,7 @@ export default function Home() {
           addSupplement={addSupplement}
           removeSupplement={removeSupplement}
           toggleSupplement={toggleSupplement}
+          setSupplementQty={setSupplementQty}
         />
       )}
       {memoryOpen && (
