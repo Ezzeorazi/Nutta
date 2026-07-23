@@ -23,6 +23,7 @@ export type DbExercise = {
   is_bodyweight: boolean;
   primary_muscles: string[];
   secondary_muscles: string[];
+  image?: string | null; // archivo en /public/exercises (o null si no hay)
 };
 
 export const EXERCISES: DbExercise[] = (
@@ -247,4 +248,100 @@ export function groupOf(name: string): MuscleGroup | null {
 /** Nombres en español de todos los ejercicios (para autocompletar). */
 export function allNamesEs(): string[] {
   return EXERCISES.map((e) => e.name_es);
+}
+
+/** Grupos musculares en orden de UI, con etiqueta y emoji. */
+export const MUSCLE_GROUPS: { key: MuscleGroup; label: string; emoji: string }[] =
+  [
+    { key: "pecho", label: "Pecho", emoji: "🫀" },
+    { key: "espalda", label: "Espalda", emoji: "🔙" },
+    { key: "piernas", label: "Piernas", emoji: "🦵" },
+    { key: "hombros", label: "Hombros", emoji: "🎽" },
+    { key: "brazos", label: "Brazos", emoji: "💪" },
+    { key: "core", label: "Core", emoji: "🎯" },
+  ];
+
+/**
+ * Todos los ejercicios agrupados por grupo muscular (según su músculo primario).
+ * Dentro de cada grupo: compuestos primero, luego alfabético por nombre_es.
+ */
+export function exercisesByGroup(): Record<MuscleGroup, DbExercise[]> {
+  const out = {
+    pecho: [],
+    espalda: [],
+    piernas: [],
+    hombros: [],
+    brazos: [],
+    core: [],
+  } as Record<MuscleGroup, DbExercise[]>;
+  for (const ex of EXERCISES) {
+    const g = groupOfMuscles(ex.primary_muscles);
+    if (g) out[g].push(ex);
+  }
+  const rank = (e: DbExercise) => (e.mechanic === "compound" ? 0 : 1);
+  for (const g of Object.keys(out) as MuscleGroup[]) {
+    out[g].sort(
+      (a, b) => rank(a) - rank(b) || a.name_es.localeCompare(b.name_es, "es"),
+    );
+  }
+  return out;
+}
+
+/** Filtra ejercicios por nombre (es/en), sin distinguir tildes ni mayúsculas. */
+export function searchExercises(query: string, limit = 40): DbExercise[] {
+  const q = norm(query);
+  if (!q) return [];
+  const out: DbExercise[] = [];
+  for (const it of INDEX) {
+    if (it.normEs.includes(q) || it.normEn.includes(q)) {
+      out.push(it.ex);
+      if (out.length >= limit) break;
+    }
+  }
+  return out;
+}
+
+/** Etiquetas en español para el equipo del dataset (fallback: capitalizar). */
+const EQUIPMENT_ES: Record<string, string> = {
+  "": "Peso corporal",
+  barbell: "Barra",
+  dumbbell: "Mancuernas",
+  cable: "Polea",
+  machine: "Máquina",
+  kettlebell: "Kettlebell",
+  ez_bar: "Barra Z",
+  trap_bar: "Barra trap",
+  smith_machine: "Máquina Smith",
+  pull_up_bar: "Barra de dominadas",
+  dip_station: "Paralelas",
+  ab_wheel: "Rueda abdominal",
+  resistance_band: "Banda elástica",
+  medicine_ball: "Balón medicinal",
+  stability_ball: "Pelota de estabilidad",
+  bosu_ball: "Bosu",
+  foam_roller: "Foam roller",
+  bench: "Banco",
+  flat_bench: "Banco plano",
+  plates: "Discos",
+  plate: "Disco",
+  box: "Cajón",
+  bodyweight: "Peso corporal",
+  none: "Peso corporal",
+};
+
+const capitalize = (s: string) =>
+  s
+    .replace(/_/g, " ")
+    .replace(/^\w/, (c) => c.toUpperCase());
+
+/** Nombre legible en español del equipo de un ejercicio. */
+export function equipmentLabel(equipment: string): string {
+  return EQUIPMENT_ES[equipment] ?? capitalize(equipment);
+}
+
+/** "Compuesto" / "Aislado" (o "" si el dato no viene). */
+export function mechanicLabel(mechanic: string): string {
+  if (mechanic === "compound") return "Compuesto";
+  if (mechanic === "isolation") return "Aislado";
+  return "";
 }

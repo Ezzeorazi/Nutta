@@ -110,7 +110,8 @@ Los **5 tabs**:
 - Onboarding y metas (Mifflin-St Jeor → TDEE → macros) en [`src/lib/nutrition.ts`](../src/lib/nutrition.ts).
 
 ### Gym — entrenamiento de fuerza (tab Gym)
-- Alta rápida estilo Strong: ejercicio (con **autocompletado** de tu historial + los 400 nombres de RepDB), reps y peso; calcula **volumen** (reps × peso), marca **PR** 🏆 y grafica la **progresión** por ejercicio.
+- Alta rápida estilo Strong: ejercicio, reps y peso; calcula **volumen** (reps × peso), marca **PR** 🏆 y grafica la **progresión** por ejercicio.
+- **Buscador visual por grupo muscular** (botón 🔍): en vez de acertar el nombre, elegís **grupo** (Pecho, Espalda, Piernas, Hombros, Brazos, Core) y ves **todos sus ejercicios** con **foto**, equipo y si es compuesto/aislado; también hay búsqueda por texto (sin tildes) y una fila de **Recientes**. Al tocar uno se autocompleta el nombre y solo cargás reps/peso. Sigue disponible el input de texto libre para nombres propios y carga rápida de varias series. UI en [`ExercisePickerSheet.tsx`](../src/components/ExercisePickerSheet.tsx) e imagen con fallback a emoji en [`ExerciseImage.tsx`](../src/components/ExerciseImage.tsx).
 - El navegador de días (**‹ ›**) permite mirar sesiones anteriores y **cargar series en un día pasado** (ver §4, "Completar días pasados").
 - **Sugerencia del día** (`dailyRoutineSuggestion`): según cuántos días de fuerza llevás en la semana (objetivo `GYM_DAYS_GOAL`, hoy **5**), te dice qué toca hoy con un banner descartable (✕, por jornada, guardado en `localStorage`):
   - Vas por debajo del objetivo → el **grupo que te falta** + 3 ejercicios concretos del catálogo (*"Hoy te conviene espalda. Probá: Peso Muerto con Barra, Remo con Barra Inclinado…"*).
@@ -121,8 +122,10 @@ Los **5 tabs**:
 - Lógica en [`src/lib/gym.ts`](../src/lib/gym.ts); catálogo y matcher en [`src/lib/exerciseDb.ts`](../src/lib/exerciseDb.ts); UI en [`GymTab.tsx`](../src/components/GymTab.tsx).
 
 ### Catálogo de ejercicios (RepDB)
-- Dataset de **+400 ejercicios** con nombre en español, **MET**, grupos musculares y categoría, adelgazado a [`src/data/exercises.json`](../src/data/exercises.json) por el script `npm run data:exercises`.
-- El matcher ([`exerciseDb.ts`](../src/lib/exerciseDb.ts)) normaliza (sin tildes/minúsculas) y compara por tokens; un guard evita que frases genéricas ("entrené espalda") se snapeen a un ejercicio puntual.
+- Dataset de **+400 ejercicios** con nombre en español, **MET**, grupos musculares, equipo, mecánica (compuesto/aislado) y **una imagen** por ejercicio, adelgazado a [`src/data/exercises.json`](../src/data/exercises.json) por el script `npm run data:exercises`.
+- Las **imágenes** (`.webp`, ~7 MB en total) se descargan en el build y se **bundlean** en [`public/exercises/`](../public/exercises) (`<id>.webp`), así funcionan **offline** (el service worker las cachea). El campo `image` de cada ejercicio apunta a ese archivo.
+- Helpers de agrupación y etiquetas en [`exerciseDb.ts`](../src/lib/exerciseDb.ts): `exercisesByGroup` (grupos con compuestos primero), `searchExercises`, `equipmentLabel`/`mechanicLabel` y `MUSCLE_GROUPS`.
+- El matcher normaliza (sin tildes/minúsculas) y compara por tokens; un guard evita que frases genéricas ("entrené espalda") se snapeen a un ejercicio puntual.
 - Se usa **solo como post-proceso determinístico**, nunca dentro de la IA (lo exige la licencia RepDB).
 
 ### Progreso corporal
@@ -214,10 +217,12 @@ src/
 │  ├─ WellbeingCard.tsx   Agua / sueño / pasos
 │  ├─ SupplementsCard.tsx Suplementos + checklist
 │  ├─ GymTab.tsx          Tab "Gym" (fuerza, PR, volumen, progresión)
+│  ├─ ExercisePickerSheet.tsx  Buscador visual de ejercicios por grupo
+│  ├─ ExerciseImage.tsx    Miniatura del ejercicio (foto RepDB + fallback emoji)
 │  ├─ FoodForm/ExerciseForm/Sheet, History, BottomNav, BarcodeScanner…
 │  └─ Login.tsx / Onboarding.tsx
 ├─ data/                   Generados por scripts/build-exercises.mjs (RepDB)
-│  ├─ exercises.json       Catálogo adelgazado (server)
+│  ├─ exercises.json       Catálogo adelgazado, con `image` (server)
 │  ├─ exercise-names.json  Solo nombres (autocompletado del cliente)
 │  ├─ exercise-groups.json Nombre → grupo muscular (recomendación)
 │  └─ exercise-by-group.json  Grupo → ejercicios sugeridos (rutina)
@@ -243,7 +248,7 @@ src/
    └─ types.ts            Tipos compartidos
 ```
 
-> El script [`scripts/build-exercises.mjs`](../scripts/build-exercises.mjs) genera los dos JSON de `data/` a partir del dataset de RepDB.
+> El script [`scripts/build-exercises.mjs`](../scripts/build-exercises.mjs) genera los JSON de `data/` **y descarga las imágenes** a `public/exercises/` a partir del dataset de RepDB.
 
 ---
 
@@ -259,7 +264,7 @@ src/
 
 ## 11. Ideas a futuro
 
-- **Biblioteca visual de ejercicios**: fichas con imágenes (RepDB), músculos e instrucciones, para tocar y cargar.
+- **Biblioteca visual de ejercicios**: ✅ hecho en parte (buscador por grupo con fotos y tap-para-cargar). Falta sumar **instrucciones** y músculos trabajados en una ficha ampliada.
 - **Tabla de alias** para vocabulario que hoy no matchea el catálogo (ej. "zancada" → estocada).
 - **Recordatorios push** reales (suplementos, hidratación) — hoy solo visual.
 - **Análisis de fotos** con visión (bloqueado: Groq no ofrece visión gratis en esta cuenta).

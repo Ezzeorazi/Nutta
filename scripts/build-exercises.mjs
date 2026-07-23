@@ -7,16 +7,22 @@
 // ni API; atribución obligatoria "Exercise data by RepDB (repdb.co)".
 // El JSON generado se usa SOLO dentro de la app (no se expone crudo).
 
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, access } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const SRC =
   "https://raw.githubusercontent.com/sergei-argutin/exercise-dataset/main/exercises.json";
+// Base para resolver los paths relativos de las imágenes (images/flat/*.webp).
+const IMG_BASE =
+  "https://raw.githubusercontent.com/sergei-argutin/exercise-dataset/main/";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, "..", "src", "data");
 const OUT_FILE = join(OUT_DIR, "exercises.json");
+// Imágenes de los ejercicios (una .webp por ejercicio), bundleadas para uso
+// offline. Se sirven estáticas desde /exercises/<id>.webp.
+const IMG_DIR = join(__dirname, "..", "public", "exercises");
 // Solo los nombres en español (para el autocompletado del Gym, sin cargar
 // el dataset entero en el bundle del cliente).
 const NAMES_FILE = join(OUT_DIR, "exercise-names.json");
@@ -137,7 +143,8 @@ const groupOfMuscles = (muscles) => {
   return null;
 };
 
-// Campos que conservamos de cada ejercicio.
+// Campos que conservamos de cada ejercicio. `image` se completa luego de bajar
+// el binario (queda null si el ejercicio no trae imagen o si falla la descarga).
 function slim(ex) {
   return {
     id: ex.id,
@@ -153,7 +160,77 @@ function slim(ex) {
     secondary_muscles: Array.isArray(ex.secondary_muscles)
       ? ex.secondary_muscles
       : [],
+    image: null,
   };
+}
+
+// Elige un path de imagen representativo del ejercicio: prioriza el pico del
+// movimiento (peak) → imagen única (main) → posición inicial (start) → cualquiera.
+// La estructura del dataset es images.<angulo>.<fase> = "images/flat/xxx.webp".
+function pickImagePath(images) {
+  if (!images || typeof images !== "object") return null;
+  const angle = images.flat ?? Object.values(images)[0];
+  if (!angle || typeof angle !== "object") return null;
+  return (
+    angle.peak ??
+    angle.main ??
+    angle.start ??
+    Object.values(angle).find((v) => typeof v === "string" && v.endsWith(".webp")) ??
+    null
+  );
+}
+
+const fileExists = (p) =>
+  access(p).then(
+    () => true,
+    () => false,
+  );
+
+// Descarga (idempotente) una imagen a public/exercises/<id>.webp.
+// Devuelve el nombre del archivo si quedó disponible, o null si falló.
+async function fetchImage(id, relPath) {
+  const fileName = `${id}.webp`;
+  const dest = join(IMG_DIR, fileName);
+  if (await fileExists(dest)) return fileName; // ya bajada
+  try {
+    const res = await fetch(IMG_BASE + relPath);
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length === 0) return null;
+    await writeFile(dest, buf);
+    return fileName;
+  } catch {
+    return null;
+  }
+}
+
+// Baja las imágenes en paralelo con un pool acotado (evita 400 fetch en serie).
+async function downloadImages(rawList, slimById) {
+  await mkdir(IMG_DIR, { recursive: true });
+  const jobs = [];
+  for (const ex of rawList) {
+    const rel = pickImagePath(ex.images);
+    if (rel) jobs.push({ id: ex.id, rel });
+  }
+  let ok = 0;
+  let fail = 0;
+  const POOL = 12;
+  let i = 0;
+  async function worker() {
+    while (i < jobs.length) {
+      const { id, rel } = jobs[i++];
+      const fileName = await fetchImage(id, rel);
+      if (fileName) {
+        const slim = slimById.get(id);
+        if (slim) slim.image = fileName;
+        ok++;
+      } else {
+        fail++;
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: POOL }, worker));
+  return { ok, fail, total: jobs.length };
 }
 
 async function main() {
@@ -166,6 +243,15 @@ async function main() {
   if (list.length === 0) throw new Error("El dataset vino vacío o mal formado");
 
   const slimmed = list.map(slim);
+  const slimById = new Map(slimmed.map((e) => [e.id, e]));
+
+  // Baja las imágenes (una por ejercicio) y completa el campo `image` de cada uno.
+  console.log("Descargando imágenes de ejercicios ...");
+  const img = await downloadImages(list, slimById);
+  console.log(
+    `OK: ${img.ok}/${img.total} imágenes en public/exercises (${img.fail} fallidas)`,
+  );
+
   const out = {
     source: "RepDB (repdb.co)",
     attribution: "Exercise data by RepDB (repdb.co)",

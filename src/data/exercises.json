@@ -23,7 +23,8 @@
         "latissimus_dorsi",
         "obliques",
         "serratus_anterior"
-      ]
+      ],
+      "image": "ab-wheel-rollout.webp"
     },
     {
       "id": "air-bike",
@@ -44,7 +45,8 @@
         "latissimus_dorsi",
         "pectoralis_major",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "air-bike.webp"
     },
     {
       "id": "archer-pull-ups",
@@ -64,7 +66,8 @@
         "forearm_flexors",
         "posterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "archer-pull-ups.webp"
     },
     {
       "id": "archer-push-ups",
@@ -84,7 +87,8 @@
         "rectus_abdominis",
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "archer-push-ups.webp"
     },
     {
       "id": "arnold-press",
@@ -104,7 +108,8 @@
         "serratus_anterior",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "arnold-press.webp"
     },
     {
       "id": "assisted-dips",
@@ -123,7 +128,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "assisted-dips.webp"
     },
     {
       "id": "assisted-pull-ups",
@@ -143,7 +149,8 @@
         "forearm_flexors",
         "posterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "assisted-pull-ups.webp"
     },
     {
       "id": "back-extension",
@@ -161,7 +168,8 @@
       "secondary_muscles": [
         "gluteus_maximus",
         "hamstrings"
-      ]
+      ],
+      "image": "back-extension.webp"
     },
     {
       "id": "ball-leg-curl",
@@ -179,7 +187,8 @@
       "secondary_muscles": [
         "gastrocnemius",
         "gluteus_maximus"
-      ]
+      ],
+      "image": "ball-leg-curl.webp"
     },
     {
       "id": "ball-pike",
@@ -199,7 +208,8 @@
         "anterior_deltoid",
         "hip_flexors",
         "serratus_anterior"
-      ]
+      ],
+      "image": "ball-pike.webp"
     },
     {
       "id": "band-assisted-pull-ups",
@@ -219,7 +229,8 @@
         "forearm_flexors",
         "posterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "band-assisted-pull-ups.webp"
     },
     {
       "id": "band-pull-apart",
@@ -237,7 +248,8 @@
       "secondary_muscles": [
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "band-pull-apart.webp"
     },
     {
       "id": "banded-adductor-stretch",
@@ -254,7 +266,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "banded-adductor-stretch.webp"
     },
     {
       "id": "banded-ankle-stretch",
@@ -271,7 +284,8 @@
       ],
       "secondary_muscles": [
         "soleus"
-      ]
+      ],
+      "image": "banded-ankle-stretch.webp"
     },
     {
       "id": "banded-calf-stretch",
@@ -288,7 +302,8 @@
       ],
       "secondary_muscles": [
         "soleus"
-      ]
+      ],
+      "image": "banded-calf-stretch.webp"
     },
     {
       "id": "banded-chest-stretch",
@@ -305,7 +320,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "banded-chest-stretch.webp"
     },
     {
       "id": "banded-clamshell",
@@ -322,7 +338,8 @@
       ],
       "secondary_muscles": [
         "gluteus_maximus"
-      ]
+      ],
+      "image": "banded-clamshell.webp"
     },
     {
       "id": "banded-figure-4-stretch",
@@ -339,7 +356,8 @@
       ],
       "secondary_muscles": [
         "gluteus_medius"
-      ]
+      ],
+      "image": "banded-figure-4-stretch.webp"
     },
     {
       "id": "banded-fire-hydrant",
@@ -356,7 +374,8 @@
       ],
       "secondary_muscles": [
         "gluteus_maximus"
-      ]
+      ],
+      "image": "banded-fire-hydrant.webp"
     },
     {
       "id": "banded-glute-bridge",
@@ -374,7 +393,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "banded-glute-bridge.webp"
     },
     {
       "id": "banded-good-morning",
@@ -392,7 +412,8 @@
       ],
       "secondary_muscles": [
         "erector_spinae"
-      ]
+      ],
+      "image": "banded-good-morning.webp"
     },
     {
       "id": "banded-hamstring-stretch",
@@ -409,7 +430,8 @@
       ],
       "secondary_muscles": [
         "gastrocnemius"
-      ]
+      ],
+      "image": "banded-hamstring-stretch.webp"
     },
     {
       "id": "banded-hip-thrust",
@@ -427,7 +449,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "banded-hip-thrust.webp"
     },
     {
       "id": "banded-it-band-stretch",
@@ -445,7 +468,8 @@
       "secondary_muscles": [
         "gluteus_maximus",
         "gluteus_medius"
-      ]
+      ],
+      "image": "banded-it-band-stretch.webp"
     },
     {
       "id": "banded-kneeling-hip-thrust",
@@ -462,7 +486,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "banded-kneeling-hip-thrust.webp"
     },
     {
       "id": "banded-lat-stretch",
@@ -479,7 +504,8 @@
       ],
       "secondary_muscles": [
         "posterior_deltoid"
-      ]
+      ],
+      "image": "banded-lat-stretch.webp"
     },
     {
       "id": "banded-lateral-walk",
@@ -497,7 +523,8 @@
       "secondary_muscles": [
         "gluteus_maximus",
         "quadriceps"
-      ]
+      ],
+      "image": "banded-lateral-walk.webp"
     },
     {
       "id": "banded-rear-delt-stretch",
@@ -515,7 +542,8 @@
       "secondary_muscles": [
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "banded-rear-delt-stretch.webp"
     },
     {
       "id": "banded-romanian-deadlift",
@@ -533,7 +561,8 @@
       ],
       "secondary_muscles": [
         "erector_spinae"
-      ]
+      ],
+      "image": "banded-romanian-deadlift.webp"
     },
     {
       "id": "banded-seated-hip-abduction",
@@ -550,7 +579,8 @@
       ],
       "secondary_muscles": [
         "gluteus_maximus"
-      ]
+      ],
+      "image": "banded-seated-hip-abduction.webp"
     },
     {
       "id": "banded-shoulder-stretch",
@@ -567,7 +597,8 @@
       ],
       "secondary_muscles": [
         "pectoralis_major"
-      ]
+      ],
+      "image": "banded-shoulder-stretch.webp"
     },
     {
       "id": "banded-squat",
@@ -586,7 +617,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "banded-squat.webp"
     },
     {
       "id": "banded-standing-curl",
@@ -603,7 +635,8 @@
       ],
       "secondary_muscles": [
         "gastrocnemius"
-      ]
+      ],
+      "image": "banded-standing-curl.webp"
     },
     {
       "id": "banded-standing-hip-abduction",
@@ -620,7 +653,8 @@
       ],
       "secondary_muscles": [
         "gluteus_maximus"
-      ]
+      ],
+      "image": "banded-standing-hip-abduction.webp"
     },
     {
       "id": "banded-standing-hip-adduction",
@@ -635,7 +669,8 @@
       "primary_muscles": [
         "adductors"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "banded-standing-hip-adduction.webp"
     },
     {
       "id": "banded-triceps-stretch",
@@ -652,7 +687,8 @@
       ],
       "secondary_muscles": [
         "latissimus_dorsi"
-      ]
+      ],
+      "image": "banded-triceps-stretch.webp"
     },
     {
       "id": "barbell-ab-rollout",
@@ -671,7 +707,8 @@
         "latissimus_dorsi",
         "obliques",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "barbell-ab-rollout.webp"
     },
     {
       "id": "barbell-calf-raise",
@@ -688,7 +725,8 @@
       ],
       "secondary_muscles": [
         "soleus"
-      ]
+      ],
+      "image": "barbell-calf-raise.webp"
     },
     {
       "id": "barbell-curl",
@@ -706,7 +744,8 @@
       "secondary_muscles": [
         "brachialis",
         "forearm_flexors"
-      ]
+      ],
+      "image": "barbell-curl.webp"
     },
     {
       "id": "barbell-front-raise",
@@ -725,7 +764,8 @@
         "lateral_deltoid",
         "pectoralis_major",
         "serratus_anterior"
-      ]
+      ],
+      "image": "barbell-front-raise.webp"
     },
     {
       "id": "barbell-glute-bridge",
@@ -742,7 +782,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "barbell-glute-bridge.webp"
     },
     {
       "id": "barbell-lunge",
@@ -762,7 +803,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "barbell-lunge.webp"
     },
     {
       "id": "barbell-overhead-extension",
@@ -777,7 +819,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "barbell-overhead-extension.webp"
     },
     {
       "id": "barbell-preacher-curl",
@@ -794,7 +837,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "barbell-preacher-curl.webp"
     },
     {
       "id": "barbell-pullover",
@@ -812,7 +856,8 @@
       ],
       "secondary_muscles": [
         "triceps_brachii"
-      ]
+      ],
+      "image": "barbell-pullover.webp"
     },
     {
       "id": "barbell-rear-delt-row",
@@ -831,7 +876,8 @@
         "latissimus_dorsi",
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "barbell-rear-delt-row.webp"
     },
     {
       "id": "barbell-reverse-lunge",
@@ -851,7 +897,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "barbell-reverse-lunge.webp"
     },
     {
       "id": "barbell-row",
@@ -870,7 +917,8 @@
       "secondary_muscles": [
         "biceps_brachii",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "barbell-row.webp"
     },
     {
       "id": "battle-ropes",
@@ -892,7 +940,8 @@
         "quadriceps",
         "rectus_abdominis",
         "trapezius"
-      ]
+      ],
+      "image": "battle-ropes.webp"
     },
     {
       "id": "behind-the-back-barbell-shrug",
@@ -910,7 +959,8 @@
       "secondary_muscles": [
         "forearm_flexors",
         "rhomboids"
-      ]
+      ],
+      "image": "behind-the-back-barbell-shrug.webp"
     },
     {
       "id": "behind-the-neck-lat-pulldown",
@@ -929,7 +979,8 @@
         "posterior_deltoid",
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "behind-the-neck-lat-pulldown.webp"
     },
     {
       "id": "behind-the-neck-press",
@@ -948,7 +999,8 @@
       "secondary_muscles": [
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "behind-the-neck-press.webp"
     },
     {
       "id": "bench-adductor-stretch",
@@ -965,7 +1017,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "bench-adductor-stretch.webp"
     },
     {
       "id": "bench-ankle-stretch",
@@ -982,7 +1035,8 @@
       ],
       "secondary_muscles": [
         "soleus"
-      ]
+      ],
+      "image": "bench-ankle-stretch.webp"
     },
     {
       "id": "bench-bulgarian-split-stretch",
@@ -1000,7 +1054,8 @@
       ],
       "secondary_muscles": [
         "gluteus_maximus"
-      ]
+      ],
+      "image": "bench-bulgarian-split-stretch.webp"
     },
     {
       "id": "bench-calf-stretch",
@@ -1017,7 +1072,8 @@
       ],
       "secondary_muscles": [
         "soleus"
-      ]
+      ],
+      "image": "bench-calf-stretch.webp"
     },
     {
       "id": "bench-chest-stretch",
@@ -1034,7 +1090,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "bench-chest-stretch.webp"
     },
     {
       "id": "bench-childs-pose",
@@ -1050,7 +1107,8 @@
         "erector_spinae",
         "latissimus_dorsi"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "bench-childs-pose.webp"
     },
     {
       "id": "bench-couch-stretch",
@@ -1066,7 +1124,8 @@
         "hip_flexors",
         "quadriceps"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "bench-couch-stretch.webp"
     },
     {
       "id": "bench-dips",
@@ -1084,7 +1143,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "pectoralis_major"
-      ]
+      ],
+      "image": "bench-dips.webp"
     },
     {
       "id": "bench-figure-4-glute-stretch",
@@ -1101,7 +1161,8 @@
       ],
       "secondary_muscles": [
         "gluteus_medius"
-      ]
+      ],
+      "image": "bench-figure-4-glute-stretch.webp"
     },
     {
       "id": "bench-hamstring-stretch",
@@ -1118,7 +1179,8 @@
       ],
       "secondary_muscles": [
         "erector_spinae"
-      ]
+      ],
+      "image": "bench-hamstring-stretch.webp"
     },
     {
       "id": "bench-lat-stretch",
@@ -1135,7 +1197,8 @@
       ],
       "secondary_muscles": [
         "posterior_deltoid"
-      ]
+      ],
+      "image": "bench-lat-stretch.webp"
     },
     {
       "id": "bench-leg-pull-in",
@@ -1153,7 +1216,8 @@
       "secondary_muscles": [
         "hip_flexors",
         "obliques"
-      ]
+      ],
+      "image": "bench-leg-pull-in.webp"
     },
     {
       "id": "bench-press",
@@ -1171,7 +1235,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "bench-press.webp"
     },
     {
       "id": "bench-pull",
@@ -1191,7 +1256,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "bench-pull.webp"
     },
     {
       "id": "bent-arm-barbell-pullover",
@@ -1210,7 +1276,8 @@
       "secondary_muscles": [
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "bent-arm-barbell-pullover.webp"
     },
     {
       "id": "bent-arm-ez-bar-pullover",
@@ -1230,7 +1297,8 @@
         "posterior_deltoid",
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "bent-arm-ez-bar-pullover.webp"
     },
     {
       "id": "bent-over-db-row",
@@ -1250,7 +1318,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "bent-over-db-row.webp"
     },
     {
       "id": "bent-over-ez-bar-row",
@@ -1269,7 +1338,8 @@
       "secondary_muscles": [
         "biceps_brachii",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "bent-over-ez-bar-row.webp"
     },
     {
       "id": "bicep-curl",
@@ -1287,7 +1357,8 @@
       "secondary_muscles": [
         "brachialis",
         "forearm_flexors"
-      ]
+      ],
+      "image": "bicep-curl.webp"
     },
     {
       "id": "bicycle-crunch",
@@ -1305,7 +1376,8 @@
       ],
       "secondary_muscles": [
         "hip_flexors"
-      ]
+      ],
+      "image": "bicycle-crunch.webp"
     },
     {
       "id": "bird-dog-hold",
@@ -1325,7 +1397,8 @@
         "gluteus_maximus",
         "obliques",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "bird-dog-hold.webp"
     },
     {
       "id": "bodyweight-calf-raise",
@@ -1342,7 +1415,8 @@
       ],
       "secondary_muscles": [
         "soleus"
-      ]
+      ],
+      "image": "bodyweight-calf-raise.webp"
     },
     {
       "id": "bodyweight-good-morning",
@@ -1360,7 +1434,8 @@
       ],
       "secondary_muscles": [
         "gluteus_maximus"
-      ]
+      ],
+      "image": "bodyweight-good-morning.webp"
     },
     {
       "id": "bodyweight-lateral-raise",
@@ -1378,7 +1453,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "bodyweight-lateral-raise.webp"
     },
     {
       "id": "bodyweight-overhead-press",
@@ -1397,7 +1473,8 @@
       "secondary_muscles": [
         "serratus_anterior",
         "trapezius"
-      ]
+      ],
+      "image": "bodyweight-overhead-press.webp"
     },
     {
       "id": "bodyweight-squat",
@@ -1417,7 +1494,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "bodyweight-squat.webp"
     },
     {
       "id": "box-jump",
@@ -1437,7 +1515,8 @@
         "gastrocnemius",
         "hamstrings",
         "soleus"
-      ]
+      ],
+      "image": "box-jump.webp"
     },
     {
       "id": "box-squat",
@@ -1457,7 +1536,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "box-squat.webp"
     },
     {
       "id": "bulgarian-split-squat",
@@ -1475,7 +1555,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "bulgarian-split-squat.webp"
     },
     {
       "id": "burpees",
@@ -1496,7 +1577,8 @@
         "anterior_deltoid",
         "rectus_abdominis",
         "triceps_brachii"
-      ]
+      ],
+      "image": "burpees.webp"
     },
     {
       "id": "butterfly-stretch",
@@ -1513,7 +1595,8 @@
       ],
       "secondary_muscles": [
         "hip_flexors"
-      ]
+      ],
+      "image": "butterfly-stretch.webp"
     },
     {
       "id": "cable-bent-over-row",
@@ -1532,7 +1615,8 @@
       "secondary_muscles": [
         "biceps_brachii",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "cable-bent-over-row.webp"
     },
     {
       "id": "cable-chest-press",
@@ -1551,7 +1635,8 @@
         "anterior_deltoid",
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "cable-chest-press.webp"
     },
     {
       "id": "cable-crunch",
@@ -1569,7 +1654,8 @@
       "secondary_muscles": [
         "obliques",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "cable-crunch.webp"
     },
     {
       "id": "cable-curl",
@@ -1586,7 +1672,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "cable-curl.webp"
     },
     {
       "id": "cable-external-rotation",
@@ -1604,7 +1691,8 @@
       "secondary_muscles": [
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "cable-external-rotation.webp"
     },
     {
       "id": "cable-fly",
@@ -1621,7 +1709,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "cable-fly.webp"
     },
     {
       "id": "cable-front-raise",
@@ -1639,7 +1728,8 @@
       "secondary_muscles": [
         "lateral_deltoid",
         "pectoralis_major"
-      ]
+      ],
+      "image": "cable-front-raise.webp"
     },
     {
       "id": "cable-hammer-curl",
@@ -1658,7 +1748,8 @@
       ],
       "secondary_muscles": [
         "forearm_flexors"
-      ]
+      ],
+      "image": "cable-hammer-curl.webp"
     },
     {
       "id": "cable-kickback",
@@ -1675,7 +1766,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "cable-kickback.webp"
     },
     {
       "id": "cable-lateral-raise",
@@ -1693,7 +1785,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "cable-lateral-raise.webp"
     },
     {
       "id": "cable-tricep-kickback",
@@ -1710,7 +1803,8 @@
       ],
       "secondary_muscles": [
         "posterior_deltoid"
-      ]
+      ],
+      "image": "cable-tricep-kickback.webp"
     },
     {
       "id": "cable-upright-row",
@@ -1729,7 +1823,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "biceps_brachii"
-      ]
+      ],
+      "image": "cable-upright-row.webp"
     },
     {
       "id": "cable-wrist-curl",
@@ -1744,7 +1839,8 @@
       "primary_muscles": [
         "forearm_flexors"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "cable-wrist-curl.webp"
     },
     {
       "id": "captains-chair-knee-raise",
@@ -1763,7 +1859,8 @@
       "secondary_muscles": [
         "obliques",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "captains-chair-knee-raise.webp"
     },
     {
       "id": "captains-chair-leg-raise",
@@ -1782,7 +1879,8 @@
       "secondary_muscles": [
         "obliques",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "captains-chair-leg-raise.webp"
     },
     {
       "id": "cheat-curl",
@@ -1801,7 +1899,8 @@
         "brachialis",
         "brachioradialis",
         "erector_spinae"
-      ]
+      ],
+      "image": "cheat-curl.webp"
     },
     {
       "id": "chest-press-machine",
@@ -1819,7 +1918,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "chest-press-machine.webp"
     },
     {
       "id": "chest-supported-db-row",
@@ -1838,7 +1938,8 @@
       "secondary_muscles": [
         "biceps_brachii",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "chest-supported-db-row.webp"
     },
     {
       "id": "chest-supported-dumbbell-shrug",
@@ -1856,7 +1957,8 @@
       "secondary_muscles": [
         "posterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "chest-supported-dumbbell-shrug.webp"
     },
     {
       "id": "chest-supported-kettlebell-row",
@@ -1876,7 +1978,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "chest-supported-kettlebell-row.webp"
     },
     {
       "id": "chin-tuck-hold",
@@ -1893,7 +1996,8 @@
       ],
       "secondary_muscles": [
         "rhomboids"
-      ]
+      ],
+      "image": "chin-tuck-hold.webp"
     },
     {
       "id": "chin-ups",
@@ -1911,7 +2015,8 @@
       ],
       "secondary_muscles": [
         "rhomboids"
-      ]
+      ],
+      "image": "chin-ups.webp"
     },
     {
       "id": "clamshells",
@@ -1929,7 +2034,8 @@
       ],
       "secondary_muscles": [
         "gluteus_maximus"
-      ]
+      ],
+      "image": "clamshells.webp"
     },
     {
       "id": "clap-push-ups",
@@ -1946,7 +2052,8 @@
       ],
       "secondary_muscles": [
         "triceps_brachii"
-      ]
+      ],
+      "image": "clap-push-ups.webp"
     },
     {
       "id": "clean",
@@ -1967,7 +2074,8 @@
         "erector_spinae",
         "hamstrings",
         "trapezius"
-      ]
+      ],
+      "image": "clean.webp"
     },
     {
       "id": "clean-and-jerk",
@@ -1988,7 +2096,8 @@
         "erector_spinae",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "clean-and-jerk.webp"
     },
     {
       "id": "close-grip-barbell-curl",
@@ -2006,7 +2115,8 @@
       "secondary_muscles": [
         "brachialis",
         "brachioradialis"
-      ]
+      ],
+      "image": "close-grip-barbell-curl.webp"
     },
     {
       "id": "close-grip-bench-press",
@@ -2024,7 +2134,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "pectoralis_major"
-      ]
+      ],
+      "image": "close-grip-bench-press.webp"
     },
     {
       "id": "close-grip-db-bench-press",
@@ -2042,7 +2153,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "pectoralis_major"
-      ]
+      ],
+      "image": "close-grip-db-bench-press.webp"
     },
     {
       "id": "close-grip-ez-bar-bench-press",
@@ -2060,7 +2172,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "pectoralis_major"
-      ]
+      ],
+      "image": "close-grip-ez-bar-bench-press.webp"
     },
     {
       "id": "close-grip-incline-bench",
@@ -2078,7 +2191,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "pectoralis_major"
-      ]
+      ],
+      "image": "close-grip-incline-bench.webp"
     },
     {
       "id": "close-grip-pull-ups",
@@ -2096,7 +2210,8 @@
       ],
       "secondary_muscles": [
         "rhomboids"
-      ]
+      ],
+      "image": "close-grip-pull-ups.webp"
     },
     {
       "id": "cocoons",
@@ -2114,7 +2229,8 @@
       "secondary_muscles": [
         "hip_flexors",
         "obliques"
-      ]
+      ],
+      "image": "cocoons.webp"
     },
     {
       "id": "concentration-curl",
@@ -2131,7 +2247,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "concentration-curl.webp"
     },
     {
       "id": "cross-body-crunch",
@@ -2148,7 +2265,8 @@
       ],
       "secondary_muscles": [
         "rectus_abdominis"
-      ]
+      ],
+      "image": "cross-body-crunch.webp"
     },
     {
       "id": "cross-body-hammer-curl",
@@ -2167,7 +2285,8 @@
       "secondary_muscles": [
         "biceps_brachii",
         "forearm_flexors"
-      ]
+      ],
+      "image": "cross-body-hammer-curl.webp"
     },
     {
       "id": "crunches",
@@ -2184,7 +2303,8 @@
       ],
       "secondary_muscles": [
         "obliques"
-      ]
+      ],
+      "image": "crunches.webp"
     },
     {
       "id": "db-bench-press",
@@ -2202,7 +2322,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "db-bench-press.webp"
     },
     {
       "id": "db-fly",
@@ -2219,7 +2340,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "db-fly.webp"
     },
     {
       "id": "db-lunge",
@@ -2237,7 +2359,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "db-lunge.webp"
     },
     {
       "id": "db-pullover",
@@ -2255,7 +2378,8 @@
       ],
       "secondary_muscles": [
         "triceps_brachii"
-      ]
+      ],
+      "image": "db-pullover.webp"
     },
     {
       "id": "db-reverse-curl",
@@ -2273,7 +2397,8 @@
       ],
       "secondary_muscles": [
         "biceps_brachii"
-      ]
+      ],
+      "image": "db-reverse-curl.webp"
     },
     {
       "id": "db-shrug",
@@ -2290,7 +2415,8 @@
       ],
       "secondary_muscles": [
         "rhomboids"
-      ]
+      ],
+      "image": "db-shrug.webp"
     },
     {
       "id": "db-skull-crusher",
@@ -2305,7 +2431,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "db-skull-crusher.webp"
     },
     {
       "id": "dead-bug",
@@ -2323,7 +2450,8 @@
       ],
       "secondary_muscles": [
         "hip_flexors"
-      ]
+      ],
+      "image": "dead-bug.webp"
     },
     {
       "id": "dead-hang",
@@ -2342,7 +2470,8 @@
         "latissimus_dorsi",
         "rectus_abdominis",
         "trapezius"
-      ]
+      ],
+      "image": "dead-hang.webp"
     },
     {
       "id": "deadlift",
@@ -2362,7 +2491,8 @@
       "secondary_muscles": [
         "quadriceps",
         "trapezius"
-      ]
+      ],
+      "image": "deadlift.webp"
     },
     {
       "id": "decline-bench-press",
@@ -2380,7 +2510,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "decline-bench-press.webp"
     },
     {
       "id": "decline-bench-press-barbell",
@@ -2398,7 +2529,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "decline-bench-press-barbell.webp"
     },
     {
       "id": "decline-bench-press-ez-bar",
@@ -2416,7 +2548,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "decline-bench-press-ez-bar.webp"
     },
     {
       "id": "decline-db-fly",
@@ -2433,7 +2566,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "decline-db-fly.webp"
     },
     {
       "id": "decline-push-up",
@@ -2451,7 +2585,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "decline-push-up.webp"
     },
     {
       "id": "deficit-deadlift",
@@ -2472,7 +2607,8 @@
         "latissimus_dorsi",
         "quadriceps",
         "trapezius"
-      ]
+      ],
+      "image": "deficit-deadlift.webp"
     },
     {
       "id": "deficit-push-ups",
@@ -2491,7 +2627,8 @@
         "anterior_deltoid",
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "deficit-push-ups.webp"
     },
     {
       "id": "diamond-push-ups",
@@ -2510,7 +2647,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "serratus_anterior"
-      ]
+      ],
+      "image": "diamond-push-ups.webp"
     },
     {
       "id": "dips",
@@ -2528,7 +2666,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "dips.webp"
     },
     {
       "id": "double-kettlebell-bicep-curl",
@@ -2546,7 +2685,8 @@
       "secondary_muscles": [
         "brachialis",
         "forearm_flexors"
-      ]
+      ],
+      "image": "double-kettlebell-bicep-curl.webp"
     },
     {
       "id": "double-kettlebell-clean",
@@ -2567,7 +2707,8 @@
         "erector_spinae",
         "forearm_flexors",
         "trapezius"
-      ]
+      ],
+      "image": "double-kettlebell-clean.webp"
     },
     {
       "id": "double-kettlebell-dead-clean",
@@ -2588,7 +2729,8 @@
         "forearm_flexors",
         "quadriceps",
         "trapezius"
-      ]
+      ],
+      "image": "double-kettlebell-dead-clean.webp"
     },
     {
       "id": "double-kettlebell-dead-split-snatch",
@@ -2609,7 +2751,8 @@
         "hamstrings",
         "quadriceps",
         "trapezius"
-      ]
+      ],
+      "image": "double-kettlebell-dead-split-snatch.webp"
     },
     {
       "id": "double-kettlebell-jerk",
@@ -2629,7 +2772,8 @@
         "gluteus_maximus",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "double-kettlebell-jerk.webp"
     },
     {
       "id": "double-kettlebell-overhead-press",
@@ -2649,7 +2793,8 @@
         "rectus_abdominis",
         "serratus_anterior",
         "trapezius"
-      ]
+      ],
+      "image": "double-kettlebell-overhead-press.webp"
     },
     {
       "id": "double-kettlebell-push-press",
@@ -2669,7 +2814,8 @@
         "lateral_deltoid",
         "quadriceps",
         "triceps_brachii"
-      ]
+      ],
+      "image": "double-kettlebell-push-press.webp"
     },
     {
       "id": "double-kettlebell-row",
@@ -2689,7 +2835,8 @@
         "biceps_brachii",
         "erector_spinae",
         "trapezius"
-      ]
+      ],
+      "image": "double-kettlebell-row.webp"
     },
     {
       "id": "double-kettlebell-split-jerk",
@@ -2709,7 +2856,8 @@
         "gluteus_maximus",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "double-kettlebell-split-jerk.webp"
     },
     {
       "id": "double-kettlebell-swing-snatch",
@@ -2730,7 +2878,8 @@
         "erector_spinae",
         "forearm_flexors",
         "trapezius"
-      ]
+      ],
+      "image": "double-kettlebell-swing-snatch.webp"
     },
     {
       "id": "drag-curl",
@@ -2747,7 +2896,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "drag-curl.webp"
     },
     {
       "id": "dragon-flag",
@@ -2767,7 +2917,8 @@
         "hip_flexors",
         "obliques",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "dragon-flag.webp"
     },
     {
       "id": "dumbbell-bench-pull",
@@ -2786,7 +2937,8 @@
       "secondary_muscles": [
         "biceps_brachii",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "dumbbell-bench-pull.webp"
     },
     {
       "id": "dumbbell-calf-raise",
@@ -2804,7 +2956,8 @@
       ],
       "secondary_muscles": [
         "forearm_flexors"
-      ]
+      ],
+      "image": "dumbbell-calf-raise.webp"
     },
     {
       "id": "dumbbell-deadlift",
@@ -2825,7 +2978,8 @@
         "latissimus_dorsi",
         "quadriceps",
         "trapezius"
-      ]
+      ],
+      "image": "dumbbell-deadlift.webp"
     },
     {
       "id": "dumbbell-farmers-walk",
@@ -2846,7 +3000,8 @@
         "obliques",
         "quadriceps",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "dumbbell-farmers-walk.webp"
     },
     {
       "id": "dumbbell-floor-press",
@@ -2864,7 +3019,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "dumbbell-floor-press.webp"
     },
     {
       "id": "dumbbell-front-raise",
@@ -2881,7 +3037,8 @@
       ],
       "secondary_muscles": [
         "lateral_deltoid"
-      ]
+      ],
+      "image": "dumbbell-front-raise.webp"
     },
     {
       "id": "dumbbell-front-squat",
@@ -2901,7 +3058,8 @@
         "erector_spinae",
         "hamstrings",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "dumbbell-front-squat.webp"
     },
     {
       "id": "dumbbell-hip-thrust",
@@ -2919,7 +3077,8 @@
       "secondary_muscles": [
         "hamstrings",
         "quadriceps"
-      ]
+      ],
+      "image": "dumbbell-hip-thrust.webp"
     },
     {
       "id": "dumbbell-pistol-squat",
@@ -2938,7 +3097,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "dumbbell-pistol-squat.webp"
     },
     {
       "id": "dumbbell-push-press",
@@ -2959,7 +3119,8 @@
         "lateral_deltoid",
         "quadriceps",
         "trapezius"
-      ]
+      ],
+      "image": "dumbbell-push-press.webp"
     },
     {
       "id": "dumbbell-reverse-fly",
@@ -2977,7 +3138,8 @@
       "secondary_muscles": [
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "dumbbell-reverse-fly.webp"
     },
     {
       "id": "dumbbell-romanian-deadlift",
@@ -2996,7 +3158,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "forearm_flexors"
-      ]
+      ],
+      "image": "dumbbell-romanian-deadlift.webp"
     },
     {
       "id": "dumbbell-shoulder-press",
@@ -3015,7 +3178,8 @@
       "secondary_muscles": [
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "dumbbell-shoulder-press.webp"
     },
     {
       "id": "dumbbell-side-bend",
@@ -3034,7 +3198,8 @@
         "erector_spinae",
         "quadratus_lumborum",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "dumbbell-side-bend.webp"
     },
     {
       "id": "dumbbell-snatch",
@@ -3055,7 +3220,8 @@
         "erector_spinae",
         "hamstrings",
         "quadriceps"
-      ]
+      ],
+      "image": "dumbbell-snatch.webp"
     },
     {
       "id": "dumbbell-split-squat",
@@ -3074,7 +3240,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "dumbbell-split-squat.webp"
     },
     {
       "id": "dumbbell-tricep-extension",
@@ -3089,7 +3256,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "dumbbell-tricep-extension.webp"
     },
     {
       "id": "dumbbell-upright-row",
@@ -3109,7 +3277,8 @@
         "anterior_deltoid",
         "biceps_brachii",
         "rhomboids"
-      ]
+      ],
+      "image": "dumbbell-upright-row.webp"
     },
     {
       "id": "dumbbell-windmill",
@@ -3129,7 +3298,8 @@
         "anterior_deltoid",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "dumbbell-windmill.webp"
     },
     {
       "id": "dumbbell-wrist-curl",
@@ -3146,7 +3316,8 @@
       ],
       "secondary_muscles": [
         "brachioradialis"
-      ]
+      ],
+      "image": "dumbbell-wrist-curl.webp"
     },
     {
       "id": "ez-bar-curl",
@@ -3164,7 +3335,8 @@
       "secondary_muscles": [
         "brachialis",
         "brachioradialis"
-      ]
+      ],
+      "image": "ez-bar-curl.webp"
     },
     {
       "id": "ez-bar-front-raise",
@@ -3181,7 +3353,8 @@
       ],
       "secondary_muscles": [
         "serratus_anterior"
-      ]
+      ],
+      "image": "ez-bar-front-raise.webp"
     },
     {
       "id": "ez-bar-overhead-extension",
@@ -3196,7 +3369,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "ez-bar-overhead-extension.webp"
     },
     {
       "id": "ez-bar-pullover",
@@ -3215,7 +3389,8 @@
       "secondary_muscles": [
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "ez-bar-pullover.webp"
     },
     {
       "id": "ez-bar-reverse-curl",
@@ -3233,7 +3408,8 @@
       ],
       "secondary_muscles": [
         "biceps_brachii"
-      ]
+      ],
+      "image": "ez-bar-reverse-curl.webp"
     },
     {
       "id": "ez-bar-reverse-grip-row",
@@ -3253,7 +3429,8 @@
         "posterior_deltoid",
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "ez-bar-reverse-grip-row.webp"
     },
     {
       "id": "ez-bar-romanian-deadlift",
@@ -3273,7 +3450,8 @@
         "erector_spinae",
         "forearm_flexors",
         "trapezius"
-      ]
+      ],
+      "image": "ez-bar-romanian-deadlift.webp"
     },
     {
       "id": "ez-bar-shrug",
@@ -3290,7 +3468,8 @@
       ],
       "secondary_muscles": [
         "rhomboids"
-      ]
+      ],
+      "image": "ez-bar-shrug.webp"
     },
     {
       "id": "ez-bar-spider-curl",
@@ -3308,7 +3487,8 @@
       "secondary_muscles": [
         "brachialis",
         "brachioradialis"
-      ]
+      ],
+      "image": "ez-bar-spider-curl.webp"
     },
     {
       "id": "ez-bar-upright-row",
@@ -3327,7 +3507,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "biceps_brachii"
-      ]
+      ],
+      "image": "ez-bar-upright-row.webp"
     },
     {
       "id": "face-pull",
@@ -3345,7 +3526,8 @@
       ],
       "secondary_muscles": [
         "trapezius"
-      ]
+      ],
+      "image": "face-pull.webp"
     },
     {
       "id": "floor-ez-bar-press",
@@ -3363,7 +3545,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "floor-ez-bar-press.webp"
     },
     {
       "id": "floor-kettlebell-pullover",
@@ -3382,7 +3565,8 @@
       "secondary_muscles": [
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "floor-kettlebell-pullover.webp"
     },
     {
       "id": "floor-press",
@@ -3400,7 +3584,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "floor-press.webp"
     },
     {
       "id": "flutter-kicks",
@@ -3418,7 +3603,8 @@
       ],
       "secondary_muscles": [
         "transverse_abdominis"
-      ]
+      ],
+      "image": "flutter-kicks.webp"
     },
     {
       "id": "front-lever",
@@ -3439,7 +3625,8 @@
         "biceps_brachii",
         "erector_spinae",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "front-lever.webp"
     },
     {
       "id": "front-squat",
@@ -3458,7 +3645,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "hamstrings"
-      ]
+      ],
+      "image": "front-squat.webp"
     },
     {
       "id": "glute-bridge",
@@ -3475,7 +3663,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "glute-bridge.webp"
     },
     {
       "id": "glute-kickback",
@@ -3494,7 +3683,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "glute-kickback.webp"
     },
     {
       "id": "goblet-squat",
@@ -3512,7 +3702,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "goblet-squat.webp"
     },
     {
       "id": "good-morning",
@@ -3529,7 +3720,8 @@
         "gluteus_maximus",
         "hamstrings"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "good-morning.webp"
     },
     {
       "id": "hack-squat",
@@ -3548,7 +3740,8 @@
       "secondary_muscles": [
         "gastrocnemius",
         "hamstrings"
-      ]
+      ],
+      "image": "hack-squat.webp"
     },
     {
       "id": "hack-squat-calf-raise",
@@ -3564,7 +3757,8 @@
         "gastrocnemius",
         "soleus"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "hack-squat-calf-raise.webp"
     },
     {
       "id": "hammer-curl",
@@ -3582,7 +3776,8 @@
       ],
       "secondary_muscles": [
         "forearm_flexors"
-      ]
+      ],
+      "image": "hammer-curl.webp"
     },
     {
       "id": "handstand-push-ups",
@@ -3602,7 +3797,8 @@
         "lateral_deltoid",
         "rectus_abdominis",
         "trapezius"
-      ]
+      ],
+      "image": "handstand-push-ups.webp"
     },
     {
       "id": "hang-clean",
@@ -3623,7 +3819,8 @@
         "anterior_deltoid",
         "erector_spinae",
         "hamstrings"
-      ]
+      ],
+      "image": "hang-clean.webp"
     },
     {
       "id": "hang-power-clean",
@@ -3643,7 +3840,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "hamstrings"
-      ]
+      ],
+      "image": "hang-power-clean.webp"
     },
     {
       "id": "hanging-knee-raise",
@@ -3662,7 +3860,8 @@
       "secondary_muscles": [
         "forearm_flexors",
         "obliques"
-      ]
+      ],
+      "image": "hanging-knee-raise.webp"
     },
     {
       "id": "hanging-leg-raise",
@@ -3680,7 +3879,8 @@
       ],
       "secondary_muscles": [
         "obliques"
-      ]
+      ],
+      "image": "hanging-leg-raise.webp"
     },
     {
       "id": "hanging-pike",
@@ -3699,7 +3899,8 @@
         "forearm_flexors",
         "hip_flexors",
         "latissimus_dorsi"
-      ]
+      ],
+      "image": "hanging-pike.webp"
     },
     {
       "id": "heel-elevated-squat",
@@ -3719,7 +3920,8 @@
         "adductors",
         "erector_spinae",
         "hamstrings"
-      ]
+      ],
+      "image": "heel-elevated-squat.webp"
     },
     {
       "id": "hex-bar-deadlift",
@@ -3740,7 +3942,8 @@
         "forearm_flexors",
         "hamstrings",
         "trapezius"
-      ]
+      ],
+      "image": "hex-bar-deadlift.webp"
     },
     {
       "id": "high-plank",
@@ -3759,7 +3962,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "obliques"
-      ]
+      ],
+      "image": "high-plank.webp"
     },
     {
       "id": "hip-abduction",
@@ -3776,7 +3980,8 @@
       ],
       "secondary_muscles": [
         "abductors"
-      ]
+      ],
+      "image": "hip-abduction.webp"
     },
     {
       "id": "hip-adduction",
@@ -3791,7 +3996,8 @@
       "primary_muscles": [
         "adductors"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "hip-adduction.webp"
     },
     {
       "id": "hip-thrust",
@@ -3809,7 +4015,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "hip-thrust.webp"
     },
     {
       "id": "horizontal-leg-press",
@@ -3827,7 +4034,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "horizontal-leg-press.webp"
     },
     {
       "id": "incline-bench-ez-bar-press",
@@ -3845,7 +4053,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "incline-bench-ez-bar-press.webp"
     },
     {
       "id": "incline-bench-press",
@@ -3863,7 +4072,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "incline-bench-press.webp"
     },
     {
       "id": "incline-db-curl",
@@ -3880,7 +4090,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "incline-db-curl.webp"
     },
     {
       "id": "incline-db-press",
@@ -3898,7 +4109,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "incline-db-press.webp"
     },
     {
       "id": "incline-dumbbell-fly",
@@ -3916,7 +4128,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "biceps_brachii"
-      ]
+      ],
+      "image": "incline-dumbbell-fly.webp"
     },
     {
       "id": "incline-hammer-curl",
@@ -3934,7 +4147,8 @@
       ],
       "secondary_muscles": [
         "forearm_flexors"
-      ]
+      ],
+      "image": "incline-hammer-curl.webp"
     },
     {
       "id": "incline-push-ups",
@@ -3952,7 +4166,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "incline-push-ups.webp"
     },
     {
       "id": "inverted-row",
@@ -3973,7 +4188,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "inverted-row.webp"
     },
     {
       "id": "isometric-neck-side",
@@ -3988,7 +4204,8 @@
       "primary_muscles": [
         "trapezius"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "isometric-neck-side.webp"
     },
     {
       "id": "jackknife-sit-up",
@@ -4006,7 +4223,8 @@
       "secondary_muscles": [
         "hip_flexors",
         "obliques"
-      ]
+      ],
+      "image": "jackknife-sit-up.webp"
     },
     {
       "id": "jump-rope",
@@ -4025,7 +4243,8 @@
       "secondary_muscles": [
         "forearm_flexors",
         "quadriceps"
-      ]
+      ],
+      "image": "jump-rope.webp"
     },
     {
       "id": "jump-squat",
@@ -4044,7 +4263,8 @@
       "secondary_muscles": [
         "gastrocnemius",
         "hamstrings"
-      ]
+      ],
+      "image": "jump-squat.webp"
     },
     {
       "id": "jumping-jacks",
@@ -4065,7 +4285,8 @@
         "abductors",
         "quadriceps",
         "soleus"
-      ]
+      ],
+      "image": "jumping-jacks.webp"
     },
     {
       "id": "kettlebell-bulgarian-split-squat",
@@ -4084,7 +4305,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "kettlebell-bulgarian-split-squat.webp"
     },
     {
       "id": "kettlebell-close-grip-floor-press",
@@ -4102,7 +4324,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "pectoralis_major"
-      ]
+      ],
+      "image": "kettlebell-close-grip-floor-press.webp"
     },
     {
       "id": "kettlebell-deadlift",
@@ -4122,7 +4345,8 @@
       "secondary_muscles": [
         "forearm_flexors",
         "quadriceps"
-      ]
+      ],
+      "image": "kettlebell-deadlift.webp"
     },
     {
       "id": "kettlebell-farmers-walk",
@@ -4143,7 +4367,8 @@
         "gluteus_maximus",
         "quadriceps",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "kettlebell-farmers-walk.webp"
     },
     {
       "id": "kettlebell-floor-press",
@@ -4161,7 +4386,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "kettlebell-floor-press.webp"
     },
     {
       "id": "kettlebell-goblet-lunge",
@@ -4180,7 +4406,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "kettlebell-goblet-lunge.webp"
     },
     {
       "id": "kettlebell-halo",
@@ -4198,7 +4425,8 @@
       "secondary_muscles": [
         "posterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "kettlebell-halo.webp"
     },
     {
       "id": "kettlebell-hammer-curl",
@@ -4216,7 +4444,8 @@
       ],
       "secondary_muscles": [
         "brachioradialis"
-      ]
+      ],
+      "image": "kettlebell-hammer-curl.webp"
     },
     {
       "id": "kettlebell-hip-thrust",
@@ -4234,7 +4463,8 @@
       "secondary_muscles": [
         "hamstrings",
         "quadriceps"
-      ]
+      ],
+      "image": "kettlebell-hip-thrust.webp"
     },
     {
       "id": "kettlebell-lunge-press",
@@ -4255,7 +4485,8 @@
         "hamstrings",
         "rectus_abdominis",
         "triceps_brachii"
-      ]
+      ],
+      "image": "kettlebell-lunge-press.webp"
     },
     {
       "id": "kettlebell-offset-reverse-lunge-and-press",
@@ -4276,7 +4507,8 @@
         "hamstrings",
         "obliques",
         "triceps_brachii"
-      ]
+      ],
+      "image": "kettlebell-offset-reverse-lunge-and-press.webp"
     },
     {
       "id": "kettlebell-overhead-tricep-extension",
@@ -4291,7 +4523,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "kettlebell-overhead-tricep-extension.webp"
     },
     {
       "id": "kettlebell-pistol-squat",
@@ -4311,7 +4544,8 @@
         "gluteus_medius",
         "hamstrings",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "kettlebell-pistol-squat.webp"
     },
     {
       "id": "kettlebell-pullover",
@@ -4330,7 +4564,8 @@
       "secondary_muscles": [
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "kettlebell-pullover.webp"
     },
     {
       "id": "kettlebell-reverse-lunge",
@@ -4350,7 +4585,8 @@
         "gluteus_medius",
         "hamstrings",
         "obliques"
-      ]
+      ],
+      "image": "kettlebell-reverse-lunge.webp"
     },
     {
       "id": "kettlebell-rotational-lunge",
@@ -4370,7 +4606,8 @@
         "gluteus_medius",
         "hamstrings",
         "obliques"
-      ]
+      ],
+      "image": "kettlebell-rotational-lunge.webp"
     },
     {
       "id": "kettlebell-russian-twist",
@@ -4388,7 +4625,8 @@
       "secondary_muscles": [
         "hip_flexors",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "kettlebell-russian-twist.webp"
     },
     {
       "id": "kettlebell-shrug",
@@ -4405,7 +4643,8 @@
       ],
       "secondary_muscles": [
         "forearm_flexors"
-      ]
+      ],
+      "image": "kettlebell-shrug.webp"
     },
     {
       "id": "kettlebell-single-leg-deadlift",
@@ -4424,7 +4663,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "gluteus_medius"
-      ]
+      ],
+      "image": "kettlebell-single-leg-deadlift.webp"
     },
     {
       "id": "kettlebell-skull-crusher",
@@ -4439,7 +4679,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "kettlebell-skull-crusher.webp"
     },
     {
       "id": "kettlebell-sumo-deadlift",
@@ -4460,7 +4701,8 @@
         "erector_spinae",
         "hamstrings",
         "trapezius"
-      ]
+      ],
+      "image": "kettlebell-sumo-deadlift.webp"
     },
     {
       "id": "kettlebell-sumo-high-pull",
@@ -4480,7 +4722,8 @@
         "hamstrings",
         "lateral_deltoid",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "kettlebell-sumo-high-pull.webp"
     },
     {
       "id": "kettlebell-swing",
@@ -4499,7 +4742,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "quadriceps"
-      ]
+      ],
+      "image": "kettlebell-swing.webp"
     },
     {
       "id": "kettlebell-swing-clean",
@@ -4519,7 +4763,8 @@
         "anterior_deltoid",
         "erector_spinae",
         "trapezius"
-      ]
+      ],
+      "image": "kettlebell-swing-clean.webp"
     },
     {
       "id": "kettlebell-turkish-get-ups",
@@ -4540,7 +4785,8 @@
         "obliques",
         "quadriceps",
         "triceps_brachii"
-      ]
+      ],
+      "image": "kettlebell-turkish-get-ups.webp"
     },
     {
       "id": "kettlebell-windmills",
@@ -4560,7 +4806,8 @@
         "erector_spinae",
         "gluteus_maximus",
         "hamstrings"
-      ]
+      ],
+      "image": "kettlebell-windmills.webp"
     },
     {
       "id": "knee-push-ups",
@@ -4579,7 +4826,8 @@
         "anterior_deltoid",
         "rectus_abdominis",
         "triceps_brachii"
-      ]
+      ],
+      "image": "knee-push-ups.webp"
     },
     {
       "id": "kneeling-cable-row",
@@ -4599,7 +4847,8 @@
         "posterior_deltoid",
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "kneeling-cable-row.webp"
     },
     {
       "id": "l-sit",
@@ -4619,7 +4868,8 @@
         "latissimus_dorsi",
         "quadriceps",
         "triceps_brachii"
-      ]
+      ],
+      "image": "l-sit.webp"
     },
     {
       "id": "landmine-press",
@@ -4638,7 +4888,8 @@
       "secondary_muscles": [
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "landmine-press.webp"
     },
     {
       "id": "lat-pulldown",
@@ -4657,7 +4908,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "lat-pulldown.webp"
     },
     {
       "id": "lateral-raise",
@@ -4674,7 +4926,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "lateral-raise.webp"
     },
     {
       "id": "leg-curl",
@@ -4691,7 +4944,8 @@
       ],
       "secondary_muscles": [
         "gastrocnemius"
-      ]
+      ],
+      "image": "leg-curl.webp"
     },
     {
       "id": "leg-extension",
@@ -4706,7 +4960,8 @@
       "primary_muscles": [
         "quadriceps"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "leg-extension.webp"
     },
     {
       "id": "leg-press",
@@ -4724,7 +4979,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "leg-press.webp"
     },
     {
       "id": "lunge",
@@ -4744,7 +5000,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "lunge.webp"
     },
     {
       "id": "lying-leg-raise",
@@ -4763,7 +5020,8 @@
       "secondary_muscles": [
         "obliques",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "lying-leg-raise.webp"
     },
     {
       "id": "lying-tricep-extension",
@@ -4780,7 +5038,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "lying-tricep-extension.webp"
     },
     {
       "id": "machine-bicep-curl",
@@ -4797,7 +5056,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "machine-bicep-curl.webp"
     },
     {
       "id": "machine-calf-raise",
@@ -4813,7 +5073,8 @@
         "gastrocnemius",
         "soleus"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "machine-calf-raise.webp"
     },
     {
       "id": "machine-preacher-curl",
@@ -4830,7 +5091,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "machine-preacher-curl.webp"
     },
     {
       "id": "machine-shoulder-press",
@@ -4849,7 +5111,8 @@
       "secondary_muscles": [
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "machine-shoulder-press.webp"
     },
     {
       "id": "medicine-ball-slam",
@@ -4868,7 +5131,8 @@
         "gluteus_maximus",
         "latissimus_dorsi",
         "obliques"
-      ]
+      ],
+      "image": "medicine-ball-slam.webp"
     },
     {
       "id": "mountain-climbers",
@@ -4887,7 +5151,8 @@
       "secondary_muscles": [
         "obliques",
         "quadriceps"
-      ]
+      ],
+      "image": "mountain-climbers.webp"
     },
     {
       "id": "muscle-snatch",
@@ -4907,7 +5172,8 @@
         "erector_spinae",
         "gluteus_maximus",
         "hamstrings"
-      ]
+      ],
+      "image": "muscle-snatch.webp"
     },
     {
       "id": "muscle-ups",
@@ -4927,7 +5193,8 @@
         "anterior_deltoid",
         "biceps_brachii",
         "pectoralis_major"
-      ]
+      ],
+      "image": "muscle-ups.webp"
     },
     {
       "id": "negative-pull-ups",
@@ -4947,7 +5214,8 @@
         "forearm_flexors",
         "posterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "negative-pull-ups.webp"
     },
     {
       "id": "neutral-grip-pull-ups",
@@ -4967,7 +5235,8 @@
         "brachialis",
         "forearm_flexors",
         "rhomboids"
-      ]
+      ],
+      "image": "neutral-grip-pull-ups.webp"
     },
     {
       "id": "nordic-hamstring-curl",
@@ -4985,7 +5254,8 @@
       "secondary_muscles": [
         "gastrocnemius",
         "gluteus_maximus"
-      ]
+      ],
+      "image": "nordic-hamstring-curl.webp"
     },
     {
       "id": "ohp",
@@ -5004,7 +5274,8 @@
       "secondary_muscles": [
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "ohp.webp"
     },
     {
       "id": "one-arm-dumbbell-push-press",
@@ -5025,7 +5296,8 @@
         "obliques",
         "quadriceps",
         "triceps_brachii"
-      ]
+      ],
+      "image": "one-arm-dumbbell-push-press.webp"
     },
     {
       "id": "one-arm-dumbbell-swing",
@@ -5045,7 +5317,8 @@
         "erector_spinae",
         "forearm_flexors",
         "lateral_deltoid"
-      ]
+      ],
+      "image": "one-arm-dumbbell-swing.webp"
     },
     {
       "id": "one-arm-kettlebell-bicep-curl",
@@ -5063,7 +5336,8 @@
       "secondary_muscles": [
         "brachialis",
         "forearm_flexors"
-      ]
+      ],
+      "image": "one-arm-kettlebell-bicep-curl.webp"
     },
     {
       "id": "one-arm-kettlebell-bottoms-up-press",
@@ -5083,7 +5357,8 @@
         "lateral_deltoid",
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "one-arm-kettlebell-bottoms-up-press.webp"
     },
     {
       "id": "one-arm-kettlebell-floor-glute-bridge-press",
@@ -5103,7 +5378,8 @@
         "anterior_deltoid",
         "hamstrings",
         "triceps_brachii"
-      ]
+      ],
+      "image": "one-arm-kettlebell-floor-glute-bridge-press.webp"
     },
     {
       "id": "one-arm-kettlebell-floor-press",
@@ -5121,7 +5397,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "one-arm-kettlebell-floor-press.webp"
     },
     {
       "id": "one-arm-kettlebell-front-squat",
@@ -5141,7 +5418,8 @@
         "erector_spinae",
         "hamstrings",
         "obliques"
-      ]
+      ],
+      "image": "one-arm-kettlebell-front-squat.webp"
     },
     {
       "id": "one-arm-kettlebell-push-press",
@@ -5161,7 +5439,8 @@
         "quadriceps",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "one-arm-kettlebell-push-press.webp"
     },
     {
       "id": "one-arm-kettlebell-row",
@@ -5181,7 +5460,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "one-arm-kettlebell-row.webp"
     },
     {
       "id": "one-arm-kettlebell-shoulder-press",
@@ -5201,7 +5481,8 @@
         "obliques",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "one-arm-kettlebell-shoulder-press.webp"
     },
     {
       "id": "one-arm-kettlebell-swing",
@@ -5221,7 +5502,8 @@
         "anterior_deltoid",
         "erector_spinae",
         "obliques"
-      ]
+      ],
+      "image": "one-arm-kettlebell-swing.webp"
     },
     {
       "id": "one-arm-kettlebell-tricep-kickback",
@@ -5238,7 +5520,8 @@
       ],
       "secondary_muscles": [
         "posterior_deltoid"
-      ]
+      ],
+      "image": "one-arm-kettlebell-tricep-kickback.webp"
     },
     {
       "id": "one-arm-landmine-press",
@@ -5258,7 +5541,8 @@
         "obliques",
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "one-arm-landmine-press.webp"
     },
     {
       "id": "one-arm-lat-pulldown",
@@ -5277,7 +5561,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "one-arm-lat-pulldown.webp"
     },
     {
       "id": "one-arm-single-leg-dumbbell-romanian-deadlift",
@@ -5298,7 +5583,8 @@
         "forearm_flexors",
         "gluteus_medius",
         "obliques"
-      ]
+      ],
+      "image": "one-arm-single-leg-dumbbell-romanian-deadlift.webp"
     },
     {
       "id": "one-arm-single-leg-kettlebell-romanian-deadlift",
@@ -5319,7 +5605,8 @@
         "forearm_flexors",
         "gluteus_medius",
         "obliques"
-      ]
+      ],
+      "image": "one-arm-single-leg-kettlebell-romanian-deadlift.webp"
     },
     {
       "id": "overhead-squat",
@@ -5339,7 +5626,8 @@
         "erector_spinae",
         "lateral_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "overhead-squat.webp"
     },
     {
       "id": "overhead-tricep-extension",
@@ -5354,7 +5642,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "overhead-tricep-extension.webp"
     },
     {
       "id": "pause-deadlift",
@@ -5374,7 +5663,8 @@
       "secondary_muscles": [
         "quadriceps",
         "trapezius"
-      ]
+      ],
+      "image": "pause-deadlift.webp"
     },
     {
       "id": "pause-squat",
@@ -5394,7 +5684,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "pause-squat.webp"
     },
     {
       "id": "paused-bench-press",
@@ -5412,7 +5703,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "paused-bench-press.webp"
     },
     {
       "id": "paused-incline-bench-press",
@@ -5430,7 +5722,8 @@
       ],
       "secondary_muscles": [
         "triceps_brachii"
-      ]
+      ],
+      "image": "paused-incline-bench-press.webp"
     },
     {
       "id": "pec-deck",
@@ -5448,7 +5741,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "serratus_anterior"
-      ]
+      ],
+      "image": "pec-deck.webp"
     },
     {
       "id": "pendlay-row",
@@ -5469,7 +5763,8 @@
         "biceps_brachii",
         "erector_spinae",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "pendlay-row.webp"
     },
     {
       "id": "pike-push-ups",
@@ -5488,7 +5783,8 @@
       "secondary_muscles": [
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "pike-push-ups.webp"
     },
     {
       "id": "pistol-squat",
@@ -5508,7 +5804,8 @@
         "gluteus_medius",
         "hamstrings",
         "hip_flexors"
-      ]
+      ],
+      "image": "pistol-squat.webp"
     },
     {
       "id": "planche",
@@ -5527,7 +5824,8 @@
       "secondary_muscles": [
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "planche.webp"
     },
     {
       "id": "plank",
@@ -5545,7 +5843,8 @@
       ],
       "secondary_muscles": [
         "erector_spinae"
-      ]
+      ],
+      "image": "plank.webp"
     },
     {
       "id": "plate-pinch",
@@ -5562,7 +5861,8 @@
       ],
       "secondary_muscles": [
         "trapezius"
-      ]
+      ],
+      "image": "plate-pinch.webp"
     },
     {
       "id": "preacher-curl",
@@ -5579,7 +5879,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "preacher-curl.webp"
     },
     {
       "id": "pseudo-planche-push-ups",
@@ -5598,7 +5899,8 @@
       "secondary_muscles": [
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "pseudo-planche-push-ups.webp"
     },
     {
       "id": "pull-up",
@@ -5617,7 +5919,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "pull-up.webp"
     },
     {
       "id": "push-jerk",
@@ -5637,7 +5940,8 @@
         "gluteus_maximus",
         "quadriceps",
         "trapezius"
-      ]
+      ],
+      "image": "push-jerk.webp"
     },
     {
       "id": "push-press",
@@ -5656,7 +5960,8 @@
       "secondary_muscles": [
         "quadriceps",
         "triceps_brachii"
-      ]
+      ],
+      "image": "push-press.webp"
     },
     {
       "id": "push-up",
@@ -5674,7 +5979,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "push-up.webp"
     },
     {
       "id": "rack-pull",
@@ -5696,7 +6002,8 @@
         "forearm_flexors",
         "forearms",
         "latissimus_dorsi"
-      ]
+      ],
+      "image": "rack-pull.webp"
     },
     {
       "id": "rear-delt-fly",
@@ -5714,7 +6021,8 @@
       ],
       "secondary_muscles": [
         "trapezius"
-      ]
+      ],
+      "image": "rear-delt-fly.webp"
     },
     {
       "id": "reverse-crunches",
@@ -5733,7 +6041,8 @@
         "hip_flexors",
         "obliques",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "reverse-crunches.webp"
     },
     {
       "id": "reverse-curl",
@@ -5751,7 +6060,8 @@
       ],
       "secondary_muscles": [
         "biceps_brachii"
-      ]
+      ],
+      "image": "reverse-curl.webp"
     },
     {
       "id": "reverse-grip-bent-over-row",
@@ -5771,7 +6081,8 @@
         "biceps_brachii",
         "erector_spinae",
         "trapezius"
-      ]
+      ],
+      "image": "reverse-grip-bent-over-row.webp"
     },
     {
       "id": "reverse-lunge",
@@ -5789,7 +6100,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "reverse-lunge.webp"
     },
     {
       "id": "reverse-plank",
@@ -5809,7 +6121,8 @@
         "hamstrings",
         "posterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "reverse-plank.webp"
     },
     {
       "id": "ring-dead-hang",
@@ -5828,7 +6141,8 @@
         "latissimus_dorsi",
         "rectus_abdominis",
         "trapezius"
-      ]
+      ],
+      "image": "ring-dead-hang.webp"
     },
     {
       "id": "ring-dips",
@@ -5846,7 +6160,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "ring-dips.webp"
     },
     {
       "id": "ring-face-pull",
@@ -5864,7 +6179,8 @@
       ],
       "secondary_muscles": [
         "trapezius"
-      ]
+      ],
+      "image": "ring-face-pull.webp"
     },
     {
       "id": "rings-inverted-row",
@@ -5886,7 +6202,8 @@
         "forearm_flexors",
         "posterior_deltoid",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "rings-inverted-row.webp"
     },
     {
       "id": "romanian-deadlift",
@@ -5904,7 +6221,8 @@
       ],
       "secondary_muscles": [
         "erector_spinae"
-      ]
+      ],
+      "image": "romanian-deadlift.webp"
     },
     {
       "id": "rope-climb",
@@ -5923,7 +6241,8 @@
         "biceps_brachii",
         "forearm_flexors",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "rope-climb.webp"
     },
     {
       "id": "russian-twist",
@@ -5941,7 +6260,8 @@
       ],
       "secondary_muscles": [
         "hip_flexors"
-      ]
+      ],
+      "image": "russian-twist.webp"
     },
     {
       "id": "scapular-pull-ups",
@@ -5960,7 +6280,8 @@
       "secondary_muscles": [
         "forearm_flexors",
         "rhomboids"
-      ]
+      ],
+      "image": "scapular-pull-ups.webp"
     },
     {
       "id": "seated-barbell-overhead-press",
@@ -5979,7 +6300,8 @@
         "lateral_deltoid",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "seated-barbell-overhead-press.webp"
     },
     {
       "id": "seated-calf-raise",
@@ -5996,7 +6318,8 @@
       ],
       "secondary_muscles": [
         "gastrocnemius"
-      ]
+      ],
+      "image": "seated-calf-raise.webp"
     },
     {
       "id": "seated-db-press",
@@ -6015,7 +6338,8 @@
       "secondary_muscles": [
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "seated-db-press.webp"
     },
     {
       "id": "seated-dumbbell-curl",
@@ -6033,7 +6357,8 @@
       "secondary_muscles": [
         "brachialis",
         "brachioradialis"
-      ]
+      ],
+      "image": "seated-dumbbell-curl.webp"
     },
     {
       "id": "seated-dumbbell-lateral-raise",
@@ -6051,7 +6376,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "seated-dumbbell-lateral-raise.webp"
     },
     {
       "id": "seated-dumbbell-tricep-extension",
@@ -6068,7 +6394,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "seated-dumbbell-tricep-extension.webp"
     },
     {
       "id": "seated-leg-curl",
@@ -6085,7 +6412,8 @@
       ],
       "secondary_muscles": [
         "gastrocnemius"
-      ]
+      ],
+      "image": "seated-leg-curl.webp"
     },
     {
       "id": "seated-smith-machine-shoulder-press",
@@ -6104,7 +6432,8 @@
       "secondary_muscles": [
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "seated-smith-machine-shoulder-press.webp"
     },
     {
       "id": "shrug",
@@ -6121,7 +6450,8 @@
       ],
       "secondary_muscles": [
         "rhomboids"
-      ]
+      ],
+      "image": "shrug.webp"
     },
     {
       "id": "side-lunge",
@@ -6141,7 +6471,8 @@
         "gluteus_medius",
         "hamstrings",
         "hip_flexors"
-      ]
+      ],
+      "image": "side-lunge.webp"
     },
     {
       "id": "side-lying-hip-abduction",
@@ -6157,7 +6488,8 @@
         "abductors",
         "gluteus_medius"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "side-lying-hip-abduction.webp"
     },
     {
       "id": "side-lying-hip-adduction",
@@ -6172,7 +6504,8 @@
       "primary_muscles": [
         "adductors"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "side-lying-hip-adduction.webp"
     },
     {
       "id": "side-plank",
@@ -6191,7 +6524,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "side-plank.webp"
     },
     {
       "id": "single-arm-db-row",
@@ -6210,7 +6544,8 @@
       "secondary_muscles": [
         "biceps_brachii",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "single-arm-db-row.webp"
     },
     {
       "id": "single-arm-dumbbell-overhead-tricep-extension",
@@ -6227,7 +6562,8 @@
       ],
       "secondary_muscles": [
         "obliques"
-      ]
+      ],
+      "image": "single-arm-dumbbell-overhead-tricep-extension.webp"
     },
     {
       "id": "single-leg-glute-bridge",
@@ -6245,7 +6581,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "hamstrings"
-      ]
+      ],
+      "image": "single-leg-glute-bridge.webp"
     },
     {
       "id": "single-leg-lying-leg-curl",
@@ -6262,7 +6599,8 @@
       ],
       "secondary_muscles": [
         "gastrocnemius"
-      ]
+      ],
+      "image": "single-leg-lying-leg-curl.webp"
     },
     {
       "id": "single-leg-romanian-deadlift",
@@ -6281,7 +6619,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "gluteus_medius"
-      ]
+      ],
+      "image": "single-leg-romanian-deadlift.webp"
     },
     {
       "id": "sit-ups",
@@ -6299,7 +6638,8 @@
       ],
       "secondary_muscles": [
         "obliques"
-      ]
+      ],
+      "image": "sit-ups.webp"
     },
     {
       "id": "skull-crusher",
@@ -6314,7 +6654,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "skull-crusher.webp"
     },
     {
       "id": "sled-row",
@@ -6335,7 +6676,8 @@
         "posterior_deltoid",
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "sled-row.webp"
     },
     {
       "id": "smith-machine-bench-press",
@@ -6353,7 +6695,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "smith-machine-bench-press.webp"
     },
     {
       "id": "smith-machine-bent-over-row",
@@ -6373,7 +6716,8 @@
         "biceps_brachii",
         "erector_spinae",
         "trapezius"
-      ]
+      ],
+      "image": "smith-machine-bent-over-row.webp"
     },
     {
       "id": "smith-machine-bulgarian-split",
@@ -6391,7 +6735,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "smith-machine-bulgarian-split.webp"
     },
     {
       "id": "smith-machine-calf-raise",
@@ -6408,7 +6753,8 @@
       ],
       "secondary_muscles": [
         "soleus"
-      ]
+      ],
+      "image": "smith-machine-calf-raise.webp"
     },
     {
       "id": "smith-machine-incline-bench-press",
@@ -6426,7 +6772,8 @@
       ],
       "secondary_muscles": [
         "triceps_brachii"
-      ]
+      ],
+      "image": "smith-machine-incline-bench-press.webp"
     },
     {
       "id": "smith-machine-rdl",
@@ -6445,7 +6792,8 @@
         "erector_spinae",
         "gluteus_maximus",
         "trapezius"
-      ]
+      ],
+      "image": "smith-machine-rdl.webp"
     },
     {
       "id": "smith-machine-reverse-grip-bent-over-row",
@@ -6465,7 +6813,8 @@
         "erector_spinae",
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "smith-machine-reverse-grip-bent-over-row.webp"
     },
     {
       "id": "smith-machine-shoulder-press",
@@ -6484,7 +6833,8 @@
       "secondary_muscles": [
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "smith-machine-shoulder-press.webp"
     },
     {
       "id": "smith-machine-shrug",
@@ -6501,7 +6851,8 @@
       ],
       "secondary_muscles": [
         "forearm_flexors"
-      ]
+      ],
+      "image": "smith-machine-shrug.webp"
     },
     {
       "id": "smith-machine-squat",
@@ -6521,7 +6872,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "smith-machine-squat.webp"
     },
     {
       "id": "snatch",
@@ -6542,7 +6894,8 @@
         "erector_spinae",
         "hamstrings",
         "lateral_deltoid"
-      ]
+      ],
+      "image": "snatch.webp"
     },
     {
       "id": "spider-curl",
@@ -6559,7 +6912,8 @@
       ],
       "secondary_muscles": [
         "brachialis"
-      ]
+      ],
+      "image": "spider-curl.webp"
     },
     {
       "id": "split-jerk",
@@ -6579,7 +6933,8 @@
         "gluteus_maximus",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "split-jerk.webp"
     },
     {
       "id": "split-squat",
@@ -6598,7 +6953,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "split-squat.webp"
     },
     {
       "id": "spoto-press",
@@ -6616,7 +6972,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "spoto-press.webp"
     },
     {
       "id": "squat",
@@ -6635,7 +6992,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "hamstrings"
-      ]
+      ],
+      "image": "squat.webp"
     },
     {
       "id": "stability-ball-hip-bridge",
@@ -6653,7 +7011,8 @@
       "secondary_muscles": [
         "hamstrings",
         "rectus_abdominis"
-      ]
+      ],
+      "image": "stability-ball-hip-bridge.webp"
     },
     {
       "id": "stability-ball-knee-tuck",
@@ -6673,7 +7032,8 @@
         "hip_flexors",
         "obliques",
         "serratus_anterior"
-      ]
+      ],
+      "image": "stability-ball-knee-tuck.webp"
     },
     {
       "id": "stability-ball-push-up",
@@ -6693,7 +7053,8 @@
         "rectus_abdominis",
         "serratus_anterior",
         "triceps_brachii"
-      ]
+      ],
+      "image": "stability-ball-push-up.webp"
     },
     {
       "id": "standing-calf-raise",
@@ -6710,7 +7071,8 @@
       ],
       "secondary_muscles": [
         "soleus"
-      ]
+      ],
+      "image": "standing-calf-raise.webp"
     },
     {
       "id": "step-ups",
@@ -6730,7 +7092,8 @@
         "gastrocnemius",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "step-ups.webp"
     },
     {
       "id": "stiff-leg-deadlift",
@@ -6749,7 +7112,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "trapezius"
-      ]
+      ],
+      "image": "stiff-leg-deadlift.webp"
     },
     {
       "id": "straight-arm-pulldown",
@@ -6767,7 +7131,8 @@
       "secondary_muscles": [
         "posterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "straight-arm-pulldown.webp"
     },
     {
       "id": "sumo-deadlift",
@@ -6786,7 +7151,8 @@
       "secondary_muscles": [
         "erector_spinae",
         "hamstrings"
-      ]
+      ],
+      "image": "sumo-deadlift.webp"
     },
     {
       "id": "sumo-squat",
@@ -6806,7 +7172,8 @@
         "erector_spinae",
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "sumo-squat.webp"
     },
     {
       "id": "superman",
@@ -6824,7 +7191,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "superman.webp"
     },
     {
       "id": "svend-press",
@@ -6842,7 +7210,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "svend-press.webp"
     },
     {
       "id": "t-bar-row",
@@ -6862,7 +7231,8 @@
         "biceps_brachii",
         "erector_spinae",
         "trapezius"
-      ]
+      ],
+      "image": "t-bar-row.webp"
     },
     {
       "id": "thoracic-bridge",
@@ -6881,7 +7251,8 @@
       "secondary_muscles": [
         "posterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "thoracic-bridge.webp"
     },
     {
       "id": "thruster",
@@ -6901,7 +7272,8 @@
         "gluteus_maximus",
         "trapezius",
         "triceps_brachii"
-      ]
+      ],
+      "image": "thruster.webp"
     },
     {
       "id": "toes-to-bar",
@@ -6921,7 +7293,8 @@
         "forearm_flexors",
         "latissimus_dorsi",
         "obliques"
-      ]
+      ],
+      "image": "toes-to-bar.webp"
     },
     {
       "id": "tricep-kickback",
@@ -6936,7 +7309,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "tricep-kickback.webp"
     },
     {
       "id": "tricep-pushdown",
@@ -6951,7 +7325,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "tricep-pushdown.webp"
     },
     {
       "id": "trx-bicep-curl",
@@ -6969,7 +7344,8 @@
       "secondary_muscles": [
         "brachialis",
         "brachioradialis"
-      ]
+      ],
+      "image": "trx-bicep-curl.webp"
     },
     {
       "id": "trx-chest-press",
@@ -6988,7 +7364,8 @@
         "anterior_deltoid",
         "rectus_abdominis",
         "triceps_brachii"
-      ]
+      ],
+      "image": "trx-chest-press.webp"
     },
     {
       "id": "trx-face-pull",
@@ -7006,7 +7383,8 @@
       ],
       "secondary_muscles": [
         "trapezius"
-      ]
+      ],
+      "image": "trx-face-pull.webp"
     },
     {
       "id": "trx-hamstring-curl",
@@ -7024,7 +7402,8 @@
       "secondary_muscles": [
         "gastrocnemius",
         "gluteus_maximus"
-      ]
+      ],
+      "image": "trx-hamstring-curl.webp"
     },
     {
       "id": "trx-lunge",
@@ -7043,7 +7422,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "trx-lunge.webp"
     },
     {
       "id": "trx-pistol-squat",
@@ -7062,7 +7442,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "trx-pistol-squat.webp"
     },
     {
       "id": "trx-plank",
@@ -7081,7 +7462,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "obliques"
-      ]
+      ],
+      "image": "trx-plank.webp"
     },
     {
       "id": "trx-row",
@@ -7101,7 +7483,8 @@
         "biceps_brachii",
         "posterior_deltoid",
         "trapezius"
-      ]
+      ],
+      "image": "trx-row.webp"
     },
     {
       "id": "trx-side-plank",
@@ -7120,7 +7503,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "lateral_deltoid"
-      ]
+      ],
+      "image": "trx-side-plank.webp"
     },
     {
       "id": "trx-squat",
@@ -7138,7 +7522,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "trx-squat.webp"
     },
     {
       "id": "trx-tricep-extension",
@@ -7153,7 +7538,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "trx-tricep-extension.webp"
     },
     {
       "id": "trx-y-fly",
@@ -7172,7 +7558,8 @@
       "secondary_muscles": [
         "lateral_deltoid",
         "rhomboids"
-      ]
+      ],
+      "image": "trx-y-fly.webp"
     },
     {
       "id": "upright-row",
@@ -7191,7 +7578,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "biceps_brachii"
-      ]
+      ],
+      "image": "upright-row.webp"
     },
     {
       "id": "v-bar-lat-pulldown",
@@ -7210,7 +7598,8 @@
         "biceps_brachii",
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "v-bar-lat-pulldown.webp"
     },
     {
       "id": "v-bar-tricep-pushdown",
@@ -7225,7 +7614,8 @@
       "primary_muscles": [
         "triceps_brachii"
       ],
-      "secondary_muscles": []
+      "secondary_muscles": [],
+      "image": "v-bar-tricep-pushdown.webp"
     },
     {
       "id": "v-sit",
@@ -7244,7 +7634,8 @@
       "secondary_muscles": [
         "obliques",
         "quadriceps"
-      ]
+      ],
+      "image": "v-sit.webp"
     },
     {
       "id": "v-ups",
@@ -7263,7 +7654,8 @@
       "secondary_muscles": [
         "obliques",
         "transverse_abdominis"
-      ]
+      ],
+      "image": "v-ups.webp"
     },
     {
       "id": "walking-lunge",
@@ -7282,7 +7674,8 @@
       "secondary_muscles": [
         "gluteus_medius",
         "hamstrings"
-      ]
+      ],
+      "image": "walking-lunge.webp"
     },
     {
       "id": "wall-push-ups",
@@ -7300,7 +7693,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "wall-push-ups.webp"
     },
     {
       "id": "wall-sit",
@@ -7318,7 +7712,8 @@
       ],
       "secondary_muscles": [
         "hamstrings"
-      ]
+      ],
+      "image": "wall-sit.webp"
     },
     {
       "id": "weighted-wall-crunch",
@@ -7335,7 +7730,8 @@
       ],
       "secondary_muscles": [
         "obliques"
-      ]
+      ],
+      "image": "weighted-wall-crunch.webp"
     },
     {
       "id": "wide-grip-bench-press",
@@ -7353,7 +7749,8 @@
       "secondary_muscles": [
         "anterior_deltoid",
         "triceps_brachii"
-      ]
+      ],
+      "image": "wide-grip-bench-press.webp"
     },
     {
       "id": "wide-grip-pull-ups",
@@ -7373,7 +7770,8 @@
         "posterior_deltoid",
         "rhomboids",
         "trapezius"
-      ]
+      ],
+      "image": "wide-grip-pull-ups.webp"
     },
     {
       "id": "wide-grip-seated-cable-row",
@@ -7392,7 +7790,8 @@
       "secondary_muscles": [
         "biceps_brachii",
         "posterior_deltoid"
-      ]
+      ],
+      "image": "wide-grip-seated-cable-row.webp"
     },
     {
       "id": "wrist-roller",
@@ -7410,7 +7809,8 @@
       ],
       "secondary_muscles": [
         "anterior_deltoid"
-      ]
+      ],
+      "image": "wrist-roller.webp"
     }
   ]
 }
