@@ -1,4 +1,5 @@
-import type { ExerciseEntry, FoodEntry } from "./types";
+import { dailySupplementProtein } from "./supplements";
+import type { ExerciseEntry, FoodEntry, Supplement, SupplementLog } from "./types";
 
 export type DayStats = {
   date: string; // YYYY-MM-DD
@@ -25,6 +26,8 @@ export function lastNDays(
   foods: FoodEntry[],
   exercises: ExerciseEntry[],
   days = 7,
+  supplements: Supplement[] = [],
+  supplementLogs: SupplementLog[] = [],
 ): DayStats[] {
   const out: DayStats[] = [];
   const today = new Date();
@@ -38,7 +41,9 @@ export function lastNDays(
     const dayEx = exercises.filter((e) => e.date === date);
 
     const calories = dayFoods.reduce((s, f) => s + f.calories, 0);
-    const protein = dayFoods.reduce((s, f) => s + f.protein, 0);
+    const protein =
+      dayFoods.reduce((s, f) => s + f.protein, 0) +
+      dailySupplementProtein(supplements, supplementLogs, date);
     const carbs = dayFoods.reduce((s, f) => s + f.carbs, 0);
     const fat = dayFoods.reduce((s, f) => s + f.fat, 0);
     const burned = dayEx.reduce((s, e) => s + e.caloriesBurned, 0);

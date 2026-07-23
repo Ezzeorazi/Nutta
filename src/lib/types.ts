@@ -125,6 +125,9 @@ export type Supplement = {
   name: string;
   dose?: string;
   time?: string; // "HH:MM"
+  defaultQty?: number; // cantidad habitual por toma (ej. 5, 30, 2)
+  unit?: string; // ej. "g", "cápsulas"
+  protein?: number; // g de proteína que aporta `defaultQty` unidades
   createdAt: number;
 };
 
@@ -132,6 +135,7 @@ export type SupplementLog = {
   id: string;
   supId: string;
   date: string;
+  qty?: number; // cantidad real tomada ese día (default: defaultQty del suplemento)
   createdAt?: number; // epoch ms
 };
 

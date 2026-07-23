@@ -86,6 +86,7 @@ export default function HoyTab({
   addSupplement,
   removeSupplement,
   toggleSupplement,
+  setSupplementQty,
 }: {
   weight: number;
   score: DailyScore;
@@ -118,9 +119,17 @@ export default function HoyTab({
     date: string,
     patch: Partial<Pick<DailyMetrics, "water" | "sleepHours" | "steps">>,
   ) => void;
-  addSupplement: (name: string, dose?: string, time?: string) => void;
+  addSupplement: (
+    name: string,
+    dose?: string,
+    time?: string,
+    defaultQty?: number,
+    unit?: string,
+    protein?: number,
+  ) => void;
   removeSupplement: (id: string) => void;
   toggleSupplement: (supId: string, date: string) => void;
+  setSupplementQty: (supId: string, date: string, qty: number) => void;
 }) {
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
@@ -227,6 +236,7 @@ export default function HoyTab({
         onAdd={addSupplement}
         onRemove={removeSupplement}
         onToggle={toggleSupplement}
+        onSetQty={setSupplementQty}
       />
 
       {/* Insights: solo el día de hoy (mira el estado actual) */}

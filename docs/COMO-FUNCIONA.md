@@ -131,7 +131,7 @@ Los **5 tabs**:
 
 ### Bienestar y suplementos (tab Hoy)
 - **Agua** (botones rápidos), **sueño** (horas) y **pasos**, con barras de progreso. La **meta de agua se escala al peso** (~35 ml/kg, piso 2 L) y también cuenta en el score. Se puede registrar en días pasados. En [`WellbeingCard.tsx`](../src/components/WellbeingCard.tsx).
-- **Suplementos**: lista propia con checklist diario y horario (**referencia visual**, sin notificación). En [`SupplementsCard.tsx`](../src/components/SupplementsCard.tsx).
+- **Suplementos**: lista propia con checklist diario y horario (**referencia visual**, sin notificación). Opcionalmente cada suplemento puede definir una **cantidad habitual** (ej. 30 g, 2 cápsulas) y la **proteína que aporta esa cantidad**; al marcarlo se puede ajustar la cantidad realmente tomada ese día (± cápsulas/gramos) con un stepper, y la proteína se **escala proporcionalmente** y se suma al total de proteína del día (Hoy, score e Historial). Cálculo puro en [`src/lib/supplements.ts`](../src/lib/supplements.ts); UI en [`SupplementsCard.tsx`](../src/components/SupplementsCard.tsx).
 
 ### Historial (últimos 7 días)
 - Promedios + gráfico de calorías netas por día (con línea de meta) + gráfico de macros. En [`History.tsx`](../src/components/History.tsx) y [`src/lib/analytics.ts`](../src/lib/analytics.ts).
@@ -230,6 +230,7 @@ src/
    ├─ exerciseDb.ts       Catálogo RepDB + matcher + grupos musculares
    ├─ gym.ts              Volumen, PR, progresión y recomendaciones
    ├─ score.ts            Score diario
+   ├─ supplements.ts      Proteína aportada por suplementos (por toma/día)
    ├─ insights.ts         Insights
    ├─ achievements.ts     Rachas y logros
    ├─ export.ts           Exportación CSV/PDF
