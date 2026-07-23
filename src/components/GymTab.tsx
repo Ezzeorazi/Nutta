@@ -11,6 +11,8 @@ import {
   YAxis,
 } from "recharts";
 import { inputCls } from "@/components/Sheet";
+import ExerciseImage from "@/components/ExerciseImage";
+import ExercisePickerSheet from "@/components/ExercisePickerSheet";
 import {
   dailyRoutineSuggestion,
   exerciseProgress,
@@ -19,6 +21,7 @@ import {
   totalVolume,
   usedExercises,
 } from "@/lib/gym";
+import { matchExercise } from "@/lib/exerciseDb";
 import {
   COMMON_LIFTS,
   startOfLocalDayMs,
@@ -70,6 +73,7 @@ export default function GymTab({
   const [exercise, setExercise] = useState("");
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [progExercise, setProgExercise] = useState<string | null>(null);
   // Día que se está mirando (permite consultar sesiones anteriores).
   const [viewDate, setViewDate] = useState(today);
@@ -126,6 +130,12 @@ export default function GymTab({
     fontSize: 12,
     color: "var(--foreground)",
   } as const;
+
+  // Ejercicio del catálogo que matchea lo escrito (para mostrar su miniatura).
+  const matched = useMemo(
+    () => (exercise.trim() ? matchExercise(exercise) : null),
+    [exercise],
+  );
 
   const canAdd = exercise.trim() !== "" && Number(reps) > 0;
   const submit = () => {
@@ -214,13 +224,28 @@ export default function GymTab({
             Cargando series en {longDate(viewDate)}
           </p>
         )}
-        <input
-          className={inputCls}
-          list="lift-options"
-          placeholder="Ejercicio (ej. Press banca)"
-          value={exercise}
-          onChange={(e) => setExercise(e.target.value)}
-        />
+        <button
+          onClick={() => setPickerOpen(true)}
+          className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-border py-2 text-sm font-medium text-primary active:scale-[0.99] hover:border-primary"
+        >
+          🔍 Buscar ejercicio por grupo
+        </button>
+        <div className="flex items-center gap-2">
+          {matched && (
+            <ExerciseImage
+              image={matched.image}
+              name={matched.name_es}
+              className="h-10 w-10"
+            />
+          )}
+          <input
+            className={inputCls}
+            list="lift-options"
+            placeholder="…o escribí el nombre (ej. Press banca)"
+            value={exercise}
+            onChange={(e) => setExercise(e.target.value)}
+          />
+        </div>
         <datalist id="lift-options">
           {options.map((o) => (
             <option key={o} value={o} />
@@ -403,6 +428,14 @@ export default function GymTab({
           RepDB (repdb.co)
         </a>
       </p>
+
+      {pickerOpen && (
+        <ExercisePickerSheet
+          strengthSets={strengthSets}
+          onSelect={setExercise}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </main>
   );
 }
