@@ -28,6 +28,10 @@ export type ExerciseEntry = {
   minutes: number;
   caloriesBurned: number;
   createdAt?: number; // epoch ms (para el timeline)
+  // Métricas opcionales del reloj/smartband (ej. Xiaomi/Mi Fitness), cargadas a mano.
+  avgHeartRate?: number; // LPM promedio
+  maxHeartRate?: number; // LPM máximo
+  trainingEffect?: number; // "Efecto del entrenamiento" (0-5)
 };
 
 export type ChatRole = "user" | "assistant";

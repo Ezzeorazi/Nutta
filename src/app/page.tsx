@@ -358,6 +358,8 @@ export default function Home() {
           today={today}
           onAddSet={addSet}
           onRemoveSet={removeSet}
+          onAddExercise={addExercise}
+          onRemoveExercise={removeExercise}
         />
       ) : tab === "progreso" ? (
         <ProgresoTab

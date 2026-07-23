@@ -13,8 +13,9 @@ import {
 import { inputCls } from "@/components/Sheet";
 import ExerciseImage from "@/components/ExerciseImage";
 import ExercisePickerSheet from "@/components/ExercisePickerSheet";
+import CardioSheet from "@/components/CardioSheet";
 import {
-  dailyRoutineSuggestion,
+  buildDailyRoutine,
   exerciseProgress,
   groupByExercise,
   personalRecords,
@@ -25,6 +26,7 @@ import { matchExercise } from "@/lib/exerciseDb";
 import {
   COMMON_LIFTS,
   startOfLocalDayMs,
+  type ExerciseEntry,
   type StrengthSet,
 } from "@/lib/types";
 import exerciseNames from "@/data/exercise-names.json";
@@ -57,9 +59,11 @@ export default function GymTab({
   today,
   onAddSet,
   onRemoveSet,
+  onAddExercise,
+  onRemoveExercise,
 }: {
   strengthSets: StrengthSet[];
-  exercises?: { date: string }[];
+  exercises?: ExerciseEntry[];
   today: string;
   onAddSet: (
     exercise: string,
@@ -69,11 +73,14 @@ export default function GymTab({
     createdAt?: number,
   ) => void;
   onRemoveSet: (id: string) => void;
+  onAddExercise: (e: ExerciseEntry) => void;
+  onRemoveExercise: (id: string) => void;
 }) {
   const [exercise, setExercise] = useState("");
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [cardioOpen, setCardioOpen] = useState(false);
   const [progExercise, setProgExercise] = useState<string | null>(null);
   // Día que se está mirando (permite consultar sesiones anteriores).
   const [viewDate, setViewDate] = useState(today);
@@ -83,11 +90,15 @@ export default function GymTab({
     () => strengthSets.filter((s) => s.date === viewDate),
     [strengthSets, viewDate],
   );
+  const dayCardio = useMemo(
+    () => exercises.filter((e) => e.date === viewDate),
+    [exercises, viewDate],
+  );
   const groups = useMemo(() => groupByExercise(daySets), [daySets]);
   const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
   const dayVolume = totalVolume(daySets);
-  const suggestion = useMemo(
-    () => dailyRoutineSuggestion(strengthSets, exercises, today),
+  const routine = useMemo(
+    () => buildDailyRoutine(strengthSets, exercises, today),
     [strengthSets, exercises, today],
   );
   // Descarte por jornada: se guarda la clave del día en localStorage. Se lee en
@@ -97,10 +108,10 @@ export default function GymTab({
       ? null
       : localStorage.getItem("nutta.routineDismissed"),
   );
-  const showSuggestion = suggestion.key !== dismissedKey;
+  const showSuggestion = routine.key !== dismissedKey;
   const dismissSuggestion = () => {
-    localStorage.setItem("nutta.routineDismissed", suggestion.key);
-    setDismissedKey(suggestion.key);
+    localStorage.setItem("nutta.routineDismissed", routine.key);
+    setDismissedKey(routine.key);
   };
 
   const used = useMemo(() => usedExercises(strengthSets), [strengthSets]);
@@ -191,29 +202,55 @@ export default function GymTab({
 
       {isToday && showSuggestion && (
         <div
-          className={`flex items-center gap-3 rounded-2xl border border-border border-l-4 bg-card px-4 py-3 ${
-            suggestion.tone === "recovery"
+          className={`flex flex-col gap-3 rounded-2xl border border-border border-l-4 bg-card px-4 py-3 ${
+            routine.tone === "recovery"
               ? "border-l-primary"
-              : suggestion.tone === "done"
+              : routine.tone === "done"
                 ? "border-l-success"
                 : "border-l-accent"
           }`}
         >
-          <span className="text-lg leading-none">
-            {suggestion.tone === "recovery"
-              ? "🧘"
-              : suggestion.tone === "done"
-                ? "✅"
-                : "🎯"}
-          </span>
-          <p className="flex-1 text-sm">{suggestion.text}</p>
-          <button
-            onClick={dismissSuggestion}
-            aria-label="Descartar sugerencia"
-            className="shrink-0 text-muted hover:text-accent"
-          >
-            ×
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="text-lg leading-none">
+              {routine.tone === "recovery"
+                ? "🧘"
+                : routine.tone === "done"
+                  ? "✅"
+                  : "🎯"}
+            </span>
+            <p className="flex-1 text-sm">{routine.headline}</p>
+            <button
+              onClick={dismissSuggestion}
+              aria-label="Descartar sugerencia"
+              className="shrink-0 text-muted hover:text-accent"
+            >
+              ×
+            </button>
+          </div>
+
+          {routine.groups.map((g) => (
+            <div key={g.group} className="flex flex-col gap-1.5 pl-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                {g.group}
+              </p>
+              {g.exercises.map((ex) => (
+                <button
+                  key={ex.name}
+                  onClick={() => setExercise(ex.name)}
+                  className="flex items-center justify-between rounded-xl border border-border bg-background px-3 py-2 text-left text-sm active:scale-[0.99] hover:border-primary"
+                >
+                  <span>{ex.name}</span>
+                  <span className="shrink-0 text-xs text-muted tabular-nums">
+                    {ex.sets} × {ex.reps}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ))}
+
+          {routine.cardioTip && (
+            <p className="pl-1 text-xs text-muted">🏃 {routine.cardioTip}</p>
+          )}
         </div>
       )}
 
@@ -351,6 +388,51 @@ export default function GymTab({
         </section>
       )}
 
+      {/* Cardio del día (correr, bici, estilo libre… con datos del reloj) */}
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-muted">
+            {isToday ? "Cardio de hoy" : `Cardio — ${longDate(viewDate)}`}
+          </h2>
+          <button
+            onClick={() => setCardioOpen(true)}
+            className="rounded-full border border-dashed border-border px-3 py-1 text-xs font-medium text-primary active:scale-95 hover:border-primary"
+          >
+            + Cardio
+          </button>
+        </div>
+        {dayCardio.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-border bg-card/50 p-4 text-center text-sm text-muted">
+            Sin cardio registrado {isToday ? "hoy" : "este día"}.
+          </p>
+        ) : (
+          dayCardio.map((c) => (
+            <div
+              key={c.id}
+              className="rounded-2xl border border-border bg-card p-4"
+            >
+              <div className="mb-1 flex items-center justify-between">
+                <h3 className="font-semibold">{c.name}</h3>
+                <button
+                  onClick={() => onRemoveExercise(c.id)}
+                  className="text-muted hover:text-accent"
+                  aria-label="Eliminar cardio"
+                >
+                  ×
+                </button>
+              </div>
+              <p className="text-sm text-muted">
+                {c.minutes} min · {c.caloriesBurned} kcal
+                {c.avgHeartRate != null && ` · ${c.avgHeartRate} LPM prom.`}
+                {c.maxHeartRate != null && ` · ${c.maxHeartRate} LPM máx.`}
+                {c.trainingEffect != null &&
+                  ` · Efecto ${c.trainingEffect.toFixed(1)}`}
+              </p>
+            </div>
+          ))
+        )}
+      </section>
+
       {/* Progresión por ejercicio */}
       {used.length > 0 && (
         <section className="flex flex-col gap-3">
@@ -428,6 +510,14 @@ export default function GymTab({
           RepDB (repdb.co)
         </a>
       </p>
+
+      {cardioOpen && (
+        <CardioSheet
+          date={viewDate}
+          onAdd={onAddExercise}
+          onClose={() => setCardioOpen(false)}
+        />
+      )}
 
       {pickerOpen && (
         <ExercisePickerSheet
