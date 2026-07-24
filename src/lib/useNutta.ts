@@ -378,6 +378,11 @@ export function useNutta() {
         minutes: entry.minutes,
         caloriesBurned: entry.caloriesBurned,
         createdAt: entry.createdAt ?? Date.now(),
+        ...(entry.avgHeartRate != null && { avgHeartRate: entry.avgHeartRate }),
+        ...(entry.maxHeartRate != null && { maxHeartRate: entry.maxHeartRate }),
+        ...(entry.trainingEffect != null && {
+          trainingEffect: entry.trainingEffect,
+        }),
       }),
     );
     return eid;

@@ -18,6 +18,7 @@ import {
 import AchievementsCard from "@/components/AchievementsCard";
 import ExportPanel from "@/components/ExportPanel";
 import { averages, lastNDays } from "@/lib/analytics";
+import { groupByExercise, groupStatsInRange } from "@/lib/gym";
 import type {
   CustomGoal,
   DailyMetrics,
@@ -72,6 +73,35 @@ export default function History({
   const xKey = days === 7 ? "label" : "dm";
   const xInterval = days === 7 ? 0 : 4;
 
+  // Ventana de fuerza: la misma que la de los gráficos de comida (7d/30d).
+  const fromISO = stats[0]?.date ?? today;
+  const groupStats = useMemo(
+    () =>
+      groupStatsInRange(strengthSets, fromISO, today).filter(
+        (g) => g.sets > 0,
+      ),
+    [strengthSets, fromISO, today],
+  );
+  const maxGroupSets = Math.max(1, ...groupStats.map((g) => g.sets));
+  const strengthDaysInRange = useMemo(
+    () =>
+      new Set(
+        strengthSets
+          .filter((s) => s.date >= fromISO && s.date <= today)
+          .map((s) => s.date),
+      ).size,
+    [strengthSets, fromISO, today],
+  );
+  const topExercises = useMemo(
+    () =>
+      groupByExercise(
+        strengthSets.filter((s) => s.date >= fromISO && s.date <= today),
+      )
+        .sort((a, b) => b.volume - a.volume)
+        .slice(0, 5),
+    [strengthSets, fromISO, today],
+  );
+
   const tooltipStyle = {
     background: "var(--card)",
     border: "1px solid var(--border)",
@@ -114,6 +144,65 @@ export default function History({
         targetWeight={targetWeight}
         today={today}
       />
+
+      {/* Entrenamiento: qué grupos y ejercicios se trabajaron en la ventana */}
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="font-semibold">Entrenamiento</h2>
+          <span className="text-xs text-muted">
+            {strengthDaysInRange} días de fuerza
+          </span>
+        </div>
+
+        {groupStats.length === 0 ? (
+          <p className="py-2 text-center text-sm text-muted">
+            Cargá series de fuerza para ver qué grupos entrenaste.
+          </p>
+        ) : (
+          <>
+            <div className="flex flex-col gap-2">
+              {groupStats.map((g) => (
+                <div key={g.group} className="flex flex-col gap-1">
+                  <div className="flex items-baseline justify-between text-sm">
+                    <span className="font-medium capitalize">{g.group}</span>
+                    <span className="text-xs text-muted tabular-nums">
+                      {g.sets} {g.sets === 1 ? "serie" : "series"} ·{" "}
+                      {Math.round(g.volume).toLocaleString("es-AR")} kg
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-border">
+                    <div
+                      className="h-1.5 rounded-full bg-primary"
+                      style={{ width: `${(g.sets / maxGroupSets) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {topExercises.length > 0 && (
+              <div className="mt-4 flex flex-col gap-1.5 border-t border-border pt-3">
+                <h3 className="text-xs font-semibold text-muted">
+                  Top ejercicios
+                </h3>
+                {topExercises.map((ex) => (
+                  <div
+                    key={ex.exercise}
+                    className="flex items-baseline justify-between text-sm"
+                  >
+                    <span>{ex.exercise}</span>
+                    <span className="text-xs text-muted tabular-nums">
+                      {ex.sets.length}{" "}
+                      {ex.sets.length === 1 ? "serie" : "series"} ·{" "}
+                      {Math.round(ex.volume).toLocaleString("es-AR")} kg
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </section>
 
       {/* Promedios */}
       <section className="grid grid-cols-3 gap-3">

@@ -1,3 +1,4 @@
+import type { ObjectiveKey } from "@/lib/nutrition";
 import type { StrengthSet } from "@/lib/types";
 import exerciseGroups from "@/data/exercise-groups.json";
 import exerciseByGroup from "@/data/exercise-by-group.json";
@@ -88,12 +89,15 @@ const MUSCLE_LIFTS: { group: string; re: RegExp }[] = [
   { group: "brazos", re: /curl|b[ií]ceps|tr[ií]ceps/i },
 ];
 
+/** Lista canónica de grupos musculares (orden estable, para rankear/listar). */
+export const MUSCLE_GROUPS: string[] = MUSCLE_LIFTS.map((m) => m.group);
+
 /**
  * Grupos musculares de un ejercicio. Primero busca el nombre en el mapa real
  * del dataset (preciso para los nombres canónicos); si no está —alta manual
  * con nombre libre— cae a la detección por regex.
  */
-const groupsOf = (name: string): string[] => {
+export const groupsOf = (name: string): string[] => {
   const mapped = GROUP_MAP[normName(name)];
   if (mapped) return [mapped];
   return MUSCLE_LIFTS.filter((m) => m.re.test(name)).map((m) => m.group);
@@ -103,87 +107,6 @@ const dayDiff = (a: string, b: string) =>
   Math.round(
     (Date.parse(`${a}T00:00:00`) - Date.parse(`${b}T00:00:00`)) / 86400000,
   );
-
-/**
- * Recomendación de qué entrenar hoy, según los grupos trabajados
- * recientemente. Devuelve una frase o null si no hay historial suficiente.
- */
-export function muscleRecommendation(
-  sets: StrengthSet[],
-  today: string,
-): string | null {
-  if (sets.length === 0) return null;
-
-  const lastByGroup = new Map<string, string>();
-  const todayGroups = new Set<string>();
-  const yesterday = new Set<string>();
-  for (const s of sets) {
-    for (const g of groupsOf(s.exercise)) {
-      const prev = lastByGroup.get(g);
-      if (!prev || s.date > prev) lastByGroup.set(g, s.date);
-      if (s.date === today) todayGroups.add(g);
-      if (dayDiff(today, s.date) === 1) yesterday.add(g);
-    }
-  }
-
-  if (todayGroups.size > 0) {
-    return `Hoy ya moviste ${[...todayGroups].join(" y ")}. 🔥`;
-  }
-
-  // Grupo con más días sin entrenar (los nunca entrenados = gap grande).
-  const groups = MUSCLE_LIFTS.map((m) => m.group);
-  let pick = groups[0];
-  let maxGap = -1;
-  for (const g of groups) {
-    const last = lastByGroup.get(g);
-    const gap = last ? dayDiff(today, last) : 999;
-    if (gap > maxGap) {
-      maxGap = gap;
-      pick = g;
-    }
-  }
-
-  const yPart = yesterday.size ? `Ayer entrenaste ${[...yesterday].join(" y ")}. ` : "";
-  const last = lastByGroup.get(pick);
-  if (last && maxGap >= 5) {
-    return `${yPart}Hace ${maxGap} días que no entrenás ${pick} — hoy es un buen día.`;
-  }
-  return `${yPart}Hoy te conviene ${pick}.`;
-}
-
-/**
- * Grupo que conviene entrenar hoy (el menos reciente), o null si hoy ya
- * entrenaste algo o no hay historial. Mismo criterio que muscleRecommendation.
- */
-export function recommendedGroup(
-  sets: StrengthSet[],
-  today: string,
-): string | null {
-  if (sets.length === 0) return null;
-  const lastByGroup = new Map<string, string>();
-  let anyToday = false;
-  for (const s of sets) {
-    for (const g of groupsOf(s.exercise)) {
-      const prev = lastByGroup.get(g);
-      if (!prev || s.date > prev) lastByGroup.set(g, s.date);
-      if (s.date === today) anyToday = true;
-    }
-  }
-  if (anyToday) return null;
-
-  const groups = MUSCLE_LIFTS.map((m) => m.group);
-  let pick = groups[0];
-  let maxGap = -1;
-  for (const g of groups) {
-    const last = lastByGroup.get(g);
-    const gap = last ? dayDiff(today, last) : 999;
-    if (gap > maxGap) {
-      maxGap = gap;
-      pick = g;
-    }
-  }
-  return pick;
-}
 
 /** Objetivo de días de fuerza por semana (dispara los días de recuperación). */
 export const GYM_DAYS_GOAL = 5;
@@ -210,24 +133,135 @@ const distinctDaysThisWeek = (dates: string[], today: string) => {
   return set.size;
 };
 
-export type RoutineSuggestion = {
-  text: string;
+export type RoutineExercise = { name: string; sets: number; reps: string };
+export type RoutineGroup = { group: string; exercises: RoutineExercise[] };
+
+export type RoutinePlan = {
+  headline: string;
   tone: "train" | "recovery" | "done";
+  groups: RoutineGroup[];
+  /** Sugerencia de cardio para el día (recuperación activa o complemento). */
+  cardioTip?: string;
   /** clave estable del día para poder descartarla por jornada. */
   key: string;
 };
 
+export type GroupStats = { group: string; sets: number; volume: number };
+
 /**
- * Sugerencia del día para armar la rutina, según cuántos días de fuerza llevás
- * en la semana y qué grupo te falta. Al llegar al objetivo, propone
- * recuperación activa (cardio suave + core/movilidad).
+ * Series y volumen por grupo muscular en un rango de fechas (inclusive).
+ * Devuelve una fila por cada grupo de `MUSCLE_GROUPS` (en cero si no se
+ * entrenó), ordenadas por series desc y volumen desc como desempate — el
+ * orden que sirve para listar/graficar. Quien necesite rankear por otro
+ * criterio (ej. recencia) puede reordenar el resultado.
  */
-export function dailyRoutineSuggestion(
+export function groupStatsInRange(
+  sets: StrengthSet[],
+  fromISO: string,
+  toISO: string,
+): GroupStats[] {
+  const stats = new Map<string, GroupStats>(
+    MUSCLE_GROUPS.map((g) => [g, { group: g, sets: 0, volume: 0 }]),
+  );
+  for (const s of sets) {
+    if (s.date < fromISO || s.date > toISO) continue;
+    for (const g of groupsOf(s.exercise)) {
+      const entry = stats.get(g);
+      if (!entry) continue; // grupo fuera de MUSCLE_GROUPS (no debería pasar)
+      entry.sets += 1;
+      entry.volume += setVolume(s);
+    }
+  }
+  return [...stats.values()].sort(
+    (a, b) => b.sets - a.sets || b.volume - a.volume,
+  );
+}
+
+/** Fecha de la última vez que se trabajó cada grupo muscular. */
+function lastTrainedByGroup(sets: StrengthSet[]): Map<string, string> {
+  const last = new Map<string, string>();
+  for (const s of sets) {
+    for (const g of groupsOf(s.exercise)) {
+      const prev = last.get(g);
+      if (!prev || s.date > prev) last.set(g, s.date);
+    }
+  }
+  return last;
+}
+
+/** Esquema de entrenamiento por objetivo: reps, series, días/semana y cardio. */
+type TrainingStyle = {
+  key: ObjectiveKey;
+  /** reps por posición del ejercicio dentro de la rutina */
+  repScheme: RoutineExercise["reps"][];
+  setsPrimary: number; // series del primer ejercicio de cada grupo
+  setsSecondary: number; // series del resto
+  daysGoal: number; // objetivo de días de fuerza por semana
+  cardioTip: string; // sugerencia de cardio en días de recuperación
+};
+
+export const TRAINING_STYLES: TrainingStyle[] = [
+  {
+    key: "bajar",
+    repScheme: ["12-15", "15-20", "15-20"],
+    setsPrimary: 4,
+    setsSecondary: 3,
+    daysGoal: 5,
+    cardioTip:
+      "25-35 min de cardio suave (caminar, bici, nadar) + movilidad/core.",
+  },
+  {
+    // Valores idénticos al esquema original (antes de sumar objetivos), para
+    // no cambiarle el comportamiento a quien no definió objetivo.
+    key: "mantener",
+    repScheme: ["8-10", "10-12", "12-15"],
+    setsPrimary: 4,
+    setsSecondary: 3,
+    daysGoal: GYM_DAYS_GOAL,
+    cardioTip: "20-30 min de cardio suave (caminar, bici, nadar) + movilidad/core.",
+  },
+  {
+    key: "subir",
+    repScheme: ["6-8", "8-10", "10-12"],
+    setsPrimary: 4,
+    setsSecondary: 4,
+    daysGoal: 4,
+    cardioTip:
+      "15-20 min de cardio ligero de recuperación (no compromete la recuperación muscular).",
+  },
+];
+
+const routineGroup = (
+  group: string,
+  from: number,
+  style: TrainingStyle,
+): RoutineGroup => ({
+  group,
+  exercises: groupExercises(group, 2).map((name, i) => ({
+    name,
+    sets: i === 0 ? style.setsPrimary : style.setsSecondary,
+    reps: style.repScheme[from + i] ?? style.repScheme[style.repScheme.length - 1],
+  })),
+});
+
+/**
+ * Arma la rutina completa de hoy según lo entrenado esta semana: prioriza
+ * los grupos musculares con menos series esta semana (desempate por más
+ * días sin entrenarlos) y propone ejercicios concretos con series y reps
+ * acordes al objetivo del usuario (bajar/mantener/subir). Al llegar al
+ * objetivo semanal de días de fuerza, sugiere recuperación activa (cardio
+ * suave) en vez de una rutina de fuerza.
+ */
+export function buildDailyRoutine(
   strengthSets: StrengthSet[],
   cardio: { date: string }[],
   today: string,
-  goal: number = GYM_DAYS_GOAL,
-): RoutineSuggestion {
+  objective: ObjectiveKey = "mantener",
+): RoutinePlan {
+  const style =
+    TRAINING_STYLES.find((s) => s.key === objective) ?? TRAINING_STYLES[1];
+  const goal = style.daysGoal;
+
   const strengthDays = distinctDaysThisWeek(
     strengthSets.map((s) => s.date),
     today,
@@ -240,7 +274,8 @@ export function dailyRoutineSuggestion(
     return {
       key,
       tone: "done",
-      text: `Listo por hoy 💪 Llevás ${strengthDays}/${goal} días de fuerza esta semana.`,
+      headline: `Listo por hoy 💪 Llevás ${strengthDays}/${goal} días de fuerza esta semana.`,
+      groups: [],
     };
   }
 
@@ -249,21 +284,36 @@ export function dailyRoutineSuggestion(
     return {
       key,
       tone: "recovery",
-      text: `Ya cumpliste tus ${goal} días de fuerza 🔥 Hoy toca recuperación activa: cardio suave + core/movilidad.${extra}`,
+      headline: `Ya cumpliste tus ${goal} días de fuerza 🔥 Hoy toca recuperación activa.${extra}`,
+      groups: [],
+      cardioTip: style.cardioTip,
     };
   }
 
-  const rec = muscleRecommendation(strengthSets, today);
-  const prefix = `Vas ${strengthDays}/${goal} días esta semana. `;
-  const group = recommendedGroup(strengthSets, today);
-  const exs = group ? groupExercises(group, 3) : [];
-  const tail = exs.length ? ` Probá: ${exs.join(", ")}.` : "";
+  const weekly = groupStatsInRange(strengthSets, startOfWeek(today), today);
+  const lastByGroup = lastTrainedByGroup(strengthSets);
+
+  // Orden: menos series esta semana primero; empate → más días sin entrenarlo.
+  const ranked = [...MUSCLE_GROUPS].sort((a, b) => {
+    const wa = weekly.find((g) => g.group === a)?.sets ?? 0;
+    const wb = weekly.find((g) => g.group === b)?.sets ?? 0;
+    if (wa !== wb) return wa - wb;
+    const lastA = lastByGroup.get(a);
+    const lastB = lastByGroup.get(b);
+    const gapA = lastA ? dayDiff(today, lastA) : 999;
+    const gapB = lastB ? dayDiff(today, lastB) : 999;
+    return gapB - gapA;
+  });
+
+  const [primary, secondary] = ranked;
+  const groups: RoutineGroup[] = [routineGroup(primary, 0, style)];
+  if (secondary) groups.push(routineGroup(secondary, 1, style));
+
   return {
     key,
     tone: "train",
-    text:
-      (rec ? prefix + rec : prefix + "Arrancá tu primer día de la semana 💪") +
-      tail,
+    headline: `Vas ${strengthDays}/${goal} días esta semana. Hoy toca: ${primary}${secondary ? ` + ${secondary}` : ""}.`,
+    groups,
   };
 }
 
