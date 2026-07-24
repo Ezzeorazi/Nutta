@@ -23,6 +23,7 @@ import {
   usedExercises,
 } from "@/lib/gym";
 import { matchExercise } from "@/lib/exerciseDb";
+import type { ObjectiveKey } from "@/lib/nutrition";
 import {
   COMMON_LIFTS,
   startOfLocalDayMs,
@@ -57,6 +58,7 @@ export default function GymTab({
   strengthSets,
   exercises = [],
   today,
+  objective,
   onAddSet,
   onRemoveSet,
   onAddExercise,
@@ -65,6 +67,7 @@ export default function GymTab({
   strengthSets: StrengthSet[];
   exercises?: ExerciseEntry[];
   today: string;
+  objective?: ObjectiveKey;
   onAddSet: (
     exercise: string,
     reps: number,
@@ -98,8 +101,8 @@ export default function GymTab({
   const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
   const dayVolume = totalVolume(daySets);
   const routine = useMemo(
-    () => buildDailyRoutine(strengthSets, exercises, today),
-    [strengthSets, exercises, today],
+    () => buildDailyRoutine(strengthSets, exercises, today, objective),
+    [strengthSets, exercises, today, objective],
   );
   // Descarte por jornada: se guarda la clave del día en localStorage. Se lee en
   // el inicializador (GymTab solo monta al abrir el tab, nunca en SSR).
