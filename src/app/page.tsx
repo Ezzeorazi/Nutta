@@ -292,7 +292,14 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          summary: weeklySummary(foods, exercises, goals, today),
+          summary: weeklySummary(
+            foods,
+            exercises,
+            strengthSets,
+            goals,
+            profile.objective,
+            today,
+          ),
           memories: memories.map((m) => ({ kind: m.kind, text: m.text })),
         }),
       });
@@ -356,8 +363,11 @@ export default function Home() {
           strengthSets={strengthSets}
           exercises={exercises}
           today={today}
+          objective={profile.objective}
           onAddSet={addSet}
           onRemoveSet={removeSet}
+          onAddExercise={addExercise}
+          onRemoveExercise={removeExercise}
         />
       ) : tab === "progreso" ? (
         <ProgresoTab

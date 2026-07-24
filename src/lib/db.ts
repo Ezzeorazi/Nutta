@@ -35,6 +35,10 @@ const schema = i.schema({
       minutes: i.number(),
       caloriesBurned: i.number(),
       createdAt: i.number().optional(), // epoch ms — para el timeline
+      // Métricas opcionales del reloj/smartband (Xiaomi/Mi Fitness, etc.).
+      avgHeartRate: i.number().optional(), // LPM promedio
+      maxHeartRate: i.number().optional(), // LPM máximo
+      trainingEffect: i.number().optional(), // "Efecto del entrenamiento" (0-5)
     }),
     // Historial del chat conversacional (estilo WhatsApp).
     messages: i.entity({
