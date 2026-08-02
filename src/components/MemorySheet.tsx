@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Sheet, { inputCls } from "@/components/Sheet";
-import {
-  MEMORY_KINDS,
-  type MemoryFact,
-  type MemoryKind,
-} from "@/lib/types";
+import { Trash2 } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
+import Sheet from "@/components/ui/Sheet";
+import { inputCls } from "@/components/ui/Field";
+import { MEMORY_KINDS, type MemoryFact, type MemoryKind } from "@/lib/types";
 
 const kindMeta = (k: MemoryKind) =>
   MEMORY_KINDS.find((x) => x.key === k) ?? MEMORY_KINDS[6];
@@ -32,29 +32,22 @@ export default function MemorySheet({
   };
 
   return (
-    <Sheet title="🧠 Lo que Nutta recuerda de vos" onClose={onClose}>
-      <div className="flex flex-col gap-4">
-        <p className="text-xs text-muted">
-          La IA usa esto para entenderte (ej. «hice lo de siempre») y lo va
-          aprendiendo sola. Podés editarlo cuando quieras.
-        </p>
-
-        {/* Alta manual */}
-        <div className="flex flex-col gap-2 rounded-2xl border border-border bg-background p-3">
-          <div className="flex flex-wrap gap-1.5">
+    <Sheet
+      title="Lo que Nutta recuerda de vos"
+      description="La IA usa esto para entenderte (ej. «hice lo de siempre») y lo va aprendiendo sola."
+      onClose={onClose}
+    >
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
             {MEMORY_KINDS.map((k) => (
-              <button
+              <Chip
                 key={k.key}
-                type="button"
+                selected={kind === k.key}
                 onClick={() => setKind(k.key)}
-                className={`rounded-full border px-2.5 py-1 text-xs transition active:scale-95 ${
-                  kind === k.key
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted"
-                }`}
               >
                 {k.emoji} {k.label}
-              </button>
+              </Chip>
             ))}
           </div>
           <div className="flex gap-2">
@@ -64,32 +57,29 @@ export default function MemorySheet({
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
+              aria-label="Qué querés que recuerde"
             />
-            <button
-              type="button"
-              onClick={submit}
-              disabled={!text.trim()}
-              className="shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-95 disabled:opacity-40"
-            >
+            <Button onClick={submit} disabled={!text.trim()}>
               Guardar
-            </button>
+            </Button>
           </div>
         </div>
 
-        {/* Lista */}
+        {/* La lista ya no tiene scroll propio: el cuerpo del sheet scrollea, y
+            dos áreas de scroll anidadas hacen que el gesto elija mal. */}
         {memories.length === 0 ? (
           <p className="py-4 text-center text-sm text-muted">
             Todavía no hay nada guardado. Contale a Nutta tus hábitos o
             agregalos acá arriba.
           </p>
         ) : (
-          <ul className="flex max-h-72 flex-col gap-2 overflow-y-auto">
+          <ul className="flex flex-col gap-2">
             {memories.map((m) => {
               const meta = kindMeta(m.kind);
               return (
                 <li
                   key={m.id}
-                  className="flex items-start justify-between gap-2 rounded-xl border border-border bg-card px-3 py-2"
+                  className="flex items-start justify-between gap-2 rounded-control bg-sunken px-3.5 py-2.5"
                 >
                   <span className="flex min-w-0 items-start gap-2 text-sm">
                     <span className="shrink-0">{meta.emoji}</span>
@@ -101,11 +91,12 @@ export default function MemorySheet({
                     </span>
                   </span>
                   <button
+                    type="button"
                     onClick={() => onRemove(m.id)}
-                    className="shrink-0 text-muted hover:text-accent"
-                    aria-label="Olvidar"
+                    className="-mr-1.5 -mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
+                    aria-label={`Olvidar: ${m.text}`}
                   >
-                    ×
+                    <Trash2 size={16} aria-hidden />
                   </button>
                 </li>
               );

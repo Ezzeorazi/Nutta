@@ -10,12 +10,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { inputCls } from "@/components/Sheet";
+import { Plus, Search, Trash2, X } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import DayNavigator from "@/components/DayNavigator";
 import ExerciseImage from "@/components/ExerciseImage";
 import ExercisePickerSheet from "@/components/ExercisePickerSheet";
 import CardioSheet from "@/components/CardioSheet";
+import RestTimer from "@/components/RestTimer";
+import Button from "@/components/ui/Button";
+import Stepper from "@/components/ui/Stepper";
+import { Field, inputCls } from "@/components/ui/Field";
 import {
   buildDailyRoutine,
   exerciseProgress,
@@ -71,6 +75,8 @@ export default function GymTab({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [cardioOpen, setCardioOpen] = useState(false);
   const [progExercise, setProgExercise] = useState<string | null>(null);
+  // Instante de la última serie cargada, para el cronómetro de descanso.
+  const [restSince, setRestSince] = useState<number | null>(null);
   // Día que se está mirando (permite consultar sesiones anteriores).
   const [viewDate, setViewDate] = useState(today);
   const isToday = viewDate === today;
@@ -146,8 +152,10 @@ export default function GymTab({
       ? undefined
       : startOfLocalDayMs(viewDate) + daySets.length * 60_000;
     onAddSet(exercise.trim(), Number(reps), Number(weight) || 0, viewDate, createdAt);
-    setReps("");
-    // se mantienen ejercicio y peso para cargar la próxima serie rápido
+    // Ejercicio, reps y peso quedan cargados: lo normal es repetir la misma
+    // serie, así que la próxima sale con un solo toque. Antes se borraban las
+    // reps y había que reescribirlas en cada serie de un 4×10.
+    if (isToday) setRestSince(Date.now());
   };
 
   return (
@@ -194,11 +202,12 @@ export default function GymTab({
             </span>
             <p className="flex-1 text-sm">{routine.headline}</p>
             <button
+              type="button"
               onClick={dismissSuggestion}
               aria-label="Descartar sugerencia"
-              className="shrink-0 text-muted hover:text-accent"
+              className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
             >
-              ×
+              <X size={17} strokeWidth={2.25} aria-hidden />
             </button>
           </div>
 
@@ -229,69 +238,83 @@ export default function GymTab({
       )}
 
       {/* Alta de serie (hoy o un día pasado que estés completando) */}
-      <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
+      <section className="flex flex-col gap-4 rounded-card bg-card p-4 shadow-e1">
         {!isToday && (
           <p className="text-xs font-medium text-accent">
             Cargando series en {dayLabel(viewDate)}
           </p>
         )}
-        <button
-          onClick={() => setPickerOpen(true)}
-          className="flex items-center justify-center gap-2 rounded-xl border border-dashed border-border py-2 text-sm font-medium text-primary active:scale-[0.99] hover:border-primary"
-        >
-          🔍 Buscar ejercicio por grupo
-        </button>
+
         <div className="flex items-center gap-2">
           {matched && (
             <ExerciseImage
               image={matched.image}
               name={matched.name_es}
-              className="h-10 w-10"
+              className="h-11 w-11 shrink-0"
             />
           )}
           <input
             className={inputCls}
             list="lift-options"
-            placeholder="…o escribí el nombre (ej. Press banca)"
+            placeholder="Ejercicio (ej. Press banca)"
             value={exercise}
             onChange={(e) => setExercise(e.target.value)}
+            aria-label="Ejercicio"
           />
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            aria-label="Buscar ejercicio por grupo muscular"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-sunken text-primary transition-transform duration-(--duration-fast) active:scale-90"
+          >
+            <Search size={19} strokeWidth={2} aria-hidden />
+          </button>
         </div>
         <datalist id="lift-options">
           {options.map((o) => (
             <option key={o} value={o} />
           ))}
         </datalist>
-        <div className="flex gap-2">
-          <input
-            type="number"
-            inputMode="numeric"
-            className={inputCls}
-            placeholder="Reps"
-            value={reps}
-            onChange={(e) => setReps(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && submit()}
-          />
-          <input
-            type="number"
-            inputMode="decimal"
-            step="0.5"
-            className={inputCls}
-            placeholder="Peso (kg)"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && submit()}
-          />
-          <button
-            onClick={submit}
-            disabled={!canAdd}
-            className="shrink-0 rounded-xl bg-accent px-4 text-sm font-semibold text-accent-foreground active:scale-95 disabled:opacity-40"
-          >
-            + Serie
-          </button>
+
+        {/* Steppers en vez de campos sueltos: entre serie y serie se carga con
+            una mano y sin mirar. El peso salta de a 2.5 kg, que es el disco
+            más chico de la mayoría de los gimnasios. */}
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Repeticiones">
+            <Stepper
+              value={reps}
+              onChange={setReps}
+              step={1}
+              min={0}
+              max={100}
+              ariaLabel="Repeticiones"
+            />
+          </Field>
+          <Field label="Peso (kg)">
+            <Stepper
+              value={weight}
+              onChange={setWeight}
+              step={2.5}
+              min={0}
+              max={500}
+              suffix="kg"
+              ariaLabel="Peso en kilos"
+            />
+          </Field>
         </div>
+
+        <Button variant="accent" size="lg" full onClick={submit} disabled={!canAdd}>
+          <Plus size={18} strokeWidth={2.5} aria-hidden />
+          Agregar serie
+        </Button>
+
+        {restSince != null && (
+          <RestTimer since={restSince} onDismiss={() => setRestSince(null)} />
+        )}
+
         <p className="text-xs text-muted">
-          Dejá el peso en 0 para ejercicios con peso corporal.
+          Dejá el peso en 0 para ejercicios con peso corporal. Los valores quedan
+          cargados para repetir la serie de un toque.
         </p>
       </section>
 
@@ -343,11 +366,12 @@ export default function GymTab({
                         {s.weight} <span className="text-muted">kg</span>
                       </span>
                       <button
+                        type="button"
                         onClick={() => onRemoveSet(s.id)}
-                        className="text-muted hover:text-accent"
-                        aria-label="Eliminar serie"
+                        className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
+                        aria-label={`Eliminar serie: ${s.reps} reps × ${s.weight} kg`}
                       >
-                        ×
+                        <Trash2 size={15} aria-hidden />
                       </button>
                     </li>
                   ))}
@@ -388,11 +412,12 @@ export default function GymTab({
               <div className="mb-1 flex items-center justify-between">
                 <h3 className="font-semibold">{c.name}</h3>
                 <button
+                  type="button"
                   onClick={() => onRemoveExercise(c.id)}
-                  className="text-muted hover:text-accent"
-                  aria-label="Eliminar cardio"
+                  className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
+                  aria-label={`Eliminar cardio: ${c.name}`}
                 >
-                  ×
+                  <Trash2 size={16} aria-hidden />
                 </button>
               </div>
               <p className="text-sm text-muted">

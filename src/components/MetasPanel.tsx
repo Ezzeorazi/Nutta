@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { inputCls } from "@/components/Sheet";
+import { Trash2 } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
+import { inputCls } from "@/components/ui/Field";
 import { usedExercises } from "@/lib/gym";
 import {
   COMMON_LIFTS,
@@ -99,30 +102,23 @@ export default function MetasPanel({
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold">🎯 Metas</h2>
-        <button
-          onClick={() => setAdding((a) => !a)}
-          className="text-xs font-medium text-primary active:scale-95"
-        >
+        <h2 className="font-semibold">Metas</h2>
+        <Button variant="ghost" size="sm" onClick={() => setAdding((a) => !a)}>
           {adding ? "Cancelar" : "+ Nueva meta"}
-        </button>
+        </Button>
       </div>
 
       {adding && (
-        <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4">
-          <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-col gap-3 rounded-card bg-card p-4 shadow-e1">
+          <div className="flex flex-wrap gap-2">
             {GOAL_KINDS.map((k) => (
-              <button
+              <Chip
                 key={k.key}
+                selected={kind === k.key}
                 onClick={() => setKind(k.key)}
-                className={`rounded-full border px-2.5 py-1 text-xs transition active:scale-95 ${
-                  kind === k.key
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted"
-                }`}
               >
                 {k.label}
-              </button>
+              </Chip>
             ))}
           </div>
 
@@ -165,13 +161,9 @@ export default function MetasPanel({
               value={target}
               onChange={(e) => setTarget(e.target.value)}
             />
-            <button
-              onClick={submit}
-              disabled={!(Number(target) > 0)}
-              className="shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-95 disabled:opacity-40"
-            >
+            <Button onClick={submit} disabled={!(Number(target) > 0)}>
               Crear
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -192,22 +184,20 @@ export default function MetasPanel({
             );
             const unit = unitOf(g.kind);
             return (
-              <li
-                key={g.id}
-                className="rounded-2xl border border-border bg-card p-4"
-              >
-                <div className="flex items-baseline justify-between">
-                  <span className="font-medium">{g.label}</span>
-                  <span className="flex items-center gap-2">
+              <li key={g.id} className="rounded-card bg-card p-4 shadow-e1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="min-w-0 truncate font-medium">{g.label}</span>
+                  <span className="flex shrink-0 items-center gap-1">
                     <span className="text-sm tabular-nums text-muted">
                       {cur != null ? cur : "—"} → {g.target} {unit}
                     </span>
                     <button
+                      type="button"
                       onClick={() => onRemove(g.id)}
-                      className="text-muted hover:text-accent"
-                      aria-label="Eliminar meta"
+                      className="-mr-1.5 grid h-9 w-9 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
+                      aria-label={`Eliminar meta: ${g.label}`}
                     >
-                      ×
+                      <Trash2 size={16} aria-hidden />
                     </button>
                   </span>
                 </div>

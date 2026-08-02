@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { inputCls } from "@/components/Sheet";
+import { Trash2 } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
+import { inputCls } from "@/components/ui/Field";
 import { dailySupplementProtein, supplementLogProtein } from "@/lib/supplements";
 import {
   COMMON_SUPPLEMENTS,
@@ -65,7 +68,7 @@ export default function SupplementsCard({
   };
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4">
+    <section className="rounded-card bg-card p-4 shadow-e1">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <h2 className="font-semibold">💊 Suplementos</h2>
@@ -130,11 +133,12 @@ export default function SupplementsCard({
                   </button>
                   {managing && (
                     <button
+                      type="button"
                       onClick={() => onRemove(s.id)}
-                      className="shrink-0 px-1 text-muted hover:text-accent"
+                      className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
                       aria-label={`Eliminar ${s.name}`}
                     >
-                      ×
+                      <Trash2 size={16} aria-hidden />
                     </button>
                   )}
                 </div>
@@ -144,7 +148,7 @@ export default function SupplementsCard({
                   <div className="ml-8 flex items-center gap-2 text-xs text-muted">
                     <button
                       onClick={() => onSetQty(s.id, today, (loggedQty ?? s.defaultQty!) - 1)}
-                      className="grid h-6 w-6 place-items-center rounded-full border border-border active:scale-90"
+                      className="grid h-9 w-9 place-items-center rounded-full bg-sunken text-base text-foreground transition-transform duration-(--duration-fast) active:scale-90"
                       aria-label={`Restar ${s.unit || "unidad"}`}
                     >
                       −
@@ -154,7 +158,7 @@ export default function SupplementsCard({
                     </span>
                     <button
                       onClick={() => onSetQty(s.id, today, (loggedQty ?? s.defaultQty!) + 1)}
-                      className="grid h-6 w-6 place-items-center rounded-full border border-border active:scale-90"
+                      className="grid h-9 w-9 place-items-center rounded-full bg-sunken text-base text-foreground transition-transform duration-(--duration-fast) active:scale-90"
                       aria-label={`Sumar ${s.unit || "unidad"}`}
                     >
                       +
@@ -180,18 +184,14 @@ export default function SupplementsCard({
 
       {/* Alta */}
       {managing && (
-        <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
-          <div className="flex flex-wrap gap-1.5">
+        <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
+          <div className="flex flex-wrap gap-2">
             {COMMON_SUPPLEMENTS.filter(
               (c) => !supplements.some((s) => s.name === c),
             ).map((c) => (
-              <button
-                key={c}
-                onClick={() => setName(c)}
-                className="rounded-full border border-border px-2.5 py-1 text-xs text-muted active:scale-95 hover:border-primary"
-              >
+              <Chip key={c} onClick={() => setName(c)}>
                 + {c}
-              </button>
+              </Chip>
             ))}
           </div>
           <input
@@ -244,13 +244,9 @@ export default function SupplementsCard({
               value={protein}
               onChange={(e) => setProtein(e.target.value)}
             />
-            <button
-              onClick={submit}
-              disabled={!name.trim()}
-              className="shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-95 disabled:opacity-40"
-            >
+            <Button onClick={submit} disabled={!name.trim()}>
               Agregar
-            </button>
+            </Button>
           </div>
         </div>
       )}

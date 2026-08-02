@@ -10,7 +10,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { inputCls } from "@/components/Sheet";
+import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
+import { inputCls } from "@/components/ui/Field";
 import {
   MEASURE_PARTS,
   type BodyPart,
@@ -77,21 +79,17 @@ export default function MeasuresPanel({
         {MEASURE_PARTS.map((p) => {
           const last = measures.filter((m) => m.part === p.key).at(-1)?.cm;
           return (
-            <button
+            <Chip
               key={p.key}
+              selected={part === p.key}
               onClick={() => setPart(p.key)}
-              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition active:scale-95 ${
-                part === p.key
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted"
-              }`}
             >
               <span>{p.emoji}</span>
               {p.label}
               {last != null && (
                 <span className="tabular-nums opacity-70">· {last}cm</span>
               )}
-            </button>
+            </Chip>
           );
         })}
       </div>
@@ -174,13 +172,9 @@ export default function MeasuresPanel({
             placeholder={`${meta.label} de hoy (cm)`}
             onKeyDown={(e) => e.key === "Enter" && submit()}
           />
-          <button
-            onClick={submit}
-            disabled={!(Number(cm) > 0)}
-            className="shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-95 disabled:opacity-40"
-          >
+          <Button onClick={submit} disabled={!(Number(cm) > 0)}>
             Guardar
-          </button>
+          </Button>
         </div>
       </div>
     </section>

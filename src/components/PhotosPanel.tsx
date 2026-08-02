@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Trash2 } from "lucide-react";
 import type { ResolvedPhoto } from "@/lib/useNutta";
 
 const shortDate = (iso: string) => {
@@ -159,11 +160,12 @@ export default function PhotosPanel({
                   {shortDate(p.date)}
                 </span>
                 <button
+                  type="button"
                   onClick={() => onRemove(p.id, p.path)}
-                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-sm text-white active:scale-90"
+                  className="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-full bg-black/60 text-white transition-transform duration-(--duration-fast) active:scale-90"
                   aria-label="Eliminar foto"
                 >
-                  ×
+                  <Trash2 size={15} aria-hidden />
                 </button>
               </div>
             ))}

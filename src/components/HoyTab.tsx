@@ -31,7 +31,7 @@ import {
   type SupplementLog,
 } from "@/lib/types";
 import { waterGoalL } from "@/lib/nutrition";
-import { uid } from "@/components/Sheet";
+import { uid } from "@/lib/uid";
 import { useToast } from "@/components/ui/Toast";
 
 type Totals = {

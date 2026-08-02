@@ -13,7 +13,7 @@ import MemorySheet from "@/components/MemorySheet";
 import ProgresoTab from "@/components/ProgresoTab";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
-import { uid } from "@/components/Sheet";
+import { uid } from "@/lib/uid";
 import { db } from "@/lib/db";
 import { computeGoals, waterGoalL } from "@/lib/nutrition";
 import { dailyScore } from "@/lib/score";

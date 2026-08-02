@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
 import {
   MEALS,
@@ -138,11 +139,12 @@ export default function Timeline({
                   {ev.kcal} kcal
                 </span>
                 <button
+                  type="button"
                   onClick={ev.onRemove}
-                  className="text-muted opacity-60 transition hover:text-accent hover:opacity-100"
+                  className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent opacity-60 hover:opacity-100"
                   aria-label={`Eliminar ${ev.name}`}
                 >
-                  ×
+                  <Trash2 size={15} aria-hidden />
                 </button>
               </div>
             </div>

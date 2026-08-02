@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Sheet, { inputCls } from "@/components/Sheet";
+import { Trash2 } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
+import Sheet from "@/components/ui/Sheet";
+import { inputCls } from "@/components/ui/Field";
 import {
   MEALS,
   type MealType,
@@ -69,24 +73,24 @@ export default function RecipesSheet({
   };
 
   return (
-    <Sheet title="🍲 Recetas" onClose={onClose}>
-      <div className="flex flex-col gap-4">
+    <Sheet
+      title="Recetas"
+      description="Tus combos habituales, cargados de un toque."
+      onClose={onClose}
+    >
+      <div className="flex flex-col gap-5">
         {/* Comida destino */}
-        <div>
-          <p className="mb-1.5 text-xs text-muted">Agregar a:</p>
-          <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-medium text-muted">Agregar a</p>
+          <div className="flex flex-wrap gap-2">
             {MEALS.map((m) => (
-              <button
+              <Chip
                 key={m.key}
+                selected={meal === m.key}
                 onClick={() => setMeal(m.key)}
-                className={`rounded-full border px-2.5 py-1 text-xs transition active:scale-95 ${
-                  meal === m.key
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted"
-                }`}
               >
                 {m.label}
-              </button>
+              </Chip>
             ))}
           </div>
         </div>
@@ -102,7 +106,7 @@ export default function RecipesSheet({
             {recipes.map((r) => (
               <li
                 key={r.id}
-                className="flex items-center justify-between gap-2 rounded-xl border border-border bg-card px-3 py-2"
+                className="flex items-center justify-between gap-2 rounded-control bg-sunken px-3.5 py-2.5"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{r.name}</p>
@@ -110,22 +114,23 @@ export default function RecipesSheet({
                     {r.items.length} ingr. · {recipeKcal(r.items)} kcal
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <button
+                <div className="flex shrink-0 items-center gap-1">
+                  <Button
+                    size="sm"
                     onClick={() => {
                       onLog(r.items, meal);
                       onClose();
                     }}
-                    className="rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground active:scale-95"
                   >
-                    + Agregar
-                  </button>
+                    Agregar
+                  </Button>
                   <button
+                    type="button"
                     onClick={() => onRemove(r.id)}
-                    className="text-muted hover:text-accent"
-                    aria-label="Eliminar receta"
+                    className="-mr-1.5 grid h-9 w-9 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
+                    aria-label={`Eliminar receta: ${r.name}`}
                   >
-                    ×
+                    <Trash2 size={16} aria-hidden />
                   </button>
                 </div>
               </li>
@@ -136,13 +141,14 @@ export default function RecipesSheet({
         {/* Crear receta */}
         {!creating ? (
           <button
+            type="button"
             onClick={() => setCreating(true)}
-            className="rounded-xl border border-dashed border-border py-2.5 text-sm font-medium text-primary active:scale-[0.99]"
+            className="min-h-11 rounded-control border border-dashed border-border text-sm font-semibold text-primary transition-transform duration-(--duration-fast) active:scale-[0.99] hover:border-primary"
           >
             + Nueva receta
           </button>
         ) : (
-          <div className="flex flex-col gap-2 rounded-2xl border border-border bg-background p-3">
+          <div className="flex flex-col gap-3 rounded-card bg-sunken p-3.5">
             <input
               className={inputCls}
               placeholder="Nombre de la receta (ej. Tostada con palta)"
@@ -164,11 +170,12 @@ export default function RecipesSheet({
                       </span>
                     </span>
                     <button
+                      type="button"
                       onClick={() => setItems(items.filter((_, j) => j !== i))}
-                      className="text-muted hover:text-accent"
-                      aria-label="Quitar ingrediente"
+                      className="-mr-1.5 grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
+                      aria-label={`Quitar ingrediente: ${it.name}`}
                     >
-                      ×
+                      <Trash2 size={15} aria-hidden />
                     </button>
                   </li>
                 ))}
@@ -189,21 +196,23 @@ export default function RecipesSheet({
               <IngInput label="C" value={draft.carbs} onChange={(v) => setDraft({ ...draft, carbs: v })} />
               <IngInput label="G" value={draft.fat} onChange={(v) => setDraft({ ...draft, fat: v })} />
             </div>
-            <button
+            <Button
+              variant="secondary"
+              full
               onClick={addIngredient}
               disabled={!draft.name.trim()}
-              className="rounded-lg border border-border py-1.5 text-xs text-muted active:scale-95 disabled:opacity-40"
             >
               + Agregar ingrediente
-            </button>
+            </Button>
 
-            <button
+            <Button
+              size="lg"
+              full
               onClick={saveRecipe}
               disabled={!name.trim() || items.length === 0}
-              className="mt-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground active:scale-[0.99] disabled:opacity-40"
             >
               Guardar receta
-            </button>
+            </Button>
           </div>
         )}
       </div>

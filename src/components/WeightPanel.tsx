@@ -11,7 +11,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { inputCls } from "@/components/Sheet";
+import Button from "@/components/ui/Button";
+import { Field, inputCls } from "@/components/ui/Field";
 import type { WeightEntry } from "@/lib/types";
 import { weightPoints, weightTrend } from "@/lib/weight";
 
@@ -67,7 +68,7 @@ export default function WeightPanel({
   return (
     <section className="flex flex-col gap-4">
       {/* Resumen */}
-      <div className="rounded-3xl border border-border bg-card p-5">
+      <div className="rounded-card bg-card p-5 shadow-e1">
         <p className="text-xs uppercase tracking-wide text-muted">Peso actual</p>
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-bold tabular-nums">
@@ -101,7 +102,7 @@ export default function WeightPanel({
 
       {/* Gráfico */}
       {chartData.length >= 2 ? (
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="rounded-card bg-card p-4 shadow-e1">
           <h2 className="mb-2 font-semibold">Evolución</h2>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart
@@ -146,17 +147,14 @@ export default function WeightPanel({
           </ResponsiveContainer>
         </div>
       ) : (
-        <p className="rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted">
+        <p className="rounded-card border border-dashed border-border p-6 text-center text-sm text-muted">
           Registrá tu peso unos días y vas a ver el gráfico y la predicción acá.
         </p>
       )}
 
       {/* Registrar / Meta */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
-        <div>
-          <label className="mb-1 block text-xs text-muted">
-            Registrar peso de hoy (kg)
-          </label>
+      <div className="flex flex-col gap-4 rounded-card bg-card p-4 shadow-e1">
+        <Field label="Registrar peso de hoy (kg)">
           <div className="flex gap-2">
             <input
               type="number"
@@ -167,19 +165,16 @@ export default function WeightPanel({
               onChange={(e) => setKg(e.target.value)}
               placeholder="Ej. 80.5"
             />
-            <button
+            <Button
+              variant="accent"
               onClick={submitWeight}
               disabled={!(Number(kg) > 0)}
-              className="shrink-0 rounded-xl bg-accent px-4 text-sm font-semibold text-accent-foreground active:scale-95 disabled:opacity-40"
             >
               Guardar
-            </button>
+            </Button>
           </div>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-muted">
-            Meta de peso (kg)
-          </label>
+        </Field>
+        <Field label="Meta de peso (kg)">
           <div className="flex gap-2">
             <input
               type="number"
@@ -190,15 +185,11 @@ export default function WeightPanel({
               onChange={(e) => setTarget(e.target.value)}
               placeholder="Ej. 78"
             />
-            <button
-              onClick={submitTarget}
-              disabled={!(Number(target) > 0)}
-              className="shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-95 disabled:opacity-40"
-            >
+            <Button onClick={submitTarget} disabled={!(Number(target) > 0)}>
               Fijar
-            </button>
+            </Button>
           </div>
-        </div>
+        </Field>
       </div>
     </section>
   );

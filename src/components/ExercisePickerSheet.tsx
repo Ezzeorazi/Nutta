@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Sheet, { inputCls } from "@/components/Sheet";
+import { Plus, Search } from "lucide-react";
+import Chip from "@/components/ui/Chip";
+import Sheet from "@/components/ui/Sheet";
+import { inputCls } from "@/components/ui/Field";
 import ExerciseImage from "@/components/ExerciseImage";
 import { usedExercises } from "@/lib/gym";
 import {
@@ -48,28 +51,32 @@ export default function ExercisePickerSheet({
 
   return (
     <Sheet title="Elegí un ejercicio" onClose={onClose}>
-      <div className="flex flex-col gap-3">
-        <input
-          className={inputCls}
-          placeholder="Buscar por nombre…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          autoFocus
-        />
+      <div className="flex flex-col gap-4">
+        <div className="relative">
+          <Search
+            size={18}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+            aria-hidden
+          />
+          <input
+            className={`${inputCls} pl-11`}
+            placeholder="Buscar por nombre…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Buscar ejercicio"
+            autoFocus
+          />
+        </div>
 
         {/* Recientes: re-elegir de un toque */}
         {!query.trim() && recents.length > 0 && (
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <span className="text-xs font-medium text-muted">Recientes</span>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {recents.map((name) => (
-                <button
-                  key={name}
-                  onClick={() => pick(name)}
-                  className="rounded-full border border-border px-2.5 py-1 text-xs active:scale-95 hover:border-primary"
-                >
+                <Chip key={name} onClick={() => pick(name)}>
                   {name}
-                </button>
+                </Chip>
               ))}
             </div>
           </div>
@@ -77,25 +84,22 @@ export default function ExercisePickerSheet({
 
         {/* Chips de grupo muscular (ocultos al buscar por texto) */}
         {!query.trim() && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {MUSCLE_GROUPS.map((g) => (
-              <button
+              <Chip
                 key={g.key}
+                selected={group === g.key}
                 onClick={() => setGroup(g.key)}
-                className={`rounded-full border px-3 py-1.5 text-sm transition active:scale-95 ${
-                  group === g.key
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted"
-                }`}
               >
                 {g.emoji} {g.label}
-              </button>
+              </Chip>
             ))}
           </div>
         )}
 
-        {/* Lista de ejercicios */}
-        <ul className="flex max-h-[52vh] flex-col gap-2 overflow-y-auto pr-1">
+        {/* Lista de ejercicios. Sin scroll propio: el cuerpo del sheet ya
+            scrollea, y dos áreas anidadas hacen que el gesto elija mal. */}
+        <ul className="flex flex-col gap-2">
           {results.length === 0 ? (
             <li className="py-6 text-center text-sm text-muted">
               Sin resultados. Probá otro nombre o grupo.
@@ -104,8 +108,9 @@ export default function ExercisePickerSheet({
             results.map((ex) => (
               <li key={ex.id}>
                 <button
+                  type="button"
                   onClick={() => pick(ex.name_es)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-2 text-left transition active:scale-[0.99] hover:border-primary"
+                  className="flex w-full items-center gap-3 rounded-control bg-sunken p-2 text-left transition-transform duration-(--duration-fast) active:scale-[0.99]"
                 >
                   <ExerciseImage
                     image={ex.image}
@@ -125,7 +130,9 @@ export default function ExercisePickerSheet({
                       )}
                     </span>
                   </span>
-                  <span className="shrink-0 text-lg text-primary">+</span>
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                    <Plus size={17} strokeWidth={2.5} aria-hidden />
+                  </span>
                 </button>
               </li>
             ))
