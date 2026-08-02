@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { User } from "lucide-react";
+import AppHeader from "@/components/AppHeader";
+import DayNavigator from "@/components/DayNavigator";
 import CalorieRing from "@/components/CalorieRing";
 import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
@@ -15,6 +18,7 @@ import type { Insight } from "@/lib/insights";
 import type { DailyScore } from "@/lib/score";
 import {
   MEALS,
+  dayLabel,
   startOfLocalDayMs,
   type DailyMetrics,
   type ExerciseEntry,
@@ -28,6 +32,7 @@ import {
 } from "@/lib/types";
 import { waterGoalL } from "@/lib/nutrition";
 import { uid } from "@/components/Sheet";
+import { useToast } from "@/components/ui/Toast";
 
 type Totals = {
   calories: number;
@@ -36,23 +41,6 @@ type Totals = {
   fat: number;
   burned: number;
 };
-
-/** Corre una fecha YYYY-MM-DD `delta` días (local). */
-const shiftISO = (iso: string, delta: number) => {
-  const d = new Date(`${iso}T00:00:00`);
-  d.setDate(d.getDate() + delta);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
-
-const dayLabel = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString("es-AR", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
 
 export default function HoyTab({
   weight,
@@ -107,13 +95,14 @@ export default function HoyTab({
   setViewDate: (d: string) => void;
   onEditProfile: () => void;
   onSignOut: () => void;
-  addFood: (e: FoodEntry) => void;
+  // Devuelven el id del registro creado: es lo que permite ofrecer "Deshacer".
+  addFood: (e: FoodEntry) => string | null;
   removeFood: (id: string) => void;
   addFavorite: (fav: Omit<FavoriteFood, "id" | "createdAt">) => void;
   removeFavorite: (id: string) => void;
   addRecipe: (name: string, items: RecipeItem[]) => void;
   removeRecipe: (id: string) => void;
-  addExercise: (e: ExerciseEntry) => void;
+  addExercise: (e: ExerciseEntry) => string | null;
   removeExercise: (id: string) => void;
   setMetric: (
     date: string,
@@ -134,6 +123,7 @@ export default function HoyTab({
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
   const [recipesOpen, setRecipesOpen] = useState(false);
+  const toast = useToast();
   const isToday = viewDate === today;
   const waterGoal = waterGoalL(weight);
   // Timestamp del día que se está viendo: hoy usa el instante real (preserva el
@@ -142,51 +132,39 @@ export default function HoyTab({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">
+      <AppHeader
+        title={
+          <>
             Nut<span className="text-primary">ta</span>
-          </h1>
-          {/* Navegador de días: consultar días anteriores */}
-          <div className="mt-1 flex items-center gap-1">
+          </>
+        }
+        actions={
+          <>
+            {streak > 0 && (
+              <span
+                className="flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-sm font-semibold text-accent tabular-nums"
+                title={`Racha de entrenamiento: ${streak} ${streak === 1 ? "día" : "días"}`}
+              >
+                🔥 {streak}
+              </span>
+            )}
             <button
-              onClick={() => setViewDate(shiftISO(viewDate, -1))}
-              className="rounded-md px-1.5 text-lg leading-none text-muted active:scale-90"
-              aria-label="Día anterior"
+              onClick={onEditProfile}
+              className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary transition-transform duration-(--duration-fast) active:scale-95"
+              aria-label="Editar perfil"
             >
-              ‹
+              <User size={20} strokeWidth={2} aria-hidden />
             </button>
-            <span className="min-w-26 text-center text-sm capitalize text-muted">
-              {isToday ? "Hoy" : dayLabel(viewDate)}
-            </span>
-            <button
-              onClick={() => setViewDate(shiftISO(viewDate, 1))}
-              disabled={isToday}
-              className="rounded-md px-1.5 text-lg leading-none text-muted active:scale-90 disabled:opacity-30"
-              aria-label="Día siguiente"
-            >
-              ›
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {streak > 0 && (
-            <span
-              className="flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-sm font-semibold text-accent tabular-nums"
-              title={`Racha de entrenamiento: ${streak} ${streak === 1 ? "día" : "días"}`}
-            >
-              🔥 {streak}
-            </span>
-          )}
-          <button
-            onClick={onEditProfile}
-            className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-lg font-bold text-primary active:scale-95"
-            aria-label="Editar perfil"
-          >
-            N
-          </button>
-        </div>
-      </header>
+          </>
+        }
+        below={
+          <DayNavigator
+            viewDate={viewDate}
+            today={today}
+            onChange={setViewDate}
+          />
+        }
+      />
 
       <ScoreCard data={score} />
 
@@ -293,8 +271,13 @@ export default function HoyTab({
           favorites={favorites}
           onClose={() => setFoodOpen(null)}
           onAdd={(entry) => {
-            addFood({ ...entry, date: viewDate, createdAt: stamp() });
+            const fid = addFood({ ...entry, date: viewDate, createdAt: stamp() });
             setFoodOpen(null);
+            const meal = MEALS.find((m) => m.key === entry.meal)?.label ?? "";
+            toast(
+              `${entry.name} · ${meal}`,
+              fid ? { label: "Deshacer", onAction: () => removeFood(fid) } : undefined,
+            );
           }}
           onAddFavorite={addFavorite}
           onRemoveFavorite={removeFavorite}
@@ -305,8 +288,18 @@ export default function HoyTab({
           weight={weight}
           onClose={() => setExOpen(false)}
           onAdd={(entry) => {
-            addExercise({ ...entry, date: viewDate, createdAt: stamp() });
+            const eid = addExercise({
+              ...entry,
+              date: viewDate,
+              createdAt: stamp(),
+            });
             setExOpen(false);
+            toast(
+              `${entry.name} · ${entry.minutes} min`,
+              eid
+                ? { label: "Deshacer", onAction: () => removeExercise(eid) }
+                : undefined,
+            );
           }}
         />
       )}
@@ -317,15 +310,27 @@ export default function HoyTab({
           onCreate={addRecipe}
           onRemove={removeRecipe}
           onLog={(items, meal) => {
+            const added: string[] = [];
             for (const it of items) {
-              addFood({
+              const fid = addFood({
                 id: uid(),
                 date: viewDate,
                 meal,
                 createdAt: stamp(),
                 ...it,
               });
+              if (fid) added.push(fid);
             }
+            const label = MEALS.find((m) => m.key === meal)?.label ?? "";
+            toast(
+              `${items.length} ${items.length === 1 ? "alimento" : "alimentos"} · ${label}`,
+              added.length
+                ? {
+                    label: "Deshacer",
+                    onAction: () => added.forEach(removeFood),
+                  }
+                : undefined,
+            );
           }}
         />
       )}

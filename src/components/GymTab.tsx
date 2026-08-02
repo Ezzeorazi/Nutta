@@ -11,6 +11,8 @@ import {
   YAxis,
 } from "recharts";
 import { inputCls } from "@/components/Sheet";
+import AppHeader from "@/components/AppHeader";
+import DayNavigator from "@/components/DayNavigator";
 import ExerciseImage from "@/components/ExerciseImage";
 import ExercisePickerSheet from "@/components/ExercisePickerSheet";
 import CardioSheet from "@/components/CardioSheet";
@@ -26,6 +28,7 @@ import { matchExercise } from "@/lib/exerciseDb";
 import type { ObjectiveKey } from "@/lib/nutrition";
 import {
   COMMON_LIFTS,
+  dayLabel,
   startOfLocalDayMs,
   type ExerciseEntry,
   type StrengthSet,
@@ -36,23 +39,6 @@ const shortDate = (iso: string) => {
   const d = new Date(`${iso}T00:00:00`);
   return `${d.getDate()}/${d.getMonth() + 1}`;
 };
-
-/** Corre una fecha YYYY-MM-DD `delta` días (local). */
-const shiftISO = (iso: string, delta: number) => {
-  const d = new Date(`${iso}T00:00:00`);
-  d.setDate(d.getDate() + delta);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-};
-
-const longDate = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString("es-AR", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
 
 export default function GymTab({
   strengthSets,
@@ -166,42 +152,27 @@ export default function GymTab({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
-      <header className="flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Entreno</h1>
-          <p className="text-sm text-muted">Series, peso y PR</p>
-        </div>
-        {daySets.length > 0 && (
-          <span className="text-right text-xs text-muted">
-            Volumen
-            <span className="block text-base font-bold tabular-nums text-foreground">
-              {Math.round(dayVolume).toLocaleString("es-AR")} kg
+      <AppHeader
+        title="Entreno"
+        subtitle="Series, peso y PR"
+        actions={
+          daySets.length > 0 ? (
+            <span className="text-right text-xs text-muted">
+              Volumen
+              <span className="block text-base font-bold tabular-nums text-foreground">
+                {Math.round(dayVolume).toLocaleString("es-AR")} kg
+              </span>
             </span>
-          </span>
-        )}
-      </header>
-
-      {/* Navegador de días: consultar sesiones anteriores */}
-      <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-2 py-1.5">
-        <button
-          onClick={() => setViewDate((d) => shiftISO(d, -1))}
-          className="rounded-lg px-4 py-1 text-xl text-muted active:scale-90"
-          aria-label="Día anterior"
-        >
-          ‹
-        </button>
-        <span className="text-sm font-semibold capitalize">
-          {isToday ? "Hoy" : longDate(viewDate)}
-        </span>
-        <button
-          onClick={() => setViewDate((d) => shiftISO(d, 1))}
-          disabled={isToday}
-          className="rounded-lg px-4 py-1 text-xl text-muted active:scale-90 disabled:opacity-30"
-          aria-label="Día siguiente"
-        >
-          ›
-        </button>
-      </div>
+          ) : undefined
+        }
+        below={
+          <DayNavigator
+            viewDate={viewDate}
+            today={today}
+            onChange={setViewDate}
+          />
+        }
+      />
 
       {isToday && showSuggestion && (
         <div
@@ -261,7 +232,7 @@ export default function GymTab({
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
         {!isToday && (
           <p className="text-xs font-medium text-accent">
-            Cargando series en {longDate(viewDate)}
+            Cargando series en {dayLabel(viewDate)}
           </p>
         )}
         <button
@@ -334,7 +305,7 @@ export default function GymTab({
       ) : (
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-semibold text-muted">
-            {isToday ? "Sesión de hoy" : `Sesión — ${longDate(viewDate)}`}
+            {isToday ? "Sesión de hoy" : `Sesión — ${dayLabel(viewDate)}`}
           </h2>
           {groups.map((g) => {
             const pr = prs.get(g.exercise) ?? 0;
@@ -395,7 +366,7 @@ export default function GymTab({
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-muted">
-            {isToday ? "Cardio de hoy" : `Cardio — ${longDate(viewDate)}`}
+            {isToday ? "Cardio de hoy" : `Cardio — ${dayLabel(viewDate)}`}
           </h2>
           <button
             onClick={() => setCardioOpen(true)}

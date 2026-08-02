@@ -1,7 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "motion/react";
 import BottomNav, { type Tab } from "@/components/BottomNav";
+import AppProviders from "@/components/ui/AppProviders";
+import { ScreenSkeleton } from "@/components/ui/Skeleton";
 import Chat from "@/components/Chat";
 import GymTab from "@/components/GymTab";
 import History from "@/components/History";
@@ -87,6 +90,23 @@ export default function Home() {
   } = useNutta();
 
   const [tab, setTab] = useState<Tab>("chat");
+  // Posición de scroll de cada tab. Como cada pantalla se desmonta al cambiar,
+  // sin esto volver a un tab te dejaba arriba de todo, perdiendo dónde estabas.
+  const scrollByTab = useRef<Partial<Record<Tab, number>>>({});
+
+  const changeTab = (next: Tab) => {
+    if (next === tab) return;
+    scrollByTab.current[tab] = window.scrollY;
+    setTab(next);
+  };
+
+  useEffect(() => {
+    // El chat se auto-scrollea al último mensaje; restaurarle la posición
+    // pelearía con eso y lo dejaría a mitad de la conversación.
+    if (tab === "chat") return;
+    window.scrollTo(0, scrollByTab.current[tab] ?? 0);
+  }, [tab]);
+
   const [sending, setSending] = useState(false);
   const [editProfile, setEditProfile] = useState(false);
   const [memoryOpen, setMemoryOpen] = useState(false);
@@ -283,7 +303,7 @@ export default function Home() {
   // Pide al coach un análisis de la última semana y lo publica en el chat.
   const runWeeklyAnalysis = async () => {
     if (!profile || sending) return;
-    setTab("chat");
+    changeTab("chat");
     setLastBatch(null);
     addMessage("user", "📊 Analizá mi semana");
     setSending(true);
@@ -329,7 +349,9 @@ export default function Home() {
 
   if (authLoading) return splash;
   if (!user) return <Login />;
-  if (dataLoading) return splash;
+  // Ya sabemos que hay sesión: en vez de texto pulsando, se dibuja la forma de
+  // lo que viene, así la pantalla no salta cuando llegan los datos.
+  if (dataLoading) return <ScreenSkeleton />;
 
   // Primera vez: sin perfil → onboarding a pantalla completa.
   if (!profile) return <Onboarding onDone={saveProfile} />;
@@ -347,8 +369,19 @@ export default function Home() {
   }
 
   return (
-    <>
-      {tab === "chat" ? (
+    <AppProviders>
+      {/* Crossfade al cambiar de tab. Se anima solo la opacidad, a propósito:
+          un `transform` acá convertiría al contenedor en bloque contenedor de
+          sus descendientes `fixed` y descolocaría la barra de entrada del chat.
+          La dirección del movimiento la comunica la píldora de la nav. */}
+      <motion.div
+        key={tab}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.21, ease: [0.32, 0.72, 0, 1] }}
+        className="flex flex-1 flex-col"
+      >
+        {tab === "chat" ? (
         <Chat
           messages={messages}
           onSend={sendChat}
@@ -437,7 +470,8 @@ export default function Home() {
           toggleSupplement={toggleSupplement}
           setSupplementQty={setSupplementQty}
         />
-      )}
+        )}
+      </motion.div>
       {memoryOpen && (
         <MemorySheet
           memories={memories}
@@ -446,7 +480,7 @@ export default function Home() {
           onClose={() => setMemoryOpen(false)}
         />
       )}
-      <BottomNav tab={tab} onChange={setTab} />
-    </>
+      <BottomNav tab={tab} onChange={changeTab} />
+    </AppProviders>
   );
 }

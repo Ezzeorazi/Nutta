@@ -25,7 +25,10 @@ export const viewport: Viewport = {
   themeColor: "#16a34a",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // Sin `maximumScale`: los campos van a 16px, así que iOS ya no hace zoom al
+  // enfocarlos y no hace falta bloquear el pinch-zoom, que es una ayuda de
+  // accesibilidad para quien necesita agrandar.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -268,3 +268,23 @@ export function todayISO(): string {
 export function startOfLocalDayMs(iso: string): number {
   return new Date(`${iso}T12:00:00`).getTime();
 }
+
+/**
+ * Corre una fecha YYYY-MM-DD `delta` días, en LOCAL. El `T00:00:00` es lo que
+ * fuerza a parsear en la zona del usuario: sin él, `new Date("2026-08-02")` se
+ * interpreta como UTC y en Argentina cae el día anterior.
+ */
+export function shiftISO(iso: string, delta: number): string {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() + delta);
+  return localDateFromMs(d.getTime());
+}
+
+/** Etiqueta corta y legible de un día: "sáb, 2 ago". */
+export function dayLabel(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("es-AR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}

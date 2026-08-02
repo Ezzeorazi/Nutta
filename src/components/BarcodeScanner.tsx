@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
+import { useDismissable } from "@/lib/useDismissable";
 
 type Props = {
   onDetected: (code: string) => void;
@@ -18,6 +21,10 @@ export default function BarcodeScanner({ onDetected, onClose }: Props) {
 
   const [error, setError] = useState<string | null>(null);
   const [manual, setManual] = useState("");
+
+  // El botón atrás del teléfono vuelve al formulario en vez de salir de la app.
+  // Siempre activo: este componente solo existe mientras el escáner está abierto.
+  useDismissable(true, onClose);
 
   useEffect(() => {
     let controls: { stop: () => void } | null = null;
@@ -53,12 +60,27 @@ export default function BarcodeScanner({ onDetected, onClose }: Props) {
     };
   }, []);
 
-  return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-black">
-      <div className="flex items-center justify-between p-4 text-white">
+  // El escáner se abre DESDE el sheet de comida. vaul le aplica un `transform`
+  // al contenido del sheet, y un `position: fixed` dentro de un ancestro
+  // transformado se posiciona respecto de ese ancestro, no de la ventana: sin
+  // portal, la cámara quedaría encerrada dentro del sheet.
+  //
+  // `document` no existe durante el render del servidor. El escáner solo
+  // aparece tras un toque, así que en la práctica nunca llega ahí, pero el
+  // guard hace que eso no dependa de dónde se lo monte.
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-60 flex flex-col bg-black">
+      <div className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] text-white">
         <span className="font-semibold">Escanear código</span>
-        <button onClick={onClose} aria-label="Cerrar" className="text-2xl">
-          ×
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar"
+          className="-mr-1 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white transition-transform active:scale-90"
+        >
+          <X size={20} strokeWidth={2.25} aria-hidden />
         </button>
       </div>
 
@@ -96,15 +118,16 @@ export default function BarcodeScanner({ onDetected, onClose }: Props) {
           placeholder="O ingresá el código (EAN)"
           value={manual}
           onChange={(e) => setManual(e.target.value)}
-          className="flex-1 rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder:text-white/50 outline-none"
+          className="min-h-11 flex-1 rounded-control border border-white/20 bg-white/10 px-3.5 text-base text-white outline-none placeholder:text-white/50"
         />
         <button
           type="submit"
-          className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+          className="min-h-11 rounded-control bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-[0.97]"
         >
           Buscar
         </button>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }

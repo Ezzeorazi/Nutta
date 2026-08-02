@@ -15,6 +15,15 @@
   --accent: #f97316; /* naranja — energía / ejercicio */
   --accent-foreground: #ffffff;
   --success: #22c55e;
+
+  /* Superficie hundida: campos y celdas DENTRO de una tarjeta. Permite separar
+     jerarquías sin dibujar un borde más (menos cajas = más limpio). */
+  --sunken: #f1f5f3;
+
+  /* Elevación. En claro la profundidad se comunica con sombra. */
+  --elev-1: 0 1px 2px rgb(15 30 23 / 0.04), 0 1px 3px rgb(15 30 23 / 0.05);
+  --elev-2: 0 2px 4px rgb(15 30 23 / 0.04), 0 6px 16px rgb(15 30 23 / 0.07);
+  --elev-3: 0 2px 6px rgb(15 30 23 / 0.06), 0 12px 32px rgb(15 30 23 / 0.13);
 }
 
 .dark {
@@ -29,21 +38,14 @@
   --accent: #fb923c;
   --accent-foreground: #1a0e04;
   --success: #34d399;
-}
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-border: var(--border);
-  --color-muted: var(--muted);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-success: var(--success);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* En oscuro la sombra no se ve: la profundidad se comunica con luminosidad,
+     así que la superficie hundida es MÁS oscura que la tarjeta, no más clara. */
+  --sunken: #0d1310;
+
+  --elev-1: 0 1px 2px rgb(0 0 0 / 0.3);
+  --elev-2: 0 4px 12px rgb(0 0 0 / 0.4);
+  --elev-3: 0 12px 32px rgb(0 0 0 / 0.55);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,13 +60,67 @@
     --accent: #fb923c;
     --accent-foreground: #1a0e04;
     --success: #34d399;
+    --sunken: #0d1310;
+    --elev-1: 0 1px 2px rgb(0 0 0 / 0.3);
+    --elev-2: 0 4px 12px rgb(0 0 0 / 0.4);
+    --elev-3: 0 12px 32px rgb(0 0 0 / 0.55);
   }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-sunken: var(--sunken);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+
+  --shadow-e1: var(--elev-1);
+  --shadow-e2: var(--elev-2);
+  --shadow-e3: var(--elev-3);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  /* Escala de radios. Regla: controles `control`, tarjetas `card`, sheets `sheet`.
+     Se reajustan además xl/2xl/3xl de Tailwind a esta misma progresión para que
+     el código que ya existe caiga en el nuevo ritmo sin tocar cada archivo. */
+  --radius-control: 14px;
+  --radius-card: 20px;
+  --radius-sheet: 28px;
+  --radius-xl: 14px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
+
+  /* Movimiento. La curva `soft` es la misma que usa vaul para el arrastre del
+     sheet: compartirla hace que toda la app se sienta como un solo sistema. */
+  --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+:root {
+  /* Duraciones. Asimétricas a propósito: lo que se va, se va rápido; lo que
+     llega, llega más suave para dar tiempo a registrarlo. */
+  --duration-fast: 150ms;
+  --duration-base: 210ms;
+  --duration-slow: 320ms;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  /* Sin flash gris al tocar en Android: el feedback lo da cada control. */
+  -webkit-tap-highlight-color: transparent;
+  /* Corta el rebote elástico que deja ver el fondo detrás de la nav fija. */
+  overscroll-behavior-y: none;
 }
 
 /* Foco de teclado visible en toda la app (Preflight borra el outline nativo).
@@ -73,4 +129,20 @@ body {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Los campos van a 16px (text-base) desde `inputCls` y la primitiva `Input`:
+   iOS hace zoom al enfocar cualquier campo de menos de 16px y deja la página
+   descuadrada. Se arregla agrandando el campo, no bloqueando el zoom con
+   maximum-scale, que le saca el gesto a quien lo necesita para leer. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

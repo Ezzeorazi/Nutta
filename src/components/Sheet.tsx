@@ -1,53 +1,16 @@
-"use client";
+/**
+ * Compatibilidad.
+ *
+ * `Sheet` se rehízo sobre vaul y vive en `@/components/ui/Sheet`; los campos,
+ * en `@/components/ui/Field`. Este archivo mantiene en pie los imports de las
+ * diez pantallas que ya lo usaban, así la mejora del sheet (cruz con área
+ * táctil real, arrastre, ESC, botón atrás, scroll interno) llega a todas sin
+ * tocarlas una por una.
+ *
+ * Se borra cuando todas importen de `@/components/ui`.
+ */
+export { default } from "@/components/ui/Sheet";
+export { Field, Input, inputCls } from "@/components/ui/Field";
 
-/** Bottom-sheet reutilizable (mobile-first: se ancla abajo, centrado en sm+). */
-export default function Sheet({
-  title,
-  children,
-  onClose,
-}: {
-  title: string;
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md rounded-t-3xl border border-border bg-card p-5 sm:rounded-3xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button onClick={onClose} className="text-muted" aria-label="Cerrar">
-            ×
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-/** Label + control apilados, para los formularios. */
-export function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1 text-xs text-muted">
-      {label}
-      {children}
-    </label>
-  );
-}
-
-export const inputCls =
-  "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
-
+/** Id corto para registros nuevos. */
 export const uid = () => Math.random().toString(36).slice(2, 10);
