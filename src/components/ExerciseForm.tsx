@@ -108,7 +108,6 @@ export default function ExerciseForm({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Buscar actividad"
-              autoFocus
             />
           </div>
 
@@ -181,7 +180,6 @@ export default function ExerciseForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="ej. Fútbol con amigos"
-              autoFocus={!name}
             />
           </Field>
 

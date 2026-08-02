@@ -62,7 +62,8 @@ export default function Stepper({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           aria-label={ariaLabel}
-          className={`w-full rounded-control border border-border bg-background py-2.5 text-center text-lg font-semibold tabular-nums outline-none transition-colors focus:border-primary ${suffix ? "pl-3.5 pr-9" : "px-3.5"}`}
+          placeholder="0"
+          className={`w-full rounded-control border border-border bg-background py-2.5 text-center text-lg font-semibold tabular-nums outline-none transition-colors placeholder:text-muted placeholder:font-normal focus:border-primary ${suffix ? "pl-3.5 pr-9" : "px-3.5"}`}
         />
         {suffix && (
           <span className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-muted">

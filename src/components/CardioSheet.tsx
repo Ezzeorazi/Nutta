@@ -81,7 +81,6 @@ export default function CardioSheet({
             placeholder="Ej. Correr, Bici, Estilo libre…"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            autoFocus
           />
         </Field>
 
