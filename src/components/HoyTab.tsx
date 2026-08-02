@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { User } from "lucide-react";
+import { CookingPot, Plus, User } from "lucide-react";
+import Chip from "@/components/ui/Chip";
 import AppHeader from "@/components/AppHeader";
 import DayNavigator from "@/components/DayNavigator";
 import CalorieRing from "@/components/CalorieRing";
@@ -166,9 +167,9 @@ export default function HoyTab({
         }
       />
 
-      <ScoreCard data={score} />
-
-      <section className="flex flex-col items-center gap-6 rounded-3xl border border-border bg-card p-6">
+      {/* El anillo es el dato principal de la pantalla: va primero y sin caja
+          propia. No necesita un borde que lo separe de nada — ya es el foco. */}
+      <section className="flex flex-col items-center gap-6">
         <CalorieRing
           consumed={Math.round(totals.calories)}
           burned={Math.round(totals.burned)}
@@ -196,6 +197,42 @@ export default function HoyTab({
         </div>
       </section>
 
+      {/* Agregar. Estaba al fondo, debajo de seis tarjetas: la única vía de
+          carga manual quedaba a varios scrolls de distancia. */}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold text-muted">
+          Agregar{isToday ? "" : ` a ${dayLabel(viewDate)}`}
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {MEALS.map((m) => (
+            <Chip key={m.key} onClick={() => setFoodOpen(m.key)}>
+              <Plus size={14} strokeWidth={2.5} aria-hidden />
+              {m.label}
+            </Chip>
+          ))}
+          <Chip tone="accent" onClick={() => setExOpen(true)}>
+            <Plus size={14} strokeWidth={2.5} aria-hidden />
+            Ejercicio
+          </Chip>
+          <Chip onClick={() => setRecipesOpen(true)}>
+            <CookingPot size={14} strokeWidth={2} aria-hidden />
+            Recetas
+          </Chip>
+        </div>
+      </section>
+
+      <Timeline
+        foods={todayFoods}
+        exercises={todayEx}
+        onRemoveFood={removeFood}
+        onRemoveExercise={removeExercise}
+      />
+
+      <ScoreCard data={score} />
+
+      {/* Insights: solo el día de hoy (mira el estado actual) */}
+      {isToday && <InsightsCard insights={insights} />}
+
       {/* Bienestar: cualquier día (permite completar/corregir días pasados) */}
       <WellbeingCard
         key={viewDate}
@@ -217,49 +254,9 @@ export default function HoyTab({
         onSetQty={setSupplementQty}
       />
 
-      {/* Insights: solo el día de hoy (mira el estado actual) */}
-      {isToday && <InsightsCard insights={insights} />}
-
-      <Timeline
-        foods={todayFoods}
-        exercises={todayEx}
-        onRemoveFood={removeFood}
-        onRemoveExercise={removeExercise}
-      />
-
-      {/* Agregar manualmente (cualquier día; el chat es la vía principal para hoy) */}
-      <section className="rounded-2xl border border-border bg-card p-4">
-          <h2 className="mb-3 text-sm font-semibold text-muted">
-            Agregar{isToday ? "" : ` a ${dayLabel(viewDate)}`}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {MEALS.map((m) => (
-              <button
-                key={m.key}
-                onClick={() => setFoodOpen(m.key)}
-                className="rounded-full border border-border px-3 py-1.5 text-sm transition active:scale-95 hover:border-primary"
-              >
-                + {m.label}
-              </button>
-            ))}
-            <button
-              onClick={() => setExOpen(true)}
-              className="rounded-full border border-border px-3 py-1.5 text-sm text-accent transition active:scale-95 hover:border-accent"
-            >
-              + Ejercicio
-            </button>
-            <button
-              onClick={() => setRecipesOpen(true)}
-              className="rounded-full border border-border px-3 py-1.5 text-sm transition active:scale-95 hover:border-primary"
-            >
-              🍲 Recetas
-            </button>
-          </div>
-        </section>
-
       <button
         onClick={onSignOut}
-        className="mx-auto text-xs text-muted underline-offset-2 hover:underline"
+        className="mx-auto min-h-11 text-xs text-muted underline-offset-2 hover:underline"
       >
         Cerrar sesión
       </button>

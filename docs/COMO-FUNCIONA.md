@@ -219,7 +219,24 @@ src/
 │  ├─ GymTab.tsx          Tab "Gym" (fuerza, PR, volumen, progresión)
 │  ├─ ExercisePickerSheet.tsx  Buscador visual de ejercicios por grupo
 │  ├─ ExerciseImage.tsx    Miniatura del ejercicio (foto RepDB + fallback emoji)
-│  ├─ FoodForm/ExerciseForm/Sheet, History, BottomNav, BarcodeScanner…
+│  ├─ AchievementsCard.tsx Rachas y logros
+│  ├─ MetasPanel.tsx       Metas personalizadas (customGoals)
+│  ├─ ExportPanel.tsx      Exportación CSV/PDF
+│  ├─ RecipesSheet.tsx     Recetas propias (reutilizables como comida)
+│  ├─ PhotosPanel.tsx      Fotos de progreso
+│  ├─ CalorieRing.tsx      Anillo de calorías del día
+│  ├─ MacroBar.tsx         Barra de macros (proteína / carbos / grasa)
+│  ├─ MacroSplit.tsx       Macros en vivo del alta de comida (reparto por kcal)
+│  ├─ History.tsx          Tab "Historial" (7/30 días, gráficos)
+│  ├─ FoodForm.tsx / ExerciseForm.tsx  Alta manual (comida / cardio)
+│  ├─ CardioSheet.tsx      Alta de cardio con datos del reloj
+│  ├─ RestTimer.tsx        Cronómetro de descanso entre series
+│  ├─ AppHeader.tsx        Encabezado común a los cinco tabs (sticky)
+│  ├─ DayNavigator.tsx     Navegador de días, compartido por Hoy y Entreno
+│  ├─ BottomNav.tsx        Navegación de tabs (con safe-area)
+│  ├─ BarcodeScanner.tsx   Escáner de códigos de barras (ZXing, por portal)
+│  ├─ ServiceWorker.tsx    Registro del service worker (PWA)
+│  ├─ ui/                  Sistema de diseño (ver abajo)
 │  └─ Login.tsx / Onboarding.tsx
 ├─ data/                   Generados por scripts/build-exercises.mjs (RepDB)
 │  ├─ exercises.json       Catálogo adelgazado, con `image` (server)
@@ -229,6 +246,10 @@ src/
 └─ lib/
    ├─ db.ts               Cliente y esquema de InstantDB
    ├─ useNutta.ts         Hook central de datos (query + mutaciones)
+   ├─ useDismissable.ts   El botón atrás del teléfono cierra overlays
+   ├─ chart.ts            Estilo común de los gráficos (tooltip, ejes)
+   ├─ chatLog.ts          Formato del resumen "Registrado" del coach
+   ├─ uid.ts              Id corto para registros nuevos
    ├─ coach.ts            IA: esquema, prompts, interpretMessage/analyzeWeek
    ├─ coachContext.ts     Contexto puro para la IA (frecuentes, resumen semanal)
    ├─ coachEnrich.ts      Post-proceso: nombres canónicos + MET real (RepDB)
@@ -249,6 +270,30 @@ src/
 ```
 
 > El script [`scripts/build-exercises.mjs`](../scripts/build-exercises.mjs) genera los JSON de `data/` **y descarga las imágenes** a `public/exercises/` a partir del dataset de RepDB.
+
+### Sistema de diseño (`components/ui/`)
+
+Toda la interfaz se arma con estas piezas. Si algo necesita un botón, un campo
+o un sheet, sale de acá: es lo que evita que cada pantalla invente su propia
+versión (que es como se llegó a tener cinco radios distintos y `×` de texto
+como botón de cerrar).
+
+| Pieza | Para qué |
+|---|---|
+| `Sheet` | Bottom sheet sobre [vaul](https://vaul.emilkowal.ski/). Cierra con la cruz, arrastre, ESC, tap afuera y **el botón atrás del teléfono**. Trae scroll interno y un slot de `footer` fijo para la acción principal. |
+| `Button` | Variantes `primary` / `accent` / `secondary` / `ghost` / `danger`, alturas de 44px+. |
+| `Chip` | Píldora de selección rápida (cantidades, favoritos, filtros). |
+| `Stepper` | Número con − y +. Para cargar con una mano en el gym o la cocina. |
+| `Field` / `Input` / `inputCls` | Campos. Van a 16px porque iOS hace zoom por debajo de eso. |
+| `Toast` | Confirmación con acción **Deshacer**. Se usa vía `useToast()`. |
+| `Skeleton` | Estados de carga. |
+| `AppProviders` | `MotionConfig` (respeta `prefers-reduced-motion`) + `ToastProvider`. |
+
+Los tokens (colores, radios, elevación, curvas y duraciones de movimiento)
+viven en [`app/globals.css`](../src/app/globals.css). Regla de radios:
+`rounded-control` para controles, `rounded-card` para tarjetas,
+`rounded-sheet` para sheets. Las tarjetas se separan del fondo con
+`shadow-e1`, no con borde.
 
 ---
 

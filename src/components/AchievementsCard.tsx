@@ -20,7 +20,7 @@ export default function AchievementsCard(input: AchievementInput) {
     <section className="flex flex-col gap-4">
       {/* Rachas */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
+        <div className="rounded-card bg-card p-4 shadow-e1 text-center">
           <p className="text-3xl font-bold tabular-nums">
             🔥 {streak.current}
           </p>
@@ -28,7 +28,7 @@ export default function AchievementsCard(input: AchievementInput) {
             {streak.current === 1 ? "día" : "días"} de racha
           </p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-4 text-center">
+        <div className="rounded-card bg-card p-4 shadow-e1 text-center">
           <p className="text-3xl font-bold tabular-nums">{streak.best}</p>
           <p className="text-xs text-muted">tu mejor racha</p>
         </div>

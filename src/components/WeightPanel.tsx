@@ -1,5 +1,6 @@
 "use client";
 
+import { tooltipStyle } from "@/lib/chart";
 import { useMemo, useState } from "react";
 import {
   CartesianGrid,
@@ -47,14 +48,6 @@ export default function WeightPanel({
   );
 
   const chartData = points.map((p) => ({ label: shortDate(p.date), kg: p.kg }));
-
-  const tooltipStyle = {
-    background: "var(--card)",
-    border: "1px solid var(--border)",
-    borderRadius: 12,
-    fontSize: 12,
-    color: "var(--foreground)",
-  } as const;
 
   const submitWeight = () => {
     const n = Number(kg);

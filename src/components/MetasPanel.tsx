@@ -169,7 +169,7 @@ export default function MetasPanel({
       )}
 
       {goals.length === 0 && !adding ? (
-        <p className="rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted">
+        <p className="rounded-card border border-dashed border-border p-6 text-center text-sm text-muted">
           Ponete una meta: peso, un PR o una medida (ej. 100 kg en press
           banca).
         </p>

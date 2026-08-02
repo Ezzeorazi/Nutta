@@ -1,5 +1,6 @@
 "use client";
 
+import AppHeader from "@/components/AppHeader";
 import MeasuresPanel from "@/components/MeasuresPanel";
 import MetasPanel from "@/components/MetasPanel";
 import PhotosPanel from "@/components/PhotosPanel";
@@ -47,10 +48,7 @@ export default function ProgresoTab({
 }) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
-      <header>
-        <h1 className="text-2xl font-bold">Progreso</h1>
-        <p className="text-sm text-muted">Tu cuerpo en el tiempo</p>
-      </header>
+      <AppHeader title="Progreso" subtitle="Tu cuerpo en el tiempo" />
       <WeightPanel
         weights={weights}
         targetWeight={targetWeight}

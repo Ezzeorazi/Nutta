@@ -18,7 +18,7 @@ export default function InsightsCard({ insights }: { insights: Insight[] }) {
         {insights.map((it, i) => (
           <li
             key={i}
-            className={`flex items-center gap-3 rounded-xl border border-border border-l-4 bg-card px-3 py-2.5 ${
+            className={`flex items-center gap-3 rounded-control border-l-4 bg-card px-3.5 py-2.5 shadow-e1 ${
               toneClasses[it.tone]
             }`}
           >

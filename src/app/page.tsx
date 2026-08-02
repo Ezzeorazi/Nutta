@@ -14,6 +14,7 @@ import ProgresoTab from "@/components/ProgresoTab";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
 import { uid } from "@/lib/uid";
+import { formatLog } from "@/lib/chatLog";
 import { db } from "@/lib/db";
 import { computeGoals, waterGoalL } from "@/lib/nutrition";
 import { dailyScore } from "@/lib/score";
@@ -274,10 +275,7 @@ export default function Home() {
       for (const r of data.remember ?? []) {
         if (r?.text?.trim()) addMemory(r.kind, r.text);
       }
-      const summary = logged.length
-        ? `${data.reply || "Listo ✅"}\n\n📝 Registrado:\n${logged.join("\n")}`
-        : data.reply || "Listo ✅";
-      addMessage("assistant", summary);
+      addMessage("assistant", formatLog(data.reply || "Listo ✅", logged));
       // Solo se puede deshacer lo que tiene id propio (comidas, cardio, series).
       setLastBatch(batchSize(batch) > 0 ? batch : null);
     } catch {

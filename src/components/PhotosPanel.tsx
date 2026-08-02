@@ -68,14 +68,14 @@ export default function PhotosPanel({
       {error && <p className="text-xs text-accent">{error}</p>}
 
       {withUrl.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted">
+        <p className="rounded-card border border-dashed border-border p-6 text-center text-sm text-muted">
           Subí fotos cada tanto para comparar tu antes y después.
         </p>
       ) : (
         <>
           {/* Comparación antes/después */}
           {withUrl.length >= 2 && antes && despues && (
-            <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4">
+            <div className="flex flex-col gap-2 rounded-card bg-card p-4 shadow-e1">
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

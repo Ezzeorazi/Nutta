@@ -1,5 +1,6 @@
 "use client";
 
+import { tooltipStyle } from "@/lib/chart";
 import { useMemo, useState } from "react";
 import {
   CartesianGrid,
@@ -129,14 +130,6 @@ export default function GymTab({
     [strengthSets, selectedProg],
   );
 
-  const tooltipStyle = {
-    background: "var(--card)",
-    border: "1px solid var(--border)",
-    borderRadius: 12,
-    fontSize: 12,
-    color: "var(--foreground)",
-  } as const;
-
   // Ejercicio del catálogo que matchea lo escrito (para mostrar su miniatura).
   const matched = useMemo(
     () => (exercise.trim() ? matchExercise(exercise) : null),
@@ -182,9 +175,14 @@ export default function GymTab({
         }
       />
 
+      {/* Sugerencia de rutina. Va con su propio título: antes arrancaba con un
+          emoji y una frase suelta, y no quedaba claro si era un consejo o algo
+          que ya habías cargado. */}
       {isToday && showSuggestion && (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-sm font-semibold text-muted">Sugerencia de hoy</h2>
         <div
-          className={`flex flex-col gap-3 rounded-2xl border border-border border-l-4 bg-card px-4 py-3 ${
+          className={`flex flex-col gap-3 rounded-card border-l-4 bg-card px-4 py-3 shadow-e1 ${
             routine.tone === "recovery"
               ? "border-l-primary"
               : routine.tone === "done"
@@ -235,6 +233,7 @@ export default function GymTab({
             <p className="pl-1 text-xs text-muted">🏃 {routine.cardioTip}</p>
           )}
         </div>
+        </section>
       )}
 
       {/* Alta de serie (hoy o un día pasado que estés completando) */}
@@ -320,7 +319,7 @@ export default function GymTab({
 
       {/* Sesión del día */}
       {groups.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted">
+        <p className="rounded-card border border-dashed border-border p-6 text-center text-sm text-muted">
           {isToday
             ? "Todavía no cargaste series hoy. Sumá tu primera serie arriba 💪"
             : "No hay series este día. Si te lo olvidaste, cargalas arriba 💪"}
@@ -336,7 +335,7 @@ export default function GymTab({
             return (
               <div
                 key={g.exercise}
-                className="rounded-2xl border border-border bg-card p-4"
+                className="rounded-card bg-card p-4 shadow-e1"
               >
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="font-semibold">
@@ -400,14 +399,14 @@ export default function GymTab({
           </button>
         </div>
         {dayCardio.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-border bg-card/50 p-4 text-center text-sm text-muted">
+          <p className="rounded-card border border-dashed border-border p-4 text-center text-sm text-muted">
             Sin cardio registrado {isToday ? "hoy" : "este día"}.
           </p>
         ) : (
           dayCardio.map((c) => (
             <div
               key={c.id}
-              className="rounded-2xl border border-border bg-card p-4"
+              className="rounded-card bg-card p-4 shadow-e1"
             >
               <div className="mb-1 flex items-center justify-between">
                 <h3 className="font-semibold">{c.name}</h3>
@@ -451,7 +450,7 @@ export default function GymTab({
               </button>
             ))}
           </div>
-          <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="rounded-card bg-card p-4 shadow-e1">
             {progData.length >= 2 ? (
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart

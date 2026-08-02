@@ -1,5 +1,6 @@
 "use client";
 
+import { tooltipStyle } from "@/lib/chart";
 import { useMemo, useState } from "react";
 import {
   CartesianGrid,
@@ -54,14 +55,6 @@ export default function MeasuresPanel({
 
   const meta = MEASURE_PARTS.find((p) => p.key === part)!;
 
-  const tooltipStyle = {
-    background: "var(--card)",
-    border: "1px solid var(--border)",
-    borderRadius: 12,
-    fontSize: 12,
-    color: "var(--foreground)",
-  } as const;
-
   const submit = () => {
     const n = Number(cm);
     if (n > 0) {
@@ -94,7 +87,7 @@ export default function MeasuresPanel({
         })}
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="rounded-card bg-card p-4 shadow-e1">
         <div className="mb-2 flex items-baseline justify-between">
           <h3 className="font-semibold">
             {meta.emoji} {meta.label}

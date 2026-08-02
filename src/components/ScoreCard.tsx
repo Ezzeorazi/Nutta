@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import type { DailyScore } from "@/lib/score";
 
-/** Color del anillo según el puntaje. */
+/** Color del puntaje. */
 function scoreColor(score: number) {
   if (score >= 70) return "var(--success)";
   if (score >= 50) return "var(--primary)";
@@ -11,70 +12,64 @@ function scoreColor(score: number) {
   return "var(--muted)";
 }
 
+/**
+ * Puntaje del día.
+ *
+ * Antes era un anillo de 120px justo encima del anillo de calorías de 200px:
+ * dos gráficos circulares apilados compitiendo por ser el foco. El anillo
+ * grande es el dato principal del día, así que acá el puntaje se cuenta con el
+ * número y una barra fina.
+ */
 export default function ScoreCard({ data }: { data: DailyScore }) {
   const [open, setOpen] = useState(false);
   const { score, label, parts, tips } = data;
-
-  const size = 120;
-  const stroke = 12;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const pct = score / 100;
   const color = scoreColor(score);
 
   return (
-    <section className="rounded-3xl border border-border bg-card p-5">
-      <div className="flex items-center gap-5">
-        <div className="relative grid shrink-0 place-items-center">
-          <svg width={size} height={size} className="-rotate-90">
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={r}
-              fill="none"
-              stroke="var(--border)"
-              strokeWidth={stroke}
-            />
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={r}
-              fill="none"
-              stroke={color}
-              strokeWidth={stroke}
-              strokeLinecap="round"
-              strokeDasharray={c}
-              strokeDashoffset={c * (1 - pct)}
-              className="transition-[stroke-dashoffset] duration-700"
-            />
-          </svg>
-          <span className="absolute text-3xl font-bold tabular-nums">
-            {score}
-          </span>
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-wide text-muted">
+    <section className="flex flex-col gap-3 rounded-card bg-card p-4 shadow-e1">
+      <div className="flex items-baseline gap-3">
+        <span
+          className="text-3xl font-bold leading-none tabular-nums"
+          style={{ color }}
+        >
+          {score}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs uppercase tracking-wide text-muted">
             Score de hoy
-          </p>
-          <p className="text-xl font-bold" style={{ color }}>
+          </span>
+          <span className="block font-semibold" style={{ color }}>
             {label}
-          </p>
-          {tips[0] && (
-            <p className="mt-1 text-sm text-muted">{tips[0]}</p>
-          )}
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="mt-2 text-xs font-medium text-primary active:scale-95"
-            aria-expanded={open}
-          >
-            {open ? "Ocultar detalle" : "Ver detalle"}
-          </button>
-        </div>
+          </span>
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-label={
+            open ? "Ocultar detalle del score" : "Ver detalle del score"
+          }
+          className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-foreground"
+        >
+          <ChevronDown
+            size={18}
+            aria-hidden
+            className={`transition-transform duration-(--duration-base) ${open ? "rotate-180" : ""}`}
+          />
+        </button>
       </div>
 
+      <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
+        <div
+          className="h-full rounded-full transition-[width] duration-700"
+          style={{ width: `${score}%`, backgroundColor: color }}
+        />
+      </div>
+
+      {tips[0] && <p className="text-sm text-muted">{tips[0]}</p>}
+
       {open && (
-        <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
+        <div className="flex flex-col gap-3 border-t border-border pt-4">
           {parts.map((p) => (
             <div key={p.label} className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
@@ -85,7 +80,7 @@ export default function ScoreCard({ data }: { data: DailyScore }) {
                 </span>
               </div>
               {p.max > 0 && (
-                <div className="h-1.5 overflow-hidden rounded-full bg-border">
+                <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
                   <div
                     className="h-full rounded-full bg-primary transition-[width] duration-500"
                     style={{
@@ -97,7 +92,7 @@ export default function ScoreCard({ data }: { data: DailyScore }) {
             </div>
           ))}
           {tips.length > 1 && (
-            <ul className="mt-1 flex flex-col gap-1">
+            <ul className="flex flex-col gap-1">
               {tips.slice(1).map((t, i) => (
                 <li key={i} className="flex gap-2 text-xs text-muted">
                   <span className="text-accent">›</span> {t}
@@ -105,7 +100,7 @@ export default function ScoreCard({ data }: { data: DailyScore }) {
               ))}
             </ul>
           )}
-          <p className="text-[10px] text-muted">
+          <p className="text-[11px] text-muted">
             Sueño y agua sumarán al score cuando los registres.
           </p>
         </div>

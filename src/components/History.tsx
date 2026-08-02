@@ -1,5 +1,6 @@
 "use client";
 
+import { tooltipStyle } from "@/lib/chart";
 import { useMemo, useState } from "react";
 import {
   Bar,
@@ -16,6 +17,7 @@ import {
   YAxis,
 } from "recharts";
 import AchievementsCard from "@/components/AchievementsCard";
+import AppHeader from "@/components/AppHeader";
 import ExportPanel from "@/components/ExportPanel";
 import { averages, lastNDays } from "@/lib/analytics";
 import { groupByExercise, groupStatsInRange } from "@/lib/gym";
@@ -102,37 +104,31 @@ export default function History({
     [strengthSets, fromISO, today],
   );
 
-  const tooltipStyle = {
-    background: "var(--card)",
-    border: "1px solid var(--border)",
-    borderRadius: 12,
-    fontSize: 12,
-    color: "var(--foreground)",
-  } as const;
-
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pb-28 pt-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Historial</h1>
-          <p className="text-sm text-muted">Rachas, logros y estadísticas</p>
-        </div>
-        <div className="flex rounded-full border border-border p-0.5 text-xs">
-          {([7, 30] as const).map((d) => (
-            <button
-              key={d}
-              onClick={() => setDays(d)}
-              className={`rounded-full px-3 py-1 font-medium transition ${
-                days === d
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted"
-              }`}
-            >
-              {d}d
-            </button>
-          ))}
-        </div>
-      </header>
+      <AppHeader
+        title="Historial"
+        subtitle="Rachas, logros y estadísticas"
+        actions={
+          <div className="flex rounded-full bg-sunken p-1 text-sm">
+            {([7, 30] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setDays(d)}
+                aria-pressed={days === d}
+                className={`min-h-9 rounded-full px-3.5 font-medium transition-colors ${
+                  days === d
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted"
+                }`}
+              >
+                {d}d
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <AchievementsCard
         foods={foods}
@@ -146,7 +142,7 @@ export default function History({
       />
 
       {/* Entrenamiento: qué grupos y ejercicios se trabajaron en la ventana */}
-      <section className="rounded-2xl border border-border bg-card p-4">
+      <section className="rounded-card bg-card p-4 shadow-e1">
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="font-semibold">Entrenamiento</h2>
           <span className="text-xs text-muted">
@@ -212,7 +208,7 @@ export default function History({
       </section>
 
       {/* Calorías netas por día */}
-      <section className="rounded-2xl border border-border bg-card p-4">
+      <section className="rounded-card bg-card p-4 shadow-e1">
         <div className="mb-2 flex items-baseline justify-between">
           <h2 className="font-semibold">Calorías netas</h2>
           <span className="text-xs text-muted">
@@ -262,7 +258,7 @@ export default function History({
       </section>
 
       {/* Macros por día */}
-      <section className="rounded-2xl border border-border bg-card p-4">
+      <section className="rounded-card bg-card p-4 shadow-e1">
         <h2 className="mb-2 font-semibold">Macros (g)</h2>
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={stats} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
@@ -341,7 +337,7 @@ function StatTile({
   suffix?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3 text-center">
+    <div className="rounded-card bg-card p-3 shadow-e1 text-center">
       <p className="text-xl font-bold tabular-nums">
         {value}
         {suffix && <span className="text-sm text-muted">{suffix}</span>}

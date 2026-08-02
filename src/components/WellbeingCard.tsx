@@ -1,10 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
+import { inputCls } from "@/components/ui/Field";
 import { STEPS_GOAL, WATER_GOAL_L, type DailyMetrics } from "@/lib/types";
 
 const fmtL = (n: number) => (Math.round(n * 100) / 100).toString();
 
+/**
+ * Agua, sueño y pasos del día.
+ *
+ * Eran tres tarjetas con borde propio para tres números. Ahora es una sola con
+ * tres filas separadas por una línea fina: la misma información con un tercio
+ * del peso visual.
+ */
 export default function WellbeingCard({
   metrics,
   waterGoal = WATER_GOAL_L,
@@ -21,7 +31,9 @@ export default function WellbeingCard({
   const water = metrics?.water ?? 0;
   const sleep = metrics?.sleepHours;
   const steps = metrics?.steps ?? 0;
-  const [sleepInput, setSleepInput] = useState(sleep != null ? String(sleep) : "");
+  const [sleepInput, setSleepInput] = useState(
+    sleep != null ? String(sleep) : "",
+  );
   const [stepsInput, setStepsInput] = useState(steps ? String(steps) : "");
 
   const pct = Math.min(1, water / waterGoal);
@@ -30,51 +42,47 @@ export default function WellbeingCard({
     onSetWater(Math.max(0, Math.round((water + delta) * 100) / 100));
 
   return (
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <section className="flex flex-col rounded-card bg-card shadow-e1">
+      <h2 className="px-4 pb-1 pt-4 text-sm font-semibold text-muted">
+        Bienestar
+      </h2>
+
       {/* Agua */}
-      <div className="rounded-2xl border border-border bg-card p-4">
-        <div className="mb-2 flex items-baseline justify-between">
-          <h3 className="font-semibold">💧 Agua</h3>
+      <div className="flex flex-col gap-2.5 px-4 py-3.5">
+        <div className="flex items-baseline justify-between">
+          <h3 className="text-sm font-medium">💧 Agua</h3>
           <span className="text-xs text-muted tabular-nums">
             {fmtL(water)} / {fmtL(waterGoal)} L
           </span>
         </div>
-        <div className="mb-3 h-2 overflow-hidden rounded-full bg-border">
+        <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
           <div
             className="h-full rounded-full bg-primary transition-[width] duration-500"
             style={{ width: `${pct * 100}%` }}
           />
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => addWater(0.25)}
-            className="rounded-full border border-border px-3 py-1.5 text-sm active:scale-95 hover:border-primary"
-          >
-            + vaso
-          </button>
-          <button
-            onClick={() => addWater(0.5)}
-            className="rounded-full border border-border px-3 py-1.5 text-sm active:scale-95 hover:border-primary"
-          >
-            +½ L
-          </button>
+        <div className="flex items-center gap-2">
+          <Chip onClick={() => addWater(0.25)}>+ vaso</Chip>
+          <Chip onClick={() => addWater(0.5)}>+½ L</Chip>
           {water > 0 && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto"
               onClick={() => {
                 if (confirm("¿Resetear el agua de este día?")) onSetWater(0);
               }}
-              className="ml-auto rounded-full px-2 py-1.5 text-xs text-muted active:scale-95"
             >
-              reset
-            </button>
+              Reiniciar
+            </Button>
           )}
         </div>
       </div>
 
       {/* Sueño */}
-      <div className="rounded-2xl border border-border bg-card p-4">
-        <div className="mb-2 flex items-baseline justify-between">
-          <h3 className="font-semibold">😴 Sueño</h3>
+      <div className="flex flex-col gap-2.5 border-t border-border px-4 py-3.5">
+        <div className="flex items-baseline justify-between">
+          <h3 className="text-sm font-medium">😴 Sueño</h3>
           {sleep != null && (
             <span className="text-xs text-muted tabular-nums">{sleep} h</span>
           )}
@@ -89,30 +97,31 @@ export default function WellbeingCard({
             placeholder="Horas (ej. 7.5)"
             value={sleepInput}
             onChange={(e) => setSleepInput(e.target.value)}
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className={inputCls}
+            aria-label="Horas de sueño"
           />
-          <button
+          <Button
             onClick={() => {
               const n = Number(sleepInput);
               if (n > 0) onSetSleep(n);
             }}
             disabled={!(Number(sleepInput) > 0)}
-            className="shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-95 disabled:opacity-40"
           >
             OK
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Pasos */}
-      <div className="rounded-2xl border border-border bg-card p-4">
-        <div className="mb-2 flex items-baseline justify-between">
-          <h3 className="font-semibold">👣 Pasos</h3>
+      <div className="flex flex-col gap-2.5 border-t border-border px-4 pb-4 pt-3.5">
+        <div className="flex items-baseline justify-between">
+          <h3 className="text-sm font-medium">👣 Pasos</h3>
           <span className="text-xs text-muted tabular-nums">
-            {steps.toLocaleString("es-AR")} / {STEPS_GOAL.toLocaleString("es-AR")}
+            {steps.toLocaleString("es-AR")} /{" "}
+            {STEPS_GOAL.toLocaleString("es-AR")}
           </span>
         </div>
-        <div className="mb-3 h-2 overflow-hidden rounded-full bg-border">
+        <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
           <div
             className="h-full rounded-full bg-accent transition-[width] duration-500"
             style={{ width: `${stepsPct * 100}%` }}
@@ -126,18 +135,18 @@ export default function WellbeingCard({
             placeholder="Pasos de hoy"
             value={stepsInput}
             onChange={(e) => setStepsInput(e.target.value)}
-            className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className={inputCls}
+            aria-label="Pasos de hoy"
           />
-          <button
+          <Button
             onClick={() => {
               const n = Number(stepsInput);
               if (n >= 0) onSetSteps(n);
             }}
             disabled={!(Number(stepsInput) >= 0) || stepsInput === ""}
-            className="shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-95 disabled:opacity-40"
           >
             OK
-          </button>
+          </Button>
         </div>
       </div>
     </section>

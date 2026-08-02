@@ -86,11 +86,10 @@ export default function Timeline({
 
   if (events.length === 0) {
     return (
-      <section className="rounded-2xl border border-dashed border-border bg-card/50 p-6 text-center">
+      <section className="flex flex-col items-center gap-1 rounded-card border border-dashed border-border px-6 py-8 text-center">
+        <p className="font-medium">Tu día está vacío</p>
         <p className="text-sm text-muted">
-          Todavía no registraste nada hoy.
-          <br />
-          Contale al chat qué comiste o entrenaste 💬
+          Sumá algo con los botones de arriba, o contale al chat qué comiste.
         </p>
       </section>
     );
