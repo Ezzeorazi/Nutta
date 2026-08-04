@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Pause, Play, Trash2 } from "lucide-react";
 import type { ResolvedPhoto } from "@/lib/useNutta";
+import { weekIndexFrom, weekStartISO } from "@/lib/week";
 
 const shortDate = (iso: string) => {
   const d = new Date(`${iso}T00:00:00`);
@@ -22,16 +23,34 @@ export default function PhotosPanel({
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [antesId, setAntesId] = useState<string | null>(null);
-  const [despuesId, setDespuesId] = useState<string | null>(null);
-  const [pos, setPos] = useState(50);
+  const [idx, setIdx] = useState(0);
+  const [playing, setPlaying] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const withUrl = photos.filter((p) => p.url);
-  const antes =
-    withUrl.find((p) => p.id === antesId) ?? withUrl[0];
-  const despues =
-    withUrl.find((p) => p.id === despuesId) ?? withUrl[withUrl.length - 1];
+  // Fotos con URL resuelta, en orden cronológico (ya vienen ordenadas por día).
+  const withUrl = useMemo(() => photos.filter((p) => p.url), [photos]);
+  const firstDate = withUrl[0]?.date;
+  // "Sem. N" de una foto, relativo a la primera.
+  const weekLabel = (date: string) =>
+    firstDate ? `Sem. ${weekIndexFrom(firstDate, date)}` : "";
+
+  // Recordatorio: ¿ya subiste foto esta semana?
+  const currentWeek = weekStartISO(today);
+  const hasThisWeek = withUrl.some((p) => weekStartISO(p.date) === currentWeek);
+
+  // Mantiene el índice del time-lapse dentro de rango y arranca en la más nueva.
+  useEffect(() => {
+    setIdx((i) => Math.min(Math.max(i, 0), Math.max(0, withUrl.length - 1)));
+  }, [withUrl.length]);
+
+  // Reproducción automática del time-lapse (loop).
+  useEffect(() => {
+    if (!playing || withUrl.length < 2) return;
+    const t = setInterval(() => {
+      setIdx((i) => (i + 1) % withUrl.length);
+    }, 800);
+    return () => clearInterval(t);
+  }, [playing, withUrl.length]);
 
   const handleFile = async (file?: File) => {
     if (!file) return;
@@ -46,6 +65,8 @@ export default function PhotosPanel({
       if (fileRef.current) fileRef.current.value = "";
     }
   };
+
+  const current = withUrl[Math.min(idx, withUrl.length - 1)];
 
   return (
     <section className="flex flex-col gap-3">
@@ -67,88 +88,77 @@ export default function PhotosPanel({
 
       {error && <p className="text-xs text-accent">{error}</p>}
 
+      {/* Recordatorio semanal (solo si ya arrancaste y falta la de esta semana) */}
+      {withUrl.length > 0 && !hasThisWeek && (
+        <p className="rounded-card border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm text-accent">
+          📸 Te toca la foto de la semana. Sumá una para seguir la comparación.
+        </p>
+      )}
+
       {withUrl.length === 0 ? (
         <p className="rounded-card border border-dashed border-border p-6 text-center text-sm text-muted">
           Subí fotos cada tanto para comparar tu antes y después.
         </p>
       ) : (
         <>
-          {/* Comparación antes/después */}
-          {withUrl.length >= 2 && antes && despues && (
+          {/* Time-lapse: recorré toda tu evolución con el slider o dale play */}
+          {withUrl.length >= 2 && current && (
             <div className="flex flex-col gap-2 rounded-card bg-card p-4 shadow-e1">
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={despues.url}
-                  alt="Después"
+                  src={current.url}
+                  alt={`Progreso ${shortDate(current.date)}`}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={antes.url}
-                  alt="Antes"
-                  className="absolute inset-0 h-full w-full object-cover"
-                  style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
-                />
-                <div
-                  className="absolute inset-y-0 w-0.5 bg-white/90"
-                  style={{ left: `${pos}%` }}
-                />
-                <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white">
-                  Antes · {shortDate(antes.date)}
+                <span className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white">
+                  {weekLabel(current.date)} · {shortDate(current.date)}
                 </span>
-                <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white">
-                  Después · {shortDate(despues.date)}
+                <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] text-white tabular-nums">
+                  {idx + 1}/{withUrl.length}
                 </span>
               </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={pos}
-                onChange={(e) => setPos(Number(e.target.value))}
-                className="w-full accent-primary"
-                aria-label="Comparar antes y después"
-              />
-              <div className="flex gap-2">
-                <label className="flex flex-1 flex-col gap-1 text-xs text-muted">
-                  Antes
-                  <select
-                    value={antes.id}
-                    onChange={(e) => setAntesId(e.target.value)}
-                    className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground"
-                  >
-                    {withUrl.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {shortDate(p.date)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex flex-1 flex-col gap-1 text-xs text-muted">
-                  Después
-                  <select
-                    value={despues.id}
-                    onChange={(e) => setDespuesId(e.target.value)}
-                    className="rounded-lg border border-border bg-background px-2 py-1.5 text-sm text-foreground"
-                  >
-                    {withUrl.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {shortDate(p.date)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPlaying((p) => !p)}
+                  aria-label={playing ? "Pausar" : "Reproducir evolución"}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground active:scale-95"
+                >
+                  {playing ? (
+                    <Pause size={18} aria-hidden />
+                  ) : (
+                    <Play size={18} aria-hidden />
+                  )}
+                </button>
+                <input
+                  type="range"
+                  min={0}
+                  max={withUrl.length - 1}
+                  value={Math.min(idx, withUrl.length - 1)}
+                  onChange={(e) => {
+                    setPlaying(false);
+                    setIdx(Number(e.target.value));
+                  }}
+                  className="w-full accent-primary"
+                  aria-label="Recorrer fotos en el tiempo"
+                />
               </div>
             </div>
           )}
 
-          {/* Galería */}
+          {/* Galería con etiqueta de semana */}
           <div className="grid grid-cols-3 gap-2">
-            {withUrl.map((p) => (
-              <div
+            {withUrl.map((p, i) => (
+              <button
                 key={p.id}
+                type="button"
+                onClick={() => {
+                  setPlaying(false);
+                  setIdx(i);
+                }}
                 className="group relative aspect-square overflow-hidden rounded-xl bg-card"
+                aria-label={`Ver ${weekLabel(p.date)} (${shortDate(p.date)})`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -157,17 +167,19 @@ export default function PhotosPanel({
                   className="h-full w-full object-cover"
                 />
                 <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 text-[10px] text-white">
-                  {shortDate(p.date)}
+                  {weekLabel(p.date)}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => onRemove(p.id, p.path)}
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(p.id, p.path);
+                  }}
                   className="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-full bg-black/60 text-white transition-transform duration-(--duration-fast) active:scale-90"
                   aria-label="Eliminar foto"
                 >
                   <Trash2 size={15} aria-hidden />
-                </button>
-              </div>
+                </span>
+              </button>
             ))}
           </div>
         </>

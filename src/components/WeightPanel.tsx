@@ -16,6 +16,7 @@ import Button from "@/components/ui/Button";
 import { Field, inputCls } from "@/components/ui/Field";
 import type { WeightEntry } from "@/lib/types";
 import { weightPoints, weightTrend } from "@/lib/weight";
+import { weeklyAverages } from "@/lib/week";
 
 const shortDate = (iso: string) => {
   const d = new Date(`${iso}T00:00:00`);
@@ -47,7 +48,16 @@ export default function WeightPanel({
     targetWeight ? String(targetWeight) : "",
   );
 
-  const chartData = points.map((p) => ({ label: shortDate(p.date), kg: p.kg }));
+  // El gráfico muestra el promedio por semana (lunes): suaviza el ruido diario.
+  const chartData = useMemo(
+    () =>
+      weeklyAverages(
+        points,
+        (p) => p.date,
+        (p) => p.kg,
+      ).map((w) => ({ label: shortDate(w.weekStart), kg: w.value })),
+    [points],
+  );
 
   const submitWeight = () => {
     const n = Number(kg);
@@ -96,7 +106,10 @@ export default function WeightPanel({
       {/* Gráfico */}
       {chartData.length >= 2 ? (
         <div className="rounded-card bg-card p-4 shadow-e1">
-          <h2 className="mb-2 font-semibold">Evolución</h2>
+          <div className="mb-2 flex items-baseline justify-between">
+            <h2 className="font-semibold">Evolución</h2>
+            <span className="text-xs text-muted">por semana</span>
+          </div>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart
               data={chartData}
@@ -141,7 +154,8 @@ export default function WeightPanel({
         </div>
       ) : (
         <p className="rounded-card border border-dashed border-border p-6 text-center text-sm text-muted">
-          Registrá tu peso unos días y vas a ver el gráfico y la predicción acá.
+          Registrá tu peso a lo largo de un par de semanas y vas a ver el
+          gráfico y la predicción acá.
         </p>
       )}
 

@@ -19,6 +19,7 @@ import {
   type BodyPart,
   type MeasureEntry,
 } from "@/lib/types";
+import { weeklyAverages } from "@/lib/week";
 
 const shortDate = (iso: string) => {
   const d = new Date(`${iso}T00:00:00`);
@@ -48,10 +49,16 @@ export default function MeasuresPanel({
   const delta =
     partPoints.length >= 2 ? current! - partPoints[0].cm : null;
 
-  const chartData = partPoints.map((p) => ({
-    label: shortDate(p.date),
-    cm: p.cm,
-  }));
+  // Promedio por semana (lunes) de la parte elegida.
+  const chartData = useMemo(
+    () =>
+      weeklyAverages(
+        partPoints,
+        (p) => p.date,
+        (p) => p.cm,
+      ).map((w) => ({ label: shortDate(w.weekStart), cm: w.value })),
+    [partPoints],
+  );
 
   const meta = MEASURE_PARTS.find((p) => p.key === part)!;
 
@@ -149,7 +156,7 @@ export default function MeasuresPanel({
           </ResponsiveContainer>
         ) : (
           <p className="py-3 text-center text-sm text-muted">
-            Registrá {meta.label.toLowerCase()} un par de veces para ver la
+            Registrá {meta.label.toLowerCase()} en un par de semanas para ver la
             evolución.
           </p>
         )}
