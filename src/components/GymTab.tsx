@@ -295,8 +295,8 @@ export default function GymTab({
         </datalist>
 
         {/* Steppers en vez de campos sueltos: entre serie y serie se carga con
-            una mano y sin mirar. El peso salta de a 2.5 kg, que es el disco
-            más chico de la mayoría de los gimnasios. */}
+            una mano y sin mirar. El peso salta de a 5 kg (para 10, dos toques);
+            para ajustes finos el campo sigue siendo editable a mano. */}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Repeticiones">
             <Stepper
@@ -312,7 +312,7 @@ export default function GymTab({
             <Stepper
               value={weight}
               onChange={setWeight}
-              step={2.5}
+              step={5}
               min={0}
               max={500}
               ariaLabel="Peso en kilos"
@@ -397,7 +397,7 @@ export default function GymTab({
                             <Stepper
                               value={editWeight}
                               onChange={setEditWeight}
-                              step={2.5}
+                              step={5}
                               min={0}
                               max={500}
                               ariaLabel="Peso en kilos"
