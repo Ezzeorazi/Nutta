@@ -306,7 +306,6 @@ export default function FoodForm({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Buscar alimento"
-                autoFocus
               />
             </div>
             <button
@@ -457,7 +456,6 @@ export default function FoodForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="ej. Yogur natural"
-              autoFocus={!name}
             />
           </Field>
 

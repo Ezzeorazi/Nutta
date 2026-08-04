@@ -64,7 +64,6 @@ export default function ExercisePickerSheet({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Buscar ejercicio"
-            autoFocus
           />
         </div>
 
