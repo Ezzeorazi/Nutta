@@ -45,6 +45,72 @@ const shortDate = (iso: string) => {
   return `${d.getDate()}/${d.getMonth() + 1}`;
 };
 
+/**
+ * Mini-formulario de una serie (reps + peso) con steppers. Se usa tanto para
+ * EDITAR una serie existente como para AGREGAR otra a un ejercicio ya cargado,
+ * así ambos flujos se ven y se cargan igual (con −/+, sin teclado).
+ */
+function SetForm({
+  reps,
+  weight,
+  onReps,
+  onWeight,
+  onSave,
+  onCancel,
+  saveLabel,
+}: {
+  reps: string;
+  weight: string;
+  onReps: (v: string) => void;
+  onWeight: (v: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  saveLabel: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-xl bg-sunken p-2">
+      <div className="flex flex-col gap-2">
+        <div>
+          <p className="mb-1 text-[11px] text-muted">Reps</p>
+          <Stepper
+            value={reps}
+            onChange={onReps}
+            step={1}
+            min={0}
+            max={100}
+            ariaLabel="Repeticiones"
+          />
+        </div>
+        <div>
+          <p className="mb-1 text-[11px] text-muted">Peso (kg)</p>
+          <Stepper
+            value={weight}
+            onChange={onWeight}
+            step={5}
+            min={0}
+            max={500}
+            ariaLabel="Peso en kilos"
+          />
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button size="sm" variant="secondary" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button
+          size="sm"
+          variant="accent"
+          onClick={onSave}
+          disabled={!(Number(reps) > 0)}
+        >
+          <Check size={15} strokeWidth={2.5} aria-hidden />
+          {saveLabel}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function GymTab({
   strengthSets,
   exercises = [],
@@ -80,15 +146,19 @@ export default function GymTab({
   const [progExercise, setProgExercise] = useState<string | null>(null);
   // Instante de la última serie cargada, para el cronómetro de descanso.
   const [restSince, setRestSince] = useState<number | null>(null);
-  // Serie que se está editando (id) + sus valores en edición.
+  // Serie que se está editando (id) o agregando (ejercicio) + sus valores.
   const [editId, setEditId] = useState<string | null>(null);
   const [editReps, setEditReps] = useState("");
   const [editWeight, setEditWeight] = useState("");
+  const [addingTo, setAddingTo] = useState<string | null>(null);
+  const [newReps, setNewReps] = useState("");
+  const [newWeight, setNewWeight] = useState("");
 
   const startEdit = (s: StrengthSet) => {
     setEditId(s.id);
     setEditReps(String(s.reps));
     setEditWeight(String(s.weight));
+    setAddingTo(null);
   };
   const cancelEdit = () => setEditId(null);
   const saveEdit = () => {
@@ -97,6 +167,7 @@ export default function GymTab({
     }
     setEditId(null);
   };
+
   // Día que se está mirando (permite consultar sesiones anteriores).
   const [viewDate, setViewDate] = useState(today);
   const isToday = viewDate === today;
@@ -168,6 +239,34 @@ export default function GymTab({
     // serie, así que la próxima sale con un solo toque. Antes se borraban las
     // reps y había que reescribirlas en cada serie de un 4×10.
     if (isToday) setRestSince(Date.now());
+  };
+
+  // Agregar otra serie a un ejercicio ya cargado, sin reescribir el nombre.
+  const startAdd = (g: { exercise: string; sets: StrengthSet[] }) => {
+    // Prefill con la última serie: lo normal es repetir reps/peso.
+    const last = g.sets[g.sets.length - 1];
+    setAddingTo(g.exercise);
+    setNewReps(last ? String(last.reps) : "");
+    setNewWeight(last ? String(last.weight) : "");
+    setEditId(null);
+  };
+  const cancelAdd = () => setAddingTo(null);
+  const saveAdd = () => {
+    if (addingTo && Number(newReps) > 0) {
+      // Mismo anclaje de fecha que el alta de arriba (día pasado → mediodía).
+      const createdAt = isToday
+        ? undefined
+        : startOfLocalDayMs(viewDate) + daySets.length * 60_000;
+      onAddSet(
+        addingTo,
+        Number(newReps),
+        Number(newWeight) || 0,
+        viewDate,
+        createdAt,
+      );
+      if (isToday) setRestSince(Date.now());
+    }
+    setAddingTo(null);
   };
 
   return (
@@ -377,54 +476,16 @@ export default function GymTab({
                 <ul className="flex flex-col gap-1.5">
                   {g.sets.map((s, i) =>
                     editId === s.id ? (
-                      <li
-                        key={s.id}
-                        className="flex flex-col gap-2 rounded-xl bg-sunken p-2"
-                      >
-                        <div className="flex flex-col gap-2">
-                          <div>
-                            <p className="mb-1 text-[11px] text-muted">Reps</p>
-                            <Stepper
-                              value={editReps}
-                              onChange={setEditReps}
-                              step={1}
-                              min={0}
-                              max={100}
-                              ariaLabel="Repeticiones"
-                            />
-                          </div>
-                          <div>
-                            <p className="mb-1 text-[11px] text-muted">
-                              Peso (kg)
-                            </p>
-                            <Stepper
-                              value={editWeight}
-                              onChange={setEditWeight}
-                              step={5}
-                              min={0}
-                              max={500}
-                              ariaLabel="Peso en kilos"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={cancelEdit}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="accent"
-                            onClick={saveEdit}
-                            disabled={!(Number(editReps) > 0)}
-                          >
-                            <Check size={15} strokeWidth={2.5} aria-hidden />
-                            Guardar
-                          </Button>
-                        </div>
+                      <li key={s.id}>
+                        <SetForm
+                          reps={editReps}
+                          weight={editWeight}
+                          onReps={setEditReps}
+                          onWeight={setEditWeight}
+                          onSave={saveEdit}
+                          onCancel={cancelEdit}
+                          saveLabel="Guardar"
+                        />
                       </li>
                     ) : (
                       <li
@@ -458,10 +519,34 @@ export default function GymTab({
                     ),
                   )}
                 </ul>
-                <p className="mt-2 text-xs text-muted">
-                  PR: {pr} kg · {g.sets.length}{" "}
-                  {g.sets.length === 1 ? "serie" : "series"}
-                </p>
+                {addingTo === g.exercise ? (
+                  <div className="mt-2">
+                    <SetForm
+                      reps={newReps}
+                      weight={newWeight}
+                      onReps={setNewReps}
+                      onWeight={setNewWeight}
+                      onSave={saveAdd}
+                      onCancel={cancelAdd}
+                      saveLabel="Agregar"
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-2 flex items-center justify-between">
+                    <p className="text-xs text-muted">
+                      PR: {pr} kg · {g.sets.length}{" "}
+                      {g.sets.length === 1 ? "serie" : "series"}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => startAdd(g)}
+                      className="flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-xs font-medium text-primary transition-colors active:scale-95 hover:border-primary"
+                    >
+                      <Plus size={13} strokeWidth={2.5} aria-hidden />
+                      Serie
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
