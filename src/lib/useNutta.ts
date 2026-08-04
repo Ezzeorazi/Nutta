@@ -533,6 +533,14 @@ export function useNutta() {
   const removeSet = (sid: string) =>
     db.transact(db.tx.strengthSets[sid].delete());
 
+  /** Corrige reps/peso de una serie ya cargada (no toca su día ni su orden). */
+  const updateSet = (sid: string, reps: number, weight: number) => {
+    if (!user || !(reps > 0)) return;
+    db.transact(
+      db.tx.strengthSets[sid].update({ reps, weight: weight || 0 }),
+    );
+  };
+
   const addGoal = (
     kind: GoalKind,
     label: string,
@@ -695,6 +703,7 @@ export function useNutta() {
     setSupplementQty,
     addSet,
     removeSet,
+    updateSet,
     addGoal,
     removeGoal,
     addPhoto,

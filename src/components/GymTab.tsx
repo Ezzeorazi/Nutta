@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Plus, Search, Trash2, X } from "lucide-react";
+import { Check, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import DayNavigator from "@/components/DayNavigator";
 import ExerciseImage from "@/components/ExerciseImage";
@@ -52,6 +52,7 @@ export default function GymTab({
   objective,
   onAddSet,
   onRemoveSet,
+  onEditSet,
   onAddExercise,
   onRemoveExercise,
 }: {
@@ -67,6 +68,7 @@ export default function GymTab({
     createdAt?: number,
   ) => void;
   onRemoveSet: (id: string) => void;
+  onEditSet: (id: string, reps: number, weight: number) => void;
   onAddExercise: (e: ExerciseEntry) => void;
   onRemoveExercise: (id: string) => void;
 }) {
@@ -78,6 +80,23 @@ export default function GymTab({
   const [progExercise, setProgExercise] = useState<string | null>(null);
   // Instante de la última serie cargada, para el cronómetro de descanso.
   const [restSince, setRestSince] = useState<number | null>(null);
+  // Serie que se está editando (id) + sus valores en edición.
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editReps, setEditReps] = useState("");
+  const [editWeight, setEditWeight] = useState("");
+
+  const startEdit = (s: StrengthSet) => {
+    setEditId(s.id);
+    setEditReps(String(s.reps));
+    setEditWeight(String(s.weight));
+  };
+  const cancelEdit = () => setEditId(null);
+  const saveEdit = () => {
+    if (editId && Number(editReps) > 0) {
+      onEditSet(editId, Number(editReps), Number(editWeight) || 0);
+    }
+    setEditId(null);
+  };
   // Día que se está mirando (permite consultar sesiones anteriores).
   const [viewDate, setViewDate] = useState(today);
   const isToday = viewDate === today;
@@ -296,7 +315,6 @@ export default function GymTab({
               step={2.5}
               min={0}
               max={500}
-              suffix="kg"
               ariaLabel="Peso en kilos"
             />
           </Field>
@@ -354,26 +372,88 @@ export default function GymTab({
                   </span>
                 </div>
                 <ul className="flex flex-col gap-1.5">
-                  {g.sets.map((s, i) => (
-                    <li
-                      key={s.id}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span className="tabular-nums">
-                        <span className="mr-2 text-muted">{i + 1}.</span>
-                        {s.reps} <span className="text-muted">reps ×</span>{" "}
-                        {s.weight} <span className="text-muted">kg</span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => onRemoveSet(s.id)}
-                        className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
-                        aria-label={`Eliminar serie: ${s.reps} reps × ${s.weight} kg`}
+                  {g.sets.map((s, i) =>
+                    editId === s.id ? (
+                      <li
+                        key={s.id}
+                        className="flex flex-col gap-2 rounded-xl bg-sunken p-2"
                       >
-                        <Trash2 size={15} aria-hidden />
-                      </button>
-                    </li>
-                  ))}
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <p className="mb-1 text-[11px] text-muted">Reps</p>
+                            <Stepper
+                              value={editReps}
+                              onChange={setEditReps}
+                              step={1}
+                              min={0}
+                              max={100}
+                              ariaLabel="Repeticiones"
+                            />
+                          </div>
+                          <div>
+                            <p className="mb-1 text-[11px] text-muted">
+                              Peso (kg)
+                            </p>
+                            <Stepper
+                              value={editWeight}
+                              onChange={setEditWeight}
+                              step={2.5}
+                              min={0}
+                              max={500}
+                              ariaLabel="Peso en kilos"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={cancelEdit}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="accent"
+                            onClick={saveEdit}
+                            disabled={!(Number(editReps) > 0)}
+                          >
+                            <Check size={15} strokeWidth={2.5} aria-hidden />
+                            Guardar
+                          </Button>
+                        </div>
+                      </li>
+                    ) : (
+                      <li
+                        key={s.id}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="tabular-nums">
+                          <span className="mr-2 text-muted">{i + 1}.</span>
+                          {s.reps} <span className="text-muted">reps ×</span>{" "}
+                          {s.weight} <span className="text-muted">kg</span>
+                        </span>
+                        <div className="flex items-center">
+                          <button
+                            type="button"
+                            onClick={() => startEdit(s)}
+                            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-primary"
+                            aria-label={`Editar serie: ${s.reps} reps × ${s.weight} kg`}
+                          >
+                            <Pencil size={14} aria-hidden />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onRemoveSet(s.id)}
+                            className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
+                            aria-label={`Eliminar serie: ${s.reps} reps × ${s.weight} kg`}
+                          >
+                            <Trash2 size={15} aria-hidden />
+                          </button>
+                        </div>
+                      </li>
+                    ),
+                  )}
                 </ul>
                 <p className="mt-2 text-xs text-muted">
                   PR: {pr} kg · {g.sets.length}{" "}

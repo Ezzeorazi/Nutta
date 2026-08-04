@@ -84,6 +84,7 @@ export default function Home() {
     setSupplementQty,
     addSet,
     removeSet,
+    updateSet,
     addGoal,
     removeGoal,
     addPhoto,
@@ -397,6 +398,7 @@ export default function Home() {
           objective={profile.objective}
           onAddSet={addSet}
           onRemoveSet={removeSet}
+          onEditSet={updateSet}
           onAddExercise={addExercise}
           onRemoveExercise={removeExercise}
         />
