@@ -109,6 +109,17 @@ Los **5 tabs**:
 - **Ejercicio (cardio)**: actividades con valores **MET** (`MET × peso × horas`) en [`ExerciseForm.tsx`](../src/components/ExerciseForm.tsx) y [`src/lib/exercises.ts`](../src/lib/exercises.ts).
 - Onboarding y metas (Mifflin-St Jeor → TDEE → macros) en [`src/lib/nutrition.ts`](../src/lib/nutrition.ts).
 
+### Reloj / smartband (Xiaomi y cía.)
+- **Por qué vía Strava**: Xiaomi **no publica API** ni OAuth para terceros. Lo único que Mi Fitness deja salir es hacia Strava/Suunto/Health Connect/Apple Health. Health Connect es API **nativa de Android** (una PWA no la puede leer), Google Fit se apaga a fines de 2026, y hablarle al reloj por Bluetooth desde el navegador implicaría reimplementar su protocolo cifrado. Queda Strava, que sí tiene API pública: **Mi Fitness → Strava → Nutta**.
+- **Qué trae**: los entrenamientos que arrancás a mano en el reloj, con duración, calorías y **LPM promedio/máximo** — justo los campos que ya tenía el cardio. **No trae pasos, sueño ni efecto del entrenamiento** (Strava no los recibe).
+- **Sincronizar**: tab **Gym** → sección *Cardio* → **Conectar Strava** (OAuth) → **Sincronizar** (últimos 30 días). Los registros importados llevan el chip **"Reloj"**.
+- **Sin duplicados**: cada actividad se guarda con `externalId` (`strava:<id>`) y `importExercises` descarta lo que ya está, así el botón se puede apretar sin miedo.
+- **Los tokens**: el `client_secret` vive solo en el server y el **refresh token va en una cookie httpOnly**, no en InstantDB — la base es cliente y ahí el token viajaría al navegador. Strava rota el refresh cada tanto y la ruta reescribe la cookie cuando pasa.
+- **Las calorías** solo están en el detalle de cada actividad, no en el listado: hay una request extra por entrenamiento, con tope de 30 (el límite de Strava es 100 requests / 15 min).
+- **Escanear la captura (IA con visión)**: cubre lo que Strava no manda. Botón **Escanear** en el alta de cardio y en la tarjeta de *Bienestar* (Hoy): se elige una captura de la pantalla del reloj y la IA saca actividad/minutos/kcal/LPM/efecto, o pasos/sueño si es el resumen del día. **Completa el formulario, no guarda**: el número siempre se ve antes de confirmar.
+  - No usa `generateObject`: los únicos modelos con visión de Groq son los **Llama 4**, que no soportan `response_format: json_schema` (misma razón que `COACH_MODEL`). Se pide JSON por prompt y se parsea a mano.
+- Archivos: [`src/lib/strava.ts`](../src/lib/strava.ts), [`src/app/api/strava/`](../src/app/api/strava), [`StravaSync.tsx`](../src/components/StravaSync.tsx), [`src/lib/watchScan.ts`](../src/lib/watchScan.ts), [`/api/watch/scan`](../src/app/api/watch/scan/route.ts), [`WatchScanButton.tsx`](../src/components/WatchScanButton.tsx). Setup paso a paso en el [README](../README.md#vincular-el-reloj-xiaomi-amazfit).
+
 ### Gym — entrenamiento de fuerza (tab Gym)
 - Alta rápida estilo Strong: ejercicio, reps y peso; calcula **volumen** (reps × peso), marca **PR** 🏆 y grafica la **progresión** por ejercicio.
 - **Buscador visual por grupo muscular** (botón 🔍): en vez de acertar el nombre, elegís **grupo** (Pecho, Espalda, Piernas, Hombros, Brazos, Core) y ves **todos sus ejercicios** con **foto**, equipo y si es compuesto/aislado; también hay búsqueda por texto (sin tildes) y una fila de **Recientes**. Al tocar uno se autocompleta el nombre y solo cargás reps/peso. Sigue disponible el input de texto libre para nombres propios y carga rápida de varias series. UI en [`ExercisePickerSheet.tsx`](../src/components/ExercisePickerSheet.tsx) e imagen con fallback a emoji en [`ExerciseImage.tsx`](../src/components/ExerciseImage.tsx).
@@ -184,8 +195,18 @@ npm run build    # build de producción
 npm run data:exercises   # regenera el catálogo de ejercicios (RepDB)
 ```
 
+Variables de entorno:
+
+| Variable | Para qué |
+|----------|----------|
+| `GROQ_API_KEY` | IA: coach, estimación de macros y lectura de capturas del reloj |
+| `GROQ_MODEL` | Opcional. Modelo del coach (default `openai/gpt-oss-20b`) |
+| `GROQ_VISION_MODEL` | Opcional. Modelo con visión (default `meta-llama/llama-4-scout-17b-16e-instruct`) |
+| `STRAVA_CLIENT_ID` / `STRAVA_CLIENT_SECRET` | Importar el cardio del reloj. Sin ellas, la UI de Strava no aparece |
+
 - Cada `git push` a `main` dispara un **deploy automático** a producción en Vercel.
-- Para que la IA funcione en producción hay que cargar `GROQ_API_KEY` en las variables de entorno de Vercel.
+- Todas las claves van también en Vercel → Settings → Environment Variables.
+- La app de Strava se crea en https://www.strava.com/settings/api. El *Authorization Callback Domain* es **solo el dominio** (`localhost` en desarrollo, el de Vercel en producción) y admite **uno solo por app**: conviene tener una app de dev y otra de prod.
 
 ---
 
@@ -201,9 +222,11 @@ src/
 │  └─ api/
 │     ├─ chat/            Coach IA: mensaje → registros (generateObject)
 │     ├─ coach/           Coach IA: análisis semanal (generateText)
-│     └─ foods/
-│        ├─ barcode/      Producto por código de barras (OFF)
-│        └─ estimate/     Estimación IA de macros por 100 g
+│     ├─ foods/
+│     │  ├─ barcode/      Producto por código de barras (OFF)
+│     │  └─ estimate/     Estimación IA de macros por 100 g
+│     ├─ strava/          OAuth + importación del cardio del reloj
+│     └─ watch/scan/      Lectura IA de una captura del reloj
 ├─ components/
 │  ├─ Chat.tsx            Chat estilo WhatsApp + voz + botones 🧠/📊
 │  ├─ HoyTab.tsx          Tab "Hoy" (score, macros, bienestar, timeline…)
@@ -230,6 +253,8 @@ src/
 │  ├─ History.tsx          Tab "Historial" (7/30 días, gráficos)
 │  ├─ FoodForm.tsx / ExerciseForm.tsx  Alta manual (comida / cardio)
 │  ├─ CardioSheet.tsx      Alta de cardio con datos del reloj
+│  ├─ StravaSync.tsx       Conectar Strava e importar el cardio del reloj
+│  ├─ WatchScanButton.tsx  Captura del reloj → IA → formulario
 │  ├─ RestTimer.tsx        Cronómetro de descanso entre series
 │  ├─ AppHeader.tsx        Encabezado común a los cinco tabs (sticky)
 │  ├─ DayNavigator.tsx     Navegador de días, compartido por Hoy y Entreno
