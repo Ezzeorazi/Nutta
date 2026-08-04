@@ -38,10 +38,8 @@ export default function PhotosPanel({
   const currentWeek = weekStartISO(today);
   const hasThisWeek = withUrl.some((p) => weekStartISO(p.date) === currentWeek);
 
-  // Mantiene el índice del time-lapse dentro de rango y arranca en la más nueva.
-  useEffect(() => {
-    setIdx((i) => Math.min(Math.max(i, 0), Math.max(0, withUrl.length - 1)));
-  }, [withUrl.length]);
+  // idx puede quedar fuera de rango tras borrar una foto; se clampea en cada
+  // lectura (`current`, slider y play), así no hace falta sincronizarlo por effect.
 
   // Reproducción automática del time-lapse (loop).
   useEffect(() => {
@@ -104,7 +102,7 @@ export default function PhotosPanel({
           {/* Time-lapse: recorré toda tu evolución con el slider o dale play */}
           {withUrl.length >= 2 && current && (
             <div className="flex flex-col gap-2 rounded-card bg-card p-4 shadow-e1">
-              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-black">
+              <div className="relative aspect-3/4 w-full overflow-hidden rounded-xl bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={current.url}
@@ -150,36 +148,38 @@ export default function PhotosPanel({
           {/* Galería con etiqueta de semana */}
           <div className="grid grid-cols-3 gap-2">
             {withUrl.map((p, i) => (
-              <button
+              <div
                 key={p.id}
-                type="button"
-                onClick={() => {
-                  setPlaying(false);
-                  setIdx(i);
-                }}
                 className="group relative aspect-square overflow-hidden rounded-xl bg-card"
-                aria-label={`Ver ${weekLabel(p.date)} (${shortDate(p.date)})`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.url}
-                  alt={`Foto ${shortDate(p.date)}`}
-                  className="h-full w-full object-cover"
-                />
-                <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 text-[10px] text-white">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPlaying(false);
+                    setIdx(i);
+                  }}
+                  className="absolute inset-0"
+                  aria-label={`Ver ${weekLabel(p.date)} (${shortDate(p.date)})`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={p.url}
+                    alt={`Foto ${shortDate(p.date)}`}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+                <span className="pointer-events-none absolute bottom-1 left-1 rounded bg-black/60 px-1.5 text-[10px] text-white">
                   {weekLabel(p.date)}
                 </span>
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRemove(p.id, p.path);
-                  }}
+                <button
+                  type="button"
+                  onClick={() => onRemove(p.id, p.path)}
                   className="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-full bg-black/60 text-white transition-transform duration-(--duration-fast) active:scale-90"
                   aria-label="Eliminar foto"
                 >
                   <Trash2 size={15} aria-hidden />
-                </span>
-              </button>
+                </button>
+              </div>
             ))}
           </div>
         </>
