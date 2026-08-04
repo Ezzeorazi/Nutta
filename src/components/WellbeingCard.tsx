@@ -4,7 +4,10 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import { inputCls } from "@/components/ui/Field";
+import { useToast } from "@/components/ui/Toast";
+import WatchScanButton from "@/components/WatchScanButton";
 import { STEPS_GOAL, WATER_GOAL_L, type DailyMetrics } from "@/lib/types";
+import type { WatchReading } from "@/lib/watchScan";
 
 const fmtL = (n: number) => (Math.round(n * 100) / 100).toString();
 
@@ -35,6 +38,29 @@ export default function WellbeingCard({
     sleep != null ? String(sleep) : "",
   );
   const [stepsInput, setStepsInput] = useState(steps ? String(steps) : "");
+  const toast = useToast();
+
+  /** Pasos y sueño leídos de una captura del reloj. */
+  const applyScan = (reading: WatchReading) => {
+    const m = reading.metrics;
+    if (!m || (m.steps == null && m.sleepHours == null)) {
+      toast("Esa captura es de un entrenamiento: cargalo en Gym → Cardio.");
+      return;
+    }
+    if (m.steps != null) {
+      setStepsInput(String(m.steps));
+      onSetSteps(m.steps);
+    }
+    if (m.sleepHours != null) {
+      setSleepInput(String(m.sleepHours));
+      onSetSleep(m.sleepHours);
+    }
+    const leido = [
+      m.steps != null && `${m.steps.toLocaleString("es-AR")} pasos`,
+      m.sleepHours != null && `${m.sleepHours} h de sueño`,
+    ].filter(Boolean);
+    toast(`Del reloj: ${leido.join(" y ")}.`);
+  };
 
   const pct = Math.min(1, water / waterGoal);
   const stepsPct = Math.min(1, steps / STEPS_GOAL);
@@ -43,9 +69,10 @@ export default function WellbeingCard({
 
   return (
     <section className="flex flex-col rounded-card bg-card shadow-e1">
-      <h2 className="px-4 pb-1 pt-4 text-sm font-semibold text-muted">
-        Bienestar
-      </h2>
+      <div className="flex items-center justify-between gap-3 px-4 pb-1 pt-4">
+        <h2 className="text-sm font-semibold text-muted">Bienestar</h2>
+        <WatchScanButton label="Escanear reloj" onRead={applyScan} />
+      </div>
 
       {/* Agua */}
       <div className="flex flex-col gap-2.5 px-4 py-3.5">

@@ -6,8 +6,11 @@ import Chip from "@/components/ui/Chip";
 import Sheet from "@/components/ui/Sheet";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
+import { useToast } from "@/components/ui/Toast";
+import WatchScanButton from "@/components/WatchScanButton";
 import { uid } from "@/lib/uid";
 import type { ExerciseEntry } from "@/lib/types";
+import type { WatchReading } from "@/lib/watchScan";
 
 const QUICK_MIN = [20, 30, 45, 60];
 
@@ -31,9 +34,28 @@ export default function CardioSheet({
   const [maxHr, setMaxHr] = useState("");
   const [effect, setEffect] = useState("");
   const [showWatch, setShowWatch] = useState(false);
+  const toast = useToast();
 
   const mins = Number(minutes) || 0;
   const canAdd = name.trim() !== "" && mins > 0;
+
+  /** Vuelca lo que la IA leyó de la captura. No guarda: deja el form listo. */
+  const applyScan = (reading: WatchReading) => {
+    const e = reading.exercise;
+    if (!e) {
+      toast("Esa captura es el resumen del día: cargala desde Hoy → Bienestar.");
+      return;
+    }
+    setName(e.name);
+    setMinutes(String(e.minutes));
+    if (e.caloriesBurned) setCalories(String(e.caloriesBurned));
+    if (e.avgHeartRate) setAvgHr(String(e.avgHeartRate));
+    if (e.maxHeartRate) setMaxHr(String(e.maxHeartRate));
+    if (e.trainingEffect) setEffect(String(e.trainingEffect));
+    // Si leyó datos del reloj, se despliega la sección para que se vean.
+    if (e.avgHeartRate || e.maxHeartRate || e.trainingEffect) setShowWatch(true);
+    toast("Completé el formulario. Revisalo antes de agregar.");
+  };
 
   const submit = () => {
     if (!canAdd) return;
@@ -75,6 +97,15 @@ export default function CardioSheet({
           submit();
         }}
       >
+        {/* Atajo: en vez de copiar los números del reloj a mano, se le saca
+            una captura y la IA llena el formulario. */}
+        <div className="flex items-center justify-between gap-3 rounded-card border border-dashed border-border px-3 py-2">
+          <span className="min-w-0 text-xs text-muted">
+            ¿Ya está en el reloj?
+          </span>
+          <WatchScanButton label="Escanear captura" onRead={applyScan} />
+        </div>
+
         <Field label="Actividad">
           <input
             className={inputCls}
