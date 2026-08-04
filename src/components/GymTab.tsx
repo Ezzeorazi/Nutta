@@ -296,8 +296,11 @@ export default function GymTab({
 
         {/* Steppers en vez de campos sueltos: entre serie y serie se carga con
             una mano y sin mirar. El peso salta de a 5 kg (para 10, dos toques);
-            para ajustes finos el campo sigue siendo editable a mano. */}
-        <div className="grid grid-cols-2 gap-3">
+            para ajustes finos el campo sigue siendo editable a mano. Van
+            apilados (no lado a lado) porque a dos columnas no queda ancho
+            para el número: con dos botones de 44px a cada lado, el dígito
+            termina tapado. */}
+        <div className="flex flex-col gap-3">
           <Field label="Repeticiones">
             <Stepper
               value={reps}
@@ -378,7 +381,7 @@ export default function GymTab({
                         key={s.id}
                         className="flex flex-col gap-2 rounded-xl bg-sunken p-2"
                       >
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-col gap-2">
                           <div>
                             <p className="mb-1 text-[11px] text-muted">Reps</p>
                             <Stepper
