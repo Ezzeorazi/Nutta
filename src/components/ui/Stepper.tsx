@@ -55,7 +55,9 @@ export default function Stepper({
         <Minus size={18} strokeWidth={2.5} aria-hidden />
       </button>
 
-      <div className="relative flex-1">
+      {/* min-w evita que, en una fila apretada, el número quede sin espacio
+          para mostrarse entero — mejor que desborde a que se tape un dígito. */}
+      <div className="relative min-w-11 flex-1">
         <input
           type="number"
           inputMode="decimal"
