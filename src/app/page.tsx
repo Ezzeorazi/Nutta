@@ -71,6 +71,7 @@ export default function Home() {
     removeRecipe,
     addExercise,
     removeExercise,
+    importExercises,
     addMessage,
     addMemory,
     removeMemory,
@@ -399,6 +400,7 @@ export default function Home() {
           onRemoveSet={removeSet}
           onAddExercise={addExercise}
           onRemoveExercise={removeExercise}
+          onImportExercises={importExercises}
         />
       ) : tab === "progreso" ? (
         <ProgresoTab

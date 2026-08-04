@@ -18,6 +18,7 @@ import ExerciseImage from "@/components/ExerciseImage";
 import ExercisePickerSheet from "@/components/ExercisePickerSheet";
 import CardioSheet from "@/components/CardioSheet";
 import RestTimer from "@/components/RestTimer";
+import StravaSync from "@/components/StravaSync";
 import Button from "@/components/ui/Button";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
@@ -54,6 +55,7 @@ export default function GymTab({
   onRemoveSet,
   onAddExercise,
   onRemoveExercise,
+  onImportExercises,
 }: {
   strengthSets: StrengthSet[];
   exercises?: ExerciseEntry[];
@@ -69,6 +71,8 @@ export default function GymTab({
   onRemoveSet: (id: string) => void;
   onAddExercise: (e: ExerciseEntry) => void;
   onRemoveExercise: (id: string) => void;
+  /** Alta en lote desde el reloj. Devuelve cuántos entraron (sin duplicados). */
+  onImportExercises: (list: ExerciseEntry[]) => number;
 }) {
   const [exercise, setExercise] = useState("");
   const [reps, setReps] = useState("");
@@ -398,6 +402,9 @@ export default function GymTab({
             + Cardio
           </button>
         </div>
+
+        <StravaSync onImport={onImportExercises} />
+
         {dayCardio.length === 0 ? (
           <p className="rounded-card border border-dashed border-border p-4 text-center text-sm text-muted">
             Sin cardio registrado {isToday ? "hoy" : "este día"}.
@@ -408,8 +415,15 @@ export default function GymTab({
               key={c.id}
               className="rounded-card bg-card p-4 shadow-e1"
             >
-              <div className="mb-1 flex items-center justify-between">
-                <h3 className="font-semibold">{c.name}</h3>
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <h3 className="truncate font-semibold">{c.name}</h3>
+                  {c.source === "strava" && (
+                    <span className="shrink-0 rounded-full bg-sunken px-2 py-0.5 text-[10px] font-medium text-muted">
+                      Reloj
+                    </span>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => onRemoveExercise(c.id)}
