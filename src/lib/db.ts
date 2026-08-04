@@ -39,6 +39,8 @@ const schema = i.schema({
       avgHeartRate: i.number().optional(), // LPM promedio
       maxHeartRate: i.number().optional(), // LPM máximo
       trainingEffect: i.number().optional(), // "Efecto del entrenamiento" (0-5)
+      source: i.string().optional(), // "strava" si se importó del reloj
+      externalId: i.string().optional(), // id en el origen — evita duplicados
     }),
     // Historial del chat conversacional (estilo WhatsApp).
     messages: i.entity({

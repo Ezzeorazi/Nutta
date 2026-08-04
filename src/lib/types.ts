@@ -28,10 +28,15 @@ export type ExerciseEntry = {
   minutes: number;
   caloriesBurned: number;
   createdAt?: number; // epoch ms (para el timeline)
-  // Métricas opcionales del reloj/smartband (ej. Xiaomi/Mi Fitness), cargadas a mano.
+  // Métricas opcionales del reloj/smartband (ej. Xiaomi/Mi Fitness).
   avgHeartRate?: number; // LPM promedio
   maxHeartRate?: number; // LPM máximo
   trainingEffect?: number; // "Efecto del entrenamiento" (0-5)
+  // Origen: ausente = cargado a mano; "strava" = importado del reloj.
+  source?: string;
+  // Id en el origen (ej. "strava:14958203641"). Es la clave para no duplicar
+  // al reimportar el mismo rango de días.
+  externalId?: string;
 };
 
 export type ChatRole = "user" | "assistant";
