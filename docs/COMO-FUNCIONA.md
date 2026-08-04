@@ -114,7 +114,8 @@ Los **5 tabs**:
 - **La solución: leer la pantalla del reloj con IA de visión.** Botón **Escanear** en el alta de cardio y en la tarjeta de *Bienestar* (Hoy): se elige una captura y la IA saca actividad/minutos/kcal/LPM/efecto, o pasos/sueño si es el resumen del día. Es gratis y es el **único** camino que trae pasos, sueño y efecto del entrenamiento.
 - **Completa el formulario, no guarda**: el número siempre se ve antes de confirmar. Lo que se dio de alta desde una captura queda marcado con `source: "reloj"` y muestra el chip **"Reloj"** en la lista de cardio.
 - **El `kind` que devuelve el modelo es una pista, no la verdad**: manda lo que realmente se pudo leer (una captura sin minutos no es un entrenamiento por más que el modelo lo diga).
-- No usa `generateObject`: los únicos modelos con visión de Groq son los **Llama 4**, que no soportan `response_format: json_schema` (misma razón que `COACH_MODEL`). Se pide JSON por prompt y se parsea a mano, tolerando que venga envuelto en texto o en ```.
+- **El modelo es el punto frágil**: Groq dejó de ofrecer los Llama 4 y hoy el **único** de su catálogo que acepta imágenes es `qwen/qwen3.6-27b` (verificado contra `/v1/models`; el resto rechaza el formato multimodal). Si Groq también lo saca, el escaneo deja de andar y hay que revisar la lista — se puede tapar el bache con `GROQ_VISION_MODEL` sin tocar código.
+- Como ese modelo **razona**, se lo llama con `reasoningFormat: "hidden"` y `reasoningEffort: "none"`; sin eso antepone un bloque `<think>` y el JSON queda enterrado. Igual se parsea tolerante (se descarta el `<think>`, se ignoran las ``` y se toma el **último objeto balanceado**, no del primer `{` al último `}`), y por eso tampoco se usa `generateObject`.
 - Archivos: [`src/lib/watchScan.ts`](../src/lib/watchScan.ts), [`/api/watch/scan`](../src/app/api/watch/scan/route.ts), [`WatchScanButton.tsx`](../src/components/WatchScanButton.tsx). Contexto en el [README](../README.md#vincular-el-reloj-xiaomi-amazfit).
 
 ### Gym — entrenamiento de fuerza (tab Gym)
@@ -198,7 +199,7 @@ Variables de entorno:
 |----------|----------|
 | `GROQ_API_KEY` | IA: coach, estimación de macros y lectura de capturas del reloj |
 | `GROQ_MODEL` | Opcional. Modelo del coach (default `openai/gpt-oss-20b`) |
-| `GROQ_VISION_MODEL` | Opcional. Modelo con visión para leer capturas del reloj (default `meta-llama/llama-4-scout-17b-16e-instruct`) |
+| `GROQ_VISION_MODEL` | Opcional. Modelo con visión para leer capturas del reloj (default `qwen/qwen3.6-27b`, el único con visión que le queda a Groq) |
 
 - Cada `git push` a `main` dispara un **deploy automático** a producción en Vercel.
 - Todas las claves van también en Vercel → Settings → Environment Variables. Ojo: **agregarlas no alcanza**, hay que hacer un **Redeploy** para que el deploy en curso las tome.

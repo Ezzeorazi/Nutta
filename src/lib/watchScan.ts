@@ -9,13 +9,17 @@ import { generateText } from "ai";
  * pasos ni sueño), y Health Connect es nativa de Android. Sacarle una foto a
  * la pantalla del reloj sí cubre todo, gratis.
  *
- * IMPORTANTE: acá NO se usa `generateObject`. Los únicos modelos con visión de
- * Groq son los Llama 4, y los Llama no soportan `response_format: json_schema`
- * (ver el comentario de COACH_MODEL en coach.ts). Se pide el JSON por prompt y
- * se parsea a mano.
+ * OJO con el modelo: Groq dejó de ofrecer los Llama 4 y hoy el único de su
+ * catálogo que acepta imágenes es `qwen/qwen3.6-27b` (verificado contra
+ * /v1/models y probando el resto, que rechaza el formato multimodal). Si algún
+ * día lo saca también, esto deja de funcionar y hay que revisar la lista.
+ *
+ * Como además es un modelo de razonamiento, se le pide que esconda su cadena de
+ * pensamiento y no razone: sin eso antepone un bloque `<think>` y el JSON queda
+ * enterrado. Por las dudas igual se parsea tolerante (ver `parseLoose`), y por
+ * eso tampoco se usa `generateObject`.
  */
-export const VISION_MODEL =
-  process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
+export const VISION_MODEL = process.env.GROQ_VISION_MODEL || "qwen/qwen3.6-27b";
 
 export type WatchReading = {
   /** Qué pantalla era: el detalle de una actividad o el resumen del día. */
@@ -50,17 +54,29 @@ Reglas:
 - "steps": pasos, sin separador de miles.
 - "sleepHours": sueño en horas decimales (7 h 30 min → 7.5).`;
 
-/** Rescata el JSON aunque el modelo lo envuelva en texto o en ```. */
+/** Rescata el JSON aunque el modelo lo envuelva en razonamiento o en ```. */
 function parseLoose(text: string): Record<string, unknown> | null {
-  const clean = text.replace(/```json|```/gi, "");
-  const start = clean.indexOf("{");
+  const clean = text
+    .replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .replace(/```json|```/gi, "");
+
+  // Se busca el ÚLTIMO objeto balanceado, no del primer `{` al último `}`: si
+  // el modelo dejó texto con llaves antes (razonando, o citando el formato
+  // pedido), el que vale es el del final.
   const end = clean.lastIndexOf("}");
-  if (start === -1 || end <= start) return null;
-  try {
-    return JSON.parse(clean.slice(start, end + 1)) as Record<string, unknown>;
-  } catch {
-    return null;
+  if (end === -1) return null;
+  let depth = 0;
+  for (let i = end; i >= 0; i--) {
+    if (clean[i] === "}") depth++;
+    else if (clean[i] === "{" && --depth === 0) {
+      try {
+        return JSON.parse(clean.slice(i, end + 1)) as Record<string, unknown>;
+      } catch {
+        return null;
+      }
+    }
   }
+  return null;
 }
 
 /** Número positivo o `undefined` — el 0 del modelo significa "no estaba". */
@@ -80,6 +96,10 @@ export async function scanWatchScreen(
   const { text } = await generateText({
     model: groq(VISION_MODEL),
     temperature: 0, // es transcripción, no creatividad
+    maxOutputTokens: 500,
+    providerOptions: {
+      groq: { reasoningFormat: "hidden", reasoningEffort: "none" },
+    },
     messages: [
       {
         role: "user",
