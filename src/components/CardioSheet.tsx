@@ -9,7 +9,7 @@ import { Field, inputCls } from "@/components/ui/Field";
 import { useToast } from "@/components/ui/Toast";
 import WatchScanButton from "@/components/WatchScanButton";
 import { uid } from "@/lib/uid";
-import type { ExerciseEntry } from "@/lib/types";
+import { dayLabel, startOfLocalDayMs, type ExerciseEntry } from "@/lib/types";
 import type { WatchReading } from "@/lib/watchScan";
 
 const QUICK_MIN = [20, 30, 45, 60];
@@ -36,10 +36,15 @@ export default function CardioSheet({
   const [showWatch, setShowWatch] = useState(false);
   // Marca que los números salieron de una captura del reloj y no de tipearlos.
   const [scanned, setScanned] = useState(false);
+  // Día y hora que mostraba la captura. Mandan sobre el día que se está viendo:
+  // lo normal es cargar el domingo un entrenamiento del sábado.
+  const [scanDate, setScanDate] = useState<string | null>(null);
+  const [scanTime, setScanTime] = useState<string | null>(null);
   const toast = useToast();
 
   const mins = Number(minutes) || 0;
   const canAdd = name.trim() !== "" && mins > 0;
+  const day = scanDate ?? date;
 
   /** Vuelca lo que la IA leyó de la captura. No guarda: deja el form listo. */
   const applyScan = (reading: WatchReading) => {
@@ -57,17 +62,33 @@ export default function CardioSheet({
     // Si leyó datos del reloj, se despliega la sección para que se vean.
     if (e.avgHeartRate || e.maxHeartRate || e.trainingEffect) setShowWatch(true);
     setScanned(true);
-    toast("Completé el formulario. Revisalo antes de agregar.");
+    setScanDate(e.date ?? null);
+    setScanTime(e.time ?? null);
+    toast(
+      e.date && e.date !== date
+        ? `Es del ${dayLabel(e.date)}: lo voy a guardar en ese día.`
+        : "Completé el formulario. Revisalo antes de agregar.",
+    );
   };
 
   const submit = () => {
     if (!canAdd) return;
+    // El día efectivo de un registro sale de su createdAt, así que para que
+    // caiga en la fecha de la captura hay que anclarlo ahí: con la hora que
+    // mostraba el reloj si la leyó, o al mediodía de ese día si no.
+    const createdAt = scanDate
+      ? scanTime
+        ? new Date(`${scanDate}T${scanTime}:00`).getTime()
+        : startOfLocalDayMs(scanDate)
+      : undefined;
+
     onAdd({
       id: uid(),
-      date,
+      date: day,
       name: name.trim(),
       minutes: mins,
       caloriesBurned: Number(calories) || 0,
+      ...(createdAt && { createdAt }),
       ...(avgHr && { avgHeartRate: Number(avgHr) }),
       ...(maxHr && { maxHeartRate: Number(maxHr) }),
       ...(effect && { trainingEffect: Number(effect) }),
@@ -109,6 +130,16 @@ export default function CardioSheet({
           </span>
           <WatchScanButton label="Escanear captura" onRead={applyScan} />
         </div>
+
+        {/* Si la captura era de otro día, se avisa acá: se guarda en el día del
+            entrenamiento, no en el que se está mirando. */}
+        {scanDate && scanDate !== date && (
+          <p className="-mt-2 text-xs text-muted">
+            📅 Se guarda en{" "}
+            <b className="text-foreground">{dayLabel(scanDate)}</b>
+            {scanTime && `, ${scanTime}`} — la fecha de la captura.
+          </p>
+        )}
 
         <Field label="Actividad">
           <input

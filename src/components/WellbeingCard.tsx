@@ -6,7 +6,7 @@ import Chip from "@/components/ui/Chip";
 import { inputCls } from "@/components/ui/Field";
 import { useToast } from "@/components/ui/Toast";
 import WatchScanButton from "@/components/WatchScanButton";
-import { STEPS_GOAL, WATER_GOAL_L, type DailyMetrics } from "@/lib/types";
+import { dayLabel, STEPS_GOAL, WATER_GOAL_L, type DailyMetrics } from "@/lib/types";
 import type { WatchReading } from "@/lib/watchScan";
 
 const fmtL = (n: number) => (Math.round(n * 100) / 100).toString();
@@ -28,8 +28,10 @@ export default function WellbeingCard({
   metrics?: DailyMetrics;
   waterGoal?: number;
   onSetWater: (liters: number) => void;
-  onSetSleep: (hours: number) => void;
-  onSetSteps: (steps: number) => void;
+  // `date` sobreescribe el día visto: lo usa el escaneo, porque la captura
+  // puede ser del resumen de otro día.
+  onSetSleep: (hours: number, date?: string) => void;
+  onSetSteps: (steps: number, date?: string) => void;
 }) {
   const water = metrics?.water ?? 0;
   const sleep = metrics?.sleepHours;
@@ -47,19 +49,24 @@ export default function WellbeingCard({
       toast("Esa captura es de un entrenamiento: cargalo en Gym → Cardio.");
       return;
     }
+    // Si la captura mostraba su fecha, el registro va a ESE día.
     if (m.steps != null) {
-      setStepsInput(String(m.steps));
-      onSetSteps(m.steps);
+      if (!m.date) setStepsInput(String(m.steps));
+      onSetSteps(m.steps, m.date);
     }
     if (m.sleepHours != null) {
-      setSleepInput(String(m.sleepHours));
-      onSetSleep(m.sleepHours);
+      if (!m.date) setSleepInput(String(m.sleepHours));
+      onSetSleep(m.sleepHours, m.date);
     }
     const leido = [
       m.steps != null && `${m.steps.toLocaleString("es-AR")} pasos`,
       m.sleepHours != null && `${m.sleepHours} h de sueño`,
     ].filter(Boolean);
-    toast(`Del reloj: ${leido.join(" y ")}.`);
+    toast(
+      m.date
+        ? `${leido.join(" y ")} — guardado en ${dayLabel(m.date)}.`
+        : `Del reloj: ${leido.join(" y ")}.`,
+    );
   };
 
   const pct = Math.min(1, water / waterGoal);

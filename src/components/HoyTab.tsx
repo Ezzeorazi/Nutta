@@ -239,8 +239,8 @@ export default function HoyTab({
         metrics={todayMetrics}
         waterGoal={waterGoal}
         onSetWater={(l) => setMetric(viewDate, { water: l })}
-        onSetSleep={(h) => setMetric(viewDate, { sleepHours: h })}
-        onSetSteps={(n) => setMetric(viewDate, { steps: n })}
+        onSetSleep={(h, date) => setMetric(date ?? viewDate, { sleepHours: h })}
+        onSetSteps={(n, date) => setMetric(date ?? viewDate, { steps: n })}
       />
 
       {/* Suplementos: cualquier día (permite completar/corregir días pasados) */}
