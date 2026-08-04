@@ -110,17 +110,12 @@ Los **5 tabs**:
 - Onboarding y metas (Mifflin-St Jeor → TDEE → macros) en [`src/lib/nutrition.ts`](../src/lib/nutrition.ts).
 
 ### Reloj / smartband (Xiaomi y cía.)
-- **El problema**: Xiaomi **no publica API** ni OAuth para terceros. Lo único que Mi Fitness deja salir es hacia Strava/Suunto/Health Connect/Apple Health. Health Connect es API **nativa de Android** (una PWA no la puede leer), Google Fit se apaga a fines de 2026, y hablarle al reloj por Bluetooth desde el navegador implicaría reimplementar su protocolo cifrado.
-- **El camino por defecto es el escaneo con IA** (más abajo): gratis, y es el único que trae pasos, sueño y efecto del entrenamiento.
-- **Strava quedó como opción paga**: desde el **1 de junio de 2026** su API exige una suscripción activa (~US$ 12/mes) y ya no hay tier gratuito para leer los datos propios ([anuncio](https://communityhub.strava.com/insider-journal-9/an-update-to-our-developer-program-13428)). El código sigue en el repo y funciona, pero **sin `STRAVA_CLIENT_ID` la UI ni siquiera se muestra**. Ojo: en junio de 2027 Strava cambia la base URL y los headers de autorización de la API.
-- **Qué trae Strava**: los entrenamientos que arrancás a mano en el reloj, con duración, calorías y **LPM promedio/máximo**. **No trae pasos, sueño ni efecto del entrenamiento.**
-- **Sincronizar**: tab **Gym** → sección *Cardio* → **Conectar Strava** (OAuth) → **Sincronizar** (últimos 30 días). Los registros importados llevan el chip **"Reloj"**.
-- **Sin duplicados**: cada actividad se guarda con `externalId` (`strava:<id>`) y `importExercises` descarta lo que ya está, así el botón se puede apretar sin miedo.
-- **Los tokens**: el `client_secret` vive solo en el server y el **refresh token va en una cookie httpOnly**, no en InstantDB — la base es cliente y ahí el token viajaría al navegador. Strava rota el refresh cada tanto y la ruta reescribe la cookie cuando pasa.
-- **Las calorías** solo están en el detalle de cada actividad, no en el listado: hay una request extra por entrenamiento, con tope de 30 (el límite de Strava es 100 requests / 15 min).
-- **Escanear la captura (IA con visión)**: cubre lo que Strava no manda. Botón **Escanear** en el alta de cardio y en la tarjeta de *Bienestar* (Hoy): se elige una captura de la pantalla del reloj y la IA saca actividad/minutos/kcal/LPM/efecto, o pasos/sueño si es el resumen del día. **Completa el formulario, no guarda**: el número siempre se ve antes de confirmar.
-  - No usa `generateObject`: los únicos modelos con visión de Groq son los **Llama 4**, que no soportan `response_format: json_schema` (misma razón que `COACH_MODEL`). Se pide JSON por prompt y se parsea a mano.
-- Archivos: [`src/lib/strava.ts`](../src/lib/strava.ts), [`src/app/api/strava/`](../src/app/api/strava), [`StravaSync.tsx`](../src/components/StravaSync.tsx), [`src/lib/watchScan.ts`](../src/lib/watchScan.ts), [`/api/watch/scan`](../src/app/api/watch/scan/route.ts), [`WatchScanButton.tsx`](../src/components/WatchScanButton.tsx). Setup paso a paso en el [README](../README.md#vincular-el-reloj-xiaomi-amazfit).
+- **El problema**: Xiaomi **no publica API** ni OAuth para terceros, y ninguna de las vías indirectas cierra. **Strava** (que Mi Fitness sabe alimentar) exige **suscripción paga desde el 1/6/2026** y no quedó tier gratuito para leer los datos propios ([anuncio](https://communityhub.strava.com/insider-journal-9/an-update-to-our-developer-program-13428)); encima solo recibe los entrenamientos que arrancás a mano en el reloj. **Health Connect** tiene todo pero es API **nativa de Android** (una PWA no la puede leer). **Google Fit** se apaga a fines de 2026. Y hablarle al reloj **por Bluetooth** desde el navegador sería reimplementar su protocolo cifrado.
+- **La solución: leer la pantalla del reloj con IA de visión.** Botón **Escanear** en el alta de cardio y en la tarjeta de *Bienestar* (Hoy): se elige una captura y la IA saca actividad/minutos/kcal/LPM/efecto, o pasos/sueño si es el resumen del día. Es gratis y es el **único** camino que trae pasos, sueño y efecto del entrenamiento.
+- **Completa el formulario, no guarda**: el número siempre se ve antes de confirmar. Lo que se dio de alta desde una captura queda marcado con `source: "reloj"` y muestra el chip **"Reloj"** en la lista de cardio.
+- **El `kind` que devuelve el modelo es una pista, no la verdad**: manda lo que realmente se pudo leer (una captura sin minutos no es un entrenamiento por más que el modelo lo diga).
+- No usa `generateObject`: los únicos modelos con visión de Groq son los **Llama 4**, que no soportan `response_format: json_schema` (misma razón que `COACH_MODEL`). Se pide JSON por prompt y se parsea a mano, tolerando que venga envuelto en texto o en ```.
+- Archivos: [`src/lib/watchScan.ts`](../src/lib/watchScan.ts), [`/api/watch/scan`](../src/app/api/watch/scan/route.ts), [`WatchScanButton.tsx`](../src/components/WatchScanButton.tsx). Contexto en el [README](../README.md#vincular-el-reloj-xiaomi-amazfit).
 
 ### Gym — entrenamiento de fuerza (tab Gym)
 - Alta rápida estilo Strong: ejercicio, reps y peso; calcula **volumen** (reps × peso), marca **PR** 🏆 y grafica la **progresión** por ejercicio.
@@ -203,12 +198,10 @@ Variables de entorno:
 |----------|----------|
 | `GROQ_API_KEY` | IA: coach, estimación de macros y lectura de capturas del reloj |
 | `GROQ_MODEL` | Opcional. Modelo del coach (default `openai/gpt-oss-20b`) |
-| `GROQ_VISION_MODEL` | Opcional. Modelo con visión (default `meta-llama/llama-4-scout-17b-16e-instruct`) |
-| `STRAVA_CLIENT_ID` / `STRAVA_CLIENT_SECRET` | Importar el cardio del reloj. Sin ellas, la UI de Strava no aparece |
+| `GROQ_VISION_MODEL` | Opcional. Modelo con visión para leer capturas del reloj (default `meta-llama/llama-4-scout-17b-16e-instruct`) |
 
 - Cada `git push` a `main` dispara un **deploy automático** a producción en Vercel.
-- Todas las claves van también en Vercel → Settings → Environment Variables.
-- La app de Strava se crea en https://www.strava.com/settings/api. El *Authorization Callback Domain* es **solo el dominio** (`localhost` en desarrollo, el de Vercel en producción) y admite **uno solo por app**: conviene tener una app de dev y otra de prod.
+- Todas las claves van también en Vercel → Settings → Environment Variables. Ojo: **agregarlas no alcanza**, hay que hacer un **Redeploy** para que el deploy en curso las tome.
 
 ---
 
@@ -227,7 +220,6 @@ src/
 │     ├─ foods/
 │     │  ├─ barcode/      Producto por código de barras (OFF)
 │     │  └─ estimate/     Estimación IA de macros por 100 g
-│     ├─ strava/          OAuth + importación del cardio del reloj
 │     └─ watch/scan/      Lectura IA de una captura del reloj
 ├─ components/
 │  ├─ Chat.tsx            Chat estilo WhatsApp + voz + botones 🧠/📊
@@ -255,7 +247,6 @@ src/
 │  ├─ History.tsx          Tab "Historial" (7/30 días, gráficos)
 │  ├─ FoodForm.tsx / ExerciseForm.tsx  Alta manual (comida / cardio)
 │  ├─ CardioSheet.tsx      Alta de cardio con datos del reloj
-│  ├─ StravaSync.tsx       Conectar Strava e importar el cardio del reloj
 │  ├─ WatchScanButton.tsx  Captura del reloj → IA → formulario
 │  ├─ RestTimer.tsx        Cronómetro de descanso entre series
 │  ├─ AppHeader.tsx        Encabezado común a los cinco tabs (sticky)

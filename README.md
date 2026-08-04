@@ -9,7 +9,7 @@ App **mobile-first** para registrar alimentación y ejercicio: calorías, prote�
 - **Onboarding** con cálculo automático de metas (Mifflin-St Jeor → TDEE → macros).
 - **Comidas**: búsqueda en [Open Food Facts](https://world.openfoodfacts.org/) y escaneo de código de barras.
 - **Ejercicio**: actividades con valores MET, calorías quemadas según tu peso, y catálogo de +400 ejercicios ([RepDB](https://repdb.co)) para el chat y el registro de fuerza.
-- **Reloj / smartband**: importa el cardio del reloj (Xiaomi y cía.) vía Strava, y lee capturas de la pantalla del reloj con IA. Ver [Vincular el reloj](#vincular-el-reloj-xiaomi-amazfit).
+- **Reloj / smartband**: le sacás una captura a la pantalla del reloj (Xiaomi y cía.) y la IA carga el entrenamiento, los pasos o el sueño. Ver [Vincular el reloj](#vincular-el-reloj-xiaomi-amazfit).
 - **Dashboard**: anillo de calorías (in/out) y barras de macros.
 - **Historial** de 7 días con gráficos (calorías netas y macros).
 - **PWA** instalable con soporte offline y dark mode.
@@ -50,41 +50,18 @@ Completa el formulario para que lo revises; no guarda solo. Solo necesita
 `GROQ_API_KEY` (gratis, de console.groq.com); el modelo de visión se puede
 cambiar con `GROQ_VISION_MODEL`.
 
-### Importar desde Strava (requiere suscripción paga a Strava)
+### Por qué no hay sincronización automática
 
-Mi Fitness puede empujar los entrenamientos a Strava, y Nutta leerlos de ahí.
-**Desde el 1 de junio de 2026 la API de Strava exige una suscripción activa**
-(~US$ 12/mes): ya no hay tier gratuito para leer tus propios datos. Solo tiene
-sentido si ya pagás Strava. Además, en junio de 2027 Strava cambia la base URL
-y los headers de la API, así que este camino va a pedir mantenimiento.
+Ninguna de las otras vías cierra:
 
-Si ya sos suscriptor:
-
-1. **Crear la app** en https://www.strava.com/settings/api. En *Authorization
-   Callback Domain* va **solo el dominio**, sin `https://` ni ruta (`localhost`
-   en desarrollo, el dominio de Vercel en producción). Strava admite un dominio
-   por app: hace falta una app de dev y otra de prod.
-2. **Cargar las claves** en `.env.local` y en Vercel → Settings → Environment
-   Variables:
-   ```bash
-   STRAVA_CLIENT_ID=12345
-   STRAVA_CLIENT_SECRET=...
-   ```
-   Sin ellas, la UI de Strava directamente no aparece.
-3. **Enganchar el reloj**: Mi Fitness → *Perfil* → *Apps conectadas* →
-   **Strava** → autorizar.
-4. **Conectar Nutta**: tab **Gym** → sección *Cardio* → **Conectar Strava** →
-   autorizar → **Sincronizar**. Trae los últimos 30 días; reimportar no duplica
-   nada (cada actividad se recuerda por su id de Strava).
-
-Por este camino **solo viajan los entrenamientos que arrancás a mano en el
-reloj**: los pasos, el sueño y el efecto del entrenamiento no salen a Strava.
-
-### Lo que no sirve
-
-- **Health Connect** sincroniza con Mi Fitness, pero es API **nativa de
-  Android**: una PWA no la puede leer. Haría falta envolver la app con
-  Capacitor y sideloadear un APK.
+- **Strava** (Mi Fitness sabe empujarle los entrenamientos): desde el **1 de
+  junio de 2026** su API exige una suscripción paga y no quedó tier gratuito
+  para leer los datos propios. Además solo recibe los entrenamientos que
+  arrancás a mano en el reloj — nunca los pasos, el sueño ni el efecto del
+  entrenamiento.
+- **Health Connect** sí tiene todo, pero es API **nativa de Android**: una PWA
+  no la puede leer. Haría falta envolver la app con Capacitor y sideloadear un
+  APK.
 - **Google Fit**: Google apaga sus APIs a fines de 2026.
 - **Bluetooth desde el navegador**: el reloj habla un protocolo propietario
   cifrado; sería reimplementar Gadgetbridge.

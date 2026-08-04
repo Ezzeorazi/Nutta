@@ -32,11 +32,8 @@ export type ExerciseEntry = {
   avgHeartRate?: number; // LPM promedio
   maxHeartRate?: number; // LPM máximo
   trainingEffect?: number; // "Efecto del entrenamiento" (0-5)
-  // Origen: ausente = cargado a mano; "strava" = importado del reloj.
+  // Origen: ausente = tipeado a mano; "reloj" = leído de una captura del reloj.
   source?: string;
-  // Id en el origen (ej. "strava:14958203641"). Es la clave para no duplicar
-  // al reimportar el mismo rango de días.
-  externalId?: string;
 };
 
 export type ChatRole = "user" | "assistant";

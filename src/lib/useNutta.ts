@@ -378,6 +378,7 @@ export function useNutta() {
         minutes: entry.minutes,
         caloriesBurned: entry.caloriesBurned,
         createdAt: entry.createdAt ?? Date.now(),
+        ...(entry.source && { source: entry.source }),
         ...(entry.avgHeartRate != null && { avgHeartRate: entry.avgHeartRate }),
         ...(entry.maxHeartRate != null && { maxHeartRate: entry.maxHeartRate }),
         ...(entry.trainingEffect != null && {
@@ -389,44 +390,6 @@ export function useNutta() {
   };
   const removeExercise = (eid: string) =>
     db.transact(db.tx.exercises[eid].delete());
-
-  /**
-   * Importa cardio de una fuente externa (el reloj, vía Strava). Descarta lo
-   * que ya esté cargado comparando `externalId`: reimportar el mismo rango de
-   * días no duplica nada, así el botón de sincronizar se puede apretar sin
-   * miedo. Devuelve cuántos entraron.
-   */
-  const importExercises = (entries: ExerciseEntry[]) => {
-    if (!user) return 0;
-    const known = new Set(
-      exercises.map((e) => e.externalId).filter((x): x is string => !!x),
-    );
-    const fresh = entries.filter(
-      (e): e is ExerciseEntry & { externalId: string } =>
-        !!e.externalId && !known.has(e.externalId),
-    );
-    if (fresh.length === 0) return 0;
-    db.transact(
-      fresh.map((e) =>
-        db.tx.exercises[id()].update({
-          owner: user.id,
-          date: e.date,
-          name: e.name,
-          minutes: e.minutes,
-          caloriesBurned: e.caloriesBurned,
-          createdAt: e.createdAt ?? Date.now(),
-          source: e.source ?? "strava",
-          externalId: e.externalId,
-          ...(e.avgHeartRate != null && { avgHeartRate: e.avgHeartRate }),
-          ...(e.maxHeartRate != null && { maxHeartRate: e.maxHeartRate }),
-          ...(e.trainingEffect != null && {
-            trainingEffect: e.trainingEffect,
-          }),
-        }),
-      ),
-    );
-    return fresh.length;
-  };
 
   /** Agrega un mensaje al historial del chat. Devuelve su id. */
   const addMessage = (role: ChatMessage["role"], text: string) => {
@@ -716,7 +679,6 @@ export function useNutta() {
     removeRecipe,
     addExercise,
     removeExercise,
-    importExercises,
     addMessage,
     removeMessage,
     addMemory,

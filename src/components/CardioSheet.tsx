@@ -34,6 +34,8 @@ export default function CardioSheet({
   const [maxHr, setMaxHr] = useState("");
   const [effect, setEffect] = useState("");
   const [showWatch, setShowWatch] = useState(false);
+  // Marca que los números salieron de una captura del reloj y no de tipearlos.
+  const [scanned, setScanned] = useState(false);
   const toast = useToast();
 
   const mins = Number(minutes) || 0;
@@ -54,6 +56,7 @@ export default function CardioSheet({
     if (e.trainingEffect) setEffect(String(e.trainingEffect));
     // Si leyó datos del reloj, se despliega la sección para que se vean.
     if (e.avgHeartRate || e.maxHeartRate || e.trainingEffect) setShowWatch(true);
+    setScanned(true);
     toast("Completé el formulario. Revisalo antes de agregar.");
   };
 
@@ -68,6 +71,7 @@ export default function CardioSheet({
       ...(avgHr && { avgHeartRate: Number(avgHr) }),
       ...(maxHr && { maxHeartRate: Number(maxHr) }),
       ...(effect && { trainingEffect: Number(effect) }),
+      ...(scanned && { source: "reloj" }),
     });
     onClose();
   };

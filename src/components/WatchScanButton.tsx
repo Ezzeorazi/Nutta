@@ -18,9 +18,9 @@ const toDataUrl = (blob: Blob) =>
 /**
  * Elige una captura del reloj y la manda a leer a la IA.
  *
- * Es el atajo para todo lo que Strava no trae: el efecto del entrenamiento, y
- * el resumen diario de pasos y sueño. Quien la usa siempre ve el resultado en
- * el formulario antes de guardarlo — la IA completa, no registra sola.
+ * Es la única vía para sacarle los datos a un reloj Xiaomi sin tipearlos (ver
+ * watchScan.ts). Quien la usa siempre ve el resultado en el formulario antes
+ * de guardarlo — la IA completa, no registra sola.
  */
 export default function WatchScanButton({
   label = "Escanear captura del reloj",

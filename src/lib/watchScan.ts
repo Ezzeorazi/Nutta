@@ -4,9 +4,10 @@ import { generateText } from "ai";
 /**
  * Lee una captura de pantalla del reloj y saca los números.
  *
- * Es el complemento de Strava: por ahí llegan los entrenamientos con GPS, pero
- * no el efecto del entrenamiento ni el resumen diario (pasos, sueño). Sacarle
- * una foto a la pantalla del reloj sí cubre todo eso.
+ * Es la única vía viable para un reloj Xiaomi desde una PWA: Xiaomi no publica
+ * API, la de Strava pasó a ser paga en junio de 2026 (y ni siquiera recibe
+ * pasos ni sueño), y Health Connect es nativa de Android. Sacarle una foto a
+ * la pantalla del reloj sí cubre todo, gratis.
  *
  * IMPORTANTE: acá NO se usa `generateObject`. Los únicos modelos con visión de
  * Groq son los Llama 4, y los Llama no soportan `response_format: json_schema`
