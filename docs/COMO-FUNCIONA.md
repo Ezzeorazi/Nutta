@@ -2,7 +2,7 @@
 
 Resumen del funcionamiento de la app: qué hace, cómo está armada y cómo fluye la información.
 
-- **Live:** https://app-alimentacion-nine.vercel.app
+- **Live:** https://nutta.vercel.app
 - **Código:** https://github.com/Ezzeorazi/Nutta
 
 ---

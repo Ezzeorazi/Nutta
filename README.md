@@ -2,7 +2,7 @@
 
 App **mobile-first** para registrar alimentación y ejercicio: calorías, proteínas, carbohidratos y grasas. Local-first e instalable como PWA.
 
-🌐 **Live:** https://app-alimentacion-nine.vercel.app
+🌐 **Live:** https://nutta.vercel.app
 
 ## Funcionalidades
 
