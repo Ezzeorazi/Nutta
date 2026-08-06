@@ -17,7 +17,9 @@ Ejemplo real:
 
 …queda todo registrado (con calorías y macros estimados) sin tocar un solo formulario.
 
-Además lleva **memoria** de tus hábitos ("hice lo de siempre"), te da un **score diario 0-100**, **insights** automáticos, seguimiento de **peso/medidas** con gráficos y predicción, **entrenamiento de fuerza** (series/reps/PR/volumen con un catálogo de +400 ejercicios), **rachas, logros y metas**, **exportación** CSV/PDF, y un **análisis semanal** en tono de entrenador. Los datos se **sincronizan en la nube** y funciona offline.
+Pero lo que la hace un **entrenador** y no un contador de calorías es que **nutrición y entrenamiento no son módulos separados**: todo se cruza en una sola capa ([`athlete.ts`](../src/lib/athlete.ts)) antes de recomendar nada. Si entrenaste fuerte y comiste poco, te habla de carbohidratos, no de fuerza de voluntad. Si dormiste 5 horas, eso va antes que cualquier ajuste de macros. Si subiste de peso pero bajó la cintura, te dice que estás recomponiendo, no que engordaste.
+
+Además lleva **memoria** de tus hábitos ("hice lo de siempre"), te da un **score diario 0-100 explicado**, un panel de **estado actual** con tu recuperación, **objetivos dinámicos** que se ajustan a lo que entrenaste, **tendencias** automáticas (PR, estancamientos, exceso de volumen, poca recuperación), seguimiento de **peso/medidas** con lectura de **recomposición corporal**, **entrenamiento de fuerza** (series/reps/PR/volumen con un catálogo de +400 ejercicios), **rachas, logros y metas**, **exportación** CSV/PDF, y un **análisis semanal** en tono de entrenador. Los datos se **sincronizan en la nube** y funciona offline.
 
 ---
 
@@ -84,17 +86,40 @@ Los **5 tabs**:
 - Muestra la jornada en orden cronológico (hora + emoji + nombre + kcal), estilo WhatsApp/Apple.
 - Emojis derivados por palabra clave en [`src/lib/emoji.ts`](../src/lib/emoji.ts); vista en [`Timeline.tsx`](../src/components/Timeline.tsx).
 
-### Score diario (0-100)
-- Pondera proteína, calorías, macros, entrenamiento y —si los registrás— sueño y agua; el alcohol resta.
-- Se **normaliza sobre los factores presentes**: no registrar sueño/agua no te penaliza.
-- Cálculo determinista (sin IA) en [`src/lib/score.ts`](../src/lib/score.ts); tarjeta con anillo, banda de color y tips en [`ScoreCard.tsx`](../src/components/ScoreCard.tsx).
+### Estado del atleta — la capa que cruza todo
+- **El problema que resuelve**: cada módulo miraba su propia rebanada de datos. El score no veía las series de fuerza (entrenabas una hora de gym y te decía *"hoy no registraste entrenamiento"*), los insights no veían el sueño, la rutina no veía la recuperación y las metas de macros eran las mismas entrenando fuerte que en el sillón.
+- [`src/lib/athlete.ts`](../src/lib/athlete.ts) calcula **una sola vez** lo que un entrenador tiene en la cabeza antes de hablar: qué se entrenó (volumen, series, duración, intensidad, PR, kcal), cómo se llega de recuperado, cuánto falta comer hoy y qué conviene hacer ahora. Score, insights, rutina y coach **leen de ahí**.
+- Es una función pura y client-safe: no toca la red, la IA ni el reloj.
+- **Intensidad de la sesión**: si el reloj dio su "efecto del entrenamiento" (0-5) se usa ese; si no, se compara el volumen contra **las propias sesiones de las últimas 4 semanas** (20 series son "fuerte" para uno y rutina para otro).
+- **Recuperación 0-100**: sueño 40 · carga acumulada 25 (días seguidos + salto de volumen) · nutrición de ayer 20 · hidratación 15. Lo que no se registró se excluye del reparto.
 
-### Insights automáticos
-- Detecta racha de entrenamiento, grupos musculares sin trabajar hace tiempo, tendencia de proteína y alcohol del día.
+### Panel "Estado actual" (tab Hoy)
+- Recuperación con su desglose, las **cinco señales del día** (entrenamiento, proteína, sueño, agua, pasos), **una** recomendación principal y la lectura del coach.
+- Después de entrenar cruza la sesión con la comida: *"Entrenaste fuerte y vas 1.916 de 3.430 kcal. Subí los carbohidratos en la cena para recuperar bien."*
+- Cuando falta proteína (o carbos) propone **comida concreta**: *"250 g de pechuga · 1 lata de atún + 150 g de pollo · 2 scoops de proteína"*. Tabla de alimentos en [`src/lib/meals.ts`](../src/lib/meals.ts).
+- UI en [`EstadoCard.tsx`](../src/components/EstadoCard.tsx).
+
+### Objetivos dinámicos
+- Las metas del día se ajustan a lo que se entrenó: sesión fuerte **+20% de carbos**, media +10%, día sin entrenar **−15%**. La **proteína no se toca nunca** (es la que sostiene el músculo) y la grasa tampoco.
+- El anillo de calorías y la barra de carbos muestran la meta ajustada, y la barra dice por qué (*"Carbohidratos (+85 por tu entreno)"*).
+
+### Score diario (0-100)
+- Reparto: **entrenamiento 30 · proteína 25 · sueño 20 · agua 10 · pasos 10 · calorías 5**. El alcohol resta 15.
+- El **entrenamiento cuenta fuerza Y cardio**, y pondera por intensidad (fuerte 100%, medio 90%, suave 70%).
+- Las calorías pesan poco a propósito: llegar a la meta calórica comiendo cualquier cosa y sin entrenar no es un buen día.
+- Se **normaliza sobre los factores presentes**: no registrar sueño/agua/pasos no te penaliza (y el score te lo dice).
+- **Siempre explica el número**: una frase fija debajo del puntaje (*"Entrenamiento te sube el score y sueño te lo baja"*) y, al desplegar, el motivo de cada factor.
+- Cálculo determinista (sin IA) en [`src/lib/score.ts`](../src/lib/score.ts); tarjeta en [`ScoreCard.tsx`](../src/components/ScoreCard.tsx).
+
+### Tendencias e insights automáticos
+- Detecta **mejoras de fuerza** (PR reciente o salto de volumen), **estancamientos** (mismo peso máximo dos ventanas de 14 días seguidas), **exceso de volumen** (+50% de una semana a la otra), **poca recuperación** (sueño promedio < 6,5 h), poca proteína, **exceso de alcohol** (3+ días en la semana), **mala hidratación** y grupos musculares abandonados.
+- Los avisos van primero: lo que hay que corregir es más útil que la palmada.
 - Deterministas en [`src/lib/insights.ts`](../src/lib/insights.ts); vista en [`InsightsCard.tsx`](../src/components/InsightsCard.tsx).
 
 ### Coach IA — análisis semanal
 - Botón 📊 en el chat: arma un resumen de los últimos 7 días y la IA responde como entrenador (directo, concreto), vía [`/api/coach`](../src/app/api/coach/route.ts).
+- El resumen incluye entrenamiento **y** volumen de fuerza con su tendencia, nutrición, sueño/agua/pasos y composición corporal. Si no le pasás sueño ni medidas, la IA no puede hacer otra cosa que hablar de calorías — que es justo lo que no queremos.
+- El prompt le exige **cruzar** los datos (entrenó mucho y comió poco → el problema es la comida), poner el sueño antes que cualquier ajuste de macros y **no** llamar retroceso a subir de peso si la cintura baja.
 
 ### Completar días pasados (backfill)
 - El chat siempre registra en **hoy**, pero si te olvidaste de cargar algo podés completar días anteriores desde el alta manual:
@@ -122,8 +147,10 @@ Los **5 tabs**:
 - Alta rápida estilo Strong: ejercicio, reps y peso; calcula **volumen** (reps × peso), marca **PR** 🏆 y grafica la **progresión** por ejercicio.
 - **Buscador visual por grupo muscular** (botón 🔍): en vez de acertar el nombre, elegís **grupo** (Pecho, Espalda, Piernas, Hombros, Brazos, Core) y ves **todos sus ejercicios** con **foto**, equipo y si es compuesto/aislado; también hay búsqueda por texto (sin tildes) y una fila de **Recientes**. Al tocar uno se autocompleta el nombre y solo cargás reps/peso. Sigue disponible el input de texto libre para nombres propios y carga rápida de varias series. UI en [`ExercisePickerSheet.tsx`](../src/components/ExercisePickerSheet.tsx) e imagen con fallback a emoji en [`ExerciseImage.tsx`](../src/components/ExerciseImage.tsx).
 - El navegador de días (**‹ ›**) permite mirar sesiones anteriores y **cargar series en un día pasado** (ver §4, "Completar días pasados").
-- **Sugerencia del día** (`dailyRoutineSuggestion`): según cuántos días de fuerza llevás en la semana (objetivo `GYM_DAYS_GOAL`, hoy **5**), te dice qué toca hoy con un banner descartable (✕, por jornada, guardado en `localStorage`):
-  - Vas por debajo del objetivo → el **grupo que te falta** + 3 ejercicios concretos del catálogo (*"Hoy te conviene espalda. Probá: Peso Muerto con Barra, Remo con Barra Inclinado…"*).
+- **Sugerencia del día** (`buildDailyRoutine`): mira **cómo llegás** (sueño, días seguidos entrenando, salto de volumen y recuperación) y recién después el calendario. Banner descartable (✕, por jornada, guardado en `localStorage`) que además dice **por qué** recomienda eso:
+  - **Recuperación < 45%** → descanso o algo muy suave, aunque falten días de fuerza en la semana. Entrenar fuerte sin recuperar no suma volumen, suma fatiga.
+  - **Recuperación 45-65%** → se entrena igual pero con **una serie menos** por ejercicio.
+  - Vas por debajo del objetivo semanal (`GYM_DAYS_GOAL`, hoy **5**) → el **grupo que te falta** + ejercicios concretos del catálogo con series y reps según tu objetivo.
   - Ya cumpliste los 5 días → 🧘 **recuperación activa** (cardio suave + core/movilidad).
   - Ya entrenaste hoy → ✅ confirmación.
 - Los grupos musculares se detectan con los **músculos reales** del dataset (mapa `exercise-groups.json`), con fallback a regex para nombres libres. Los ejercicios sugeridos por grupo salen de `exercise-by-group.json` (priorizados: compuestos + pesos libres + básicos icónicos, con variedad).
@@ -140,6 +167,14 @@ Los **5 tabs**:
 ### Progreso corporal
 - **Peso**: gráfico de evolución, meta y **predicción** (regresión lineal → ETA a la meta). En [`WeightPanel.tsx`](../src/components/WeightPanel.tsx) y [`src/lib/weight.ts`](../src/lib/weight.ts).
 - **Medidas**: cintura, pecho, brazo, muslo y pantorrilla, con gráfico por parte. En [`MeasuresPanel.tsx`](../src/components/MeasuresPanel.tsx).
+- **Recomposición corporal** ([`src/lib/body.ts`](../src/lib/body.ts) + [`RecompCard.tsx`](../src/components/RecompCard.tsx)): peso y medidas se leen **juntos**, nunca el peso solo. Compara el promedio de las últimas 3 semanas contra las 3 anteriores (promediar evita que un pesaje malo dé vuelta la conclusión) y dictamina *recomposición · músculo · definición · grasa · estable*.
+  - Si el peso sube pero la cintura baja y los brazos crecen → **recomposición**, con mensaje positivo.
+  - **Regla dura**: nunca concluir que el usuario está peor solo porque subió de peso. Recién se habla de grasa cuando peso **y** cintura suben juntos y ninguna medida de músculo se mueve, y aun así con una acción concreta, no con un reto.
+
+### Gráficos: dominio y escala del eje Y
+- El eje Y se calcula con `niceScale`/`yAxis` en [`src/lib/chart.ts`](../src/lib/chart.ts): ajusta el dominio a múltiplos de un escalón redondo (1, 2, 5, 10 × 10ⁿ) y genera las marcas, así el peso muestra `92 · 93 · 94 · 95 · 96` y la cintura `95 · 100 · 105` en vez de decimales arbitrarios.
+- El **margen izquierdo va en 0**. Antes era `-18` para ganar ancho, pero eso corría el eje fuera del área visible y —como las etiquetas están alineadas a la derecha— **recortaba los primeros píxeles**: `94.9` se leía `4.9`, `100.75` se leía `.75` y `103` se leía `03`. El ancho del eje ahora se calcula según el texto real de las marcas.
+- Lo usan los cuatro gráficos (Peso, Medidas, Progresión del Gym e Historial), junto con `axisProps` y `chartMargin`.
 
 ### Bienestar y suplementos (tab Hoy)
 - **Agua** (botones rápidos), **sueño** (horas) y **pasos**, con barras de progreso. La **meta de agua se escala al peso** (~35 ml/kg, piso 2 L) y también cuenta en el score. Se puede registrar en días pasados. En [`WellbeingCard.tsx`](../src/components/WellbeingCard.tsx).
@@ -224,11 +259,13 @@ src/
 │     └─ watch/scan/      Lectura IA de una captura del reloj
 ├─ components/
 │  ├─ Chat.tsx            Chat estilo WhatsApp + voz + botones 🧠/📊
-│  ├─ HoyTab.tsx          Tab "Hoy" (score, macros, bienestar, timeline…)
-│  ├─ ProgresoTab.tsx     Tab "Progreso" (peso + medidas)
+│  ├─ HoyTab.tsx          Tab "Hoy" (estado, macros, bienestar, timeline…)
+│  ├─ ProgresoTab.tsx     Tab "Progreso" (peso + recomposición + medidas)
+│  ├─ EstadoCard.tsx      Panel "Estado actual" + coach del día
+│  ├─ RecompCard.tsx      Lectura de la composición corporal
 │  ├─ Timeline.tsx        Línea de tiempo del día
-│  ├─ ScoreCard.tsx       Score diario 0-100
-│  ├─ InsightsCard.tsx    Insights automáticos
+│  ├─ ScoreCard.tsx       Score diario 0-100 (con su explicación)
+│  ├─ InsightsCard.tsx    Tendencias e insights automáticos
 │  ├─ MemorySheet.tsx     Memoria del usuario (🧠)
 │  ├─ WeightPanel.tsx     Peso: gráfico, meta, predicción
 │  ├─ MeasuresPanel.tsx   Medidas corporales por parte
@@ -265,8 +302,11 @@ src/
 └─ lib/
    ├─ db.ts               Cliente y esquema de InstantDB
    ├─ useNutta.ts         Hook central de datos (query + mutaciones)
+   ├─ athlete.ts          ★ Estado del atleta: cruza TODOS los datos
+   ├─ body.ts             Composición corporal (peso + medidas → interpretación)
+   ├─ meals.ts            "Te faltan 45 g de proteína" → comida concreta
    ├─ useDismissable.ts   El botón atrás del teléfono cierra overlays
-   ├─ chart.ts            Estilo común de los gráficos (tooltip, ejes)
+   ├─ chart.ts            Estilo y escalas de los gráficos (tooltip, ejes)
    ├─ chatLog.ts          Formato del resumen "Registrado" del coach
    ├─ uid.ts              Id corto para registros nuevos
    ├─ coach.ts            IA: esquema, prompts, interpretMessage/analyzeWeek

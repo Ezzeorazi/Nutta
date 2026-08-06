@@ -19,10 +19,13 @@ function scoreColor(score: number) {
  * dos gráficos circulares apilados compitiendo por ser el foco. El anillo
  * grande es el dato principal del día, así que acá el puntaje se cuenta con el
  * número y una barra fina.
+ *
+ * El número nunca va solo: debajo siempre está la frase que explica qué lo
+ * sube y qué lo baja, y al desplegar, cada factor dice por qué sacó lo que sacó.
  */
 export default function ScoreCard({ data }: { data: DailyScore }) {
   const [open, setOpen] = useState(false);
-  const { score, label, parts, tips } = data;
+  const { score, label, summary, parts, tips } = data;
   const color = scoreColor(score);
 
   return (
@@ -36,7 +39,7 @@ export default function ScoreCard({ data }: { data: DailyScore }) {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-xs uppercase tracking-wide text-muted">
-            Score de hoy
+            Score del día
           </span>
           <span className="block font-semibold" style={{ color }}>
             {label}
@@ -66,15 +69,21 @@ export default function ScoreCard({ data }: { data: DailyScore }) {
         />
       </div>
 
-      {tips[0] && <p className="text-sm text-muted">{tips[0]}</p>}
+      {/* La explicación va siempre: un número sin motivo no enseña nada. */}
+      <p className="text-sm text-muted">
+        <span className="font-medium text-foreground">{summary}</span>
+        {tips[0] ? ` ${tips[0]}` : ""}
+      </p>
 
       {open && (
         <div className="flex flex-col gap-3 border-t border-border pt-4">
           {parts.map((p) => (
             <div key={p.label} className="flex flex-col gap-1">
-              <div className="flex justify-between text-xs">
-                <span>{p.label}</span>
-                <span className="tabular-nums text-muted">
+              <div className="flex justify-between gap-2 text-xs">
+                <span className={p.logged ? "" : "text-muted"}>
+                  {p.emoji} {p.label}
+                </span>
+                <span className="shrink-0 tabular-nums text-muted">
                   {p.points}
                   {p.max > 0 ? ` / ${p.max}` : ""}
                 </span>
@@ -89,10 +98,11 @@ export default function ScoreCard({ data }: { data: DailyScore }) {
                   />
                 </div>
               )}
+              <p className="text-[11px] text-muted">{p.detail}</p>
             </div>
           ))}
           {tips.length > 1 && (
-            <ul className="flex flex-col gap-1">
+            <ul className="flex flex-col gap-1 border-t border-border pt-3">
               {tips.slice(1).map((t, i) => (
                 <li key={i} className="flex gap-2 text-xs text-muted">
                   <span className="text-accent">›</span> {t}
@@ -101,7 +111,8 @@ export default function ScoreCard({ data }: { data: DailyScore }) {
             </ul>
           )}
           <p className="text-[11px] text-muted">
-            Sueño y agua sumarán al score cuando los registres.
+            Reparto: entrenamiento 30 · proteína 25 · sueño 20 · agua 10 · pasos
+            10 · calorías 5. Lo que no registrás no cuenta (ni suma ni resta).
           </p>
         </div>
       )}

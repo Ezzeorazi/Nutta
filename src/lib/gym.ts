@@ -142,8 +142,26 @@ export type RoutinePlan = {
   groups: RoutineGroup[];
   /** Sugerencia de cardio para el día (recuperación activa o complemento). */
   cardioTip?: string;
+  /** Por qué se recomienda esto (sueño, carga acumulada, recuperación). */
+  why?: string;
   /** clave estable del día para poder descartarla por jornada. */
   key: string;
+};
+
+/**
+ * Cómo llega el usuario al entrenamiento de hoy. Sin esto la rutina solo sabía
+ * contar días de la semana y te mandaba a buscar un PR después de dormir 4 h.
+ */
+export type Readiness = {
+  /** Score de recuperación 0-100 (`null` si no hay datos). */
+  recovery: number | null;
+  /** Horas de la última noche registrada. */
+  sleepHours?: number | null;
+  /** Días seguidos entrenando hasta hoy. */
+  streak: number;
+  /** Volumen de fuerza de los últimos 7 días y de los 7 anteriores. */
+  weekVolume: number;
+  prevWeekVolume: number;
 };
 
 export type GroupStats = { group: string; sets: number; volume: number };
@@ -235,28 +253,51 @@ const routineGroup = (
   group: string,
   from: number,
   style: TrainingStyle,
+  setsDelta = 0,
 ): RoutineGroup => ({
   group,
   exercises: groupExercises(group, 2).map((name, i) => ({
     name,
-    sets: i === 0 ? style.setsPrimary : style.setsSecondary,
+    sets: Math.max(
+      2,
+      (i === 0 ? style.setsPrimary : style.setsSecondary) + setsDelta,
+    ),
     reps: style.repScheme[from + i] ?? style.repScheme[style.repScheme.length - 1],
   })),
 });
 
+/** Por qué la recuperación está donde está, en una frase. */
+function readinessNote(r: Readiness): string | undefined {
+  const partes: string[] = [];
+  if (r.sleepHours != null && r.sleepHours > 0) {
+    partes.push(`dormiste ${r.sleepHours} h`);
+  }
+  if (r.streak >= 4) partes.push(`${r.streak} días seguidos entrenando`);
+  if (r.prevWeekVolume > 0 && r.weekVolume > r.prevWeekVolume * 1.5) {
+    partes.push("subiste mucho el volumen esta semana");
+  }
+  if (partes.length === 0) return undefined;
+  const rec = r.recovery != null ? `Recuperación ${r.recovery}%: ` : "";
+  return `${rec}${partes.join(", ")}.`;
+}
+
 /**
- * Arma la rutina completa de hoy según lo entrenado esta semana: prioriza
- * los grupos musculares con menos series esta semana (desempate por más
+ * Arma la rutina completa de hoy según CÓMO LLEGÁS y qué entrenaste esta
+ * semana: prioriza los grupos musculares con menos series (desempate por más
  * días sin entrenarlos) y propone ejercicios concretos con series y reps
- * acordes al objetivo del usuario (bajar/mantener/subir). Al llegar al
- * objetivo semanal de días de fuerza, sugiere recuperación activa (cardio
- * suave) en vez de una rutina de fuerza.
+ * acordes al objetivo del usuario (bajar/mantener/subir).
+ *
+ * La recuperación manda sobre el calendario: con recuperación baja se sugiere
+ * descanso aunque falten días de fuerza en la semana, y con recuperación justa
+ * se recorta una serie por ejercicio. Al llegar al objetivo semanal de días de
+ * fuerza, sugiere recuperación activa (cardio suave).
  */
 export function buildDailyRoutine(
   strengthSets: StrengthSet[],
   cardio: { date: string }[],
   today: string,
   objective: ObjectiveKey = "mantener",
+  readiness?: Readiness,
 ): RoutinePlan {
   const style =
     TRAINING_STYLES.find((s) => s.key === objective) ?? TRAINING_STYLES[1];
@@ -269,6 +310,8 @@ export function buildDailyRoutine(
   const trainedToday = strengthSets.some((s) => s.date === today);
   const cardioToday = cardio.some((c) => c.date === today);
   const key = `${today}:${strengthDays}:${trainedToday ? "t" : "n"}`;
+  const why = readiness ? readinessNote(readiness) : undefined;
+  const rec = readiness?.recovery ?? null;
 
   if (trainedToday) {
     return {
@@ -276,6 +319,20 @@ export function buildDailyRoutine(
       tone: "done",
       headline: `Listo por hoy 💪 Llevás ${strengthDays}/${goal} días de fuerza esta semana.`,
       groups: [],
+      why,
+    };
+  }
+
+  // La recuperación va antes que el calendario: entrenar fuerte sin recuperar
+  // no suma volumen, suma fatiga (y a la larga, lesiones).
+  if (rec != null && rec < 45) {
+    return {
+      key,
+      tone: "recovery",
+      headline: `Venís con poca recuperación (${rec}%). Hoy conviene descanso o algo muy suave.`,
+      groups: [],
+      cardioTip: style.cardioTip,
+      why,
     };
   }
 
@@ -287,6 +344,7 @@ export function buildDailyRoutine(
       headline: `Ya cumpliste tus ${goal} días de fuerza 🔥 Hoy toca recuperación activa.${extra}`,
       groups: [],
       cardioTip: style.cardioTip,
+      why,
     };
   }
 
@@ -305,15 +363,23 @@ export function buildDailyRoutine(
     return gapB - gapA;
   });
 
+  // Recuperación justa (45-65): se entrena igual, pero con una serie menos por
+  // ejercicio. Es la diferencia entre bajar la carga y perder el día.
+  const light = rec != null && rec < 65;
+  const setsDelta = light ? -1 : 0;
+
   const [primary, secondary] = ranked;
-  const groups: RoutineGroup[] = [routineGroup(primary, 0, style)];
-  if (secondary) groups.push(routineGroup(secondary, 1, style));
+  const groups: RoutineGroup[] = [routineGroup(primary, 0, style, setsDelta)];
+  if (secondary) groups.push(routineGroup(secondary, 1, style, setsDelta));
 
   return {
     key,
     tone: "train",
-    headline: `Vas ${strengthDays}/${goal} días esta semana. Hoy toca: ${primary}${secondary ? ` + ${secondary}` : ""}.`,
+    headline: light
+      ? `Hoy toca ${primary}${secondary ? ` + ${secondary}` : ""}, pero con una serie menos: venís justo de recuperación.`
+      : `Vas ${strengthDays}/${goal} días esta semana. Hoy toca: ${primary}${secondary ? ` + ${secondary}` : ""}.`,
     groups,
+    why,
   };
 }
 

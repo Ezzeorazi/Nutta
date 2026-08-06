@@ -6,6 +6,7 @@ import Chip from "@/components/ui/Chip";
 import AppHeader from "@/components/AppHeader";
 import DayNavigator from "@/components/DayNavigator";
 import CalorieRing from "@/components/CalorieRing";
+import EstadoCard from "@/components/EstadoCard";
 import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
 import InsightsCard from "@/components/InsightsCard";
@@ -15,6 +16,7 @@ import ScoreCard from "@/components/ScoreCard";
 import SupplementsCard from "@/components/SupplementsCard";
 import Timeline from "@/components/Timeline";
 import WellbeingCard from "@/components/WellbeingCard";
+import type { AthleteState } from "@/lib/athlete";
 import type { Insight } from "@/lib/insights";
 import type { DailyScore } from "@/lib/score";
 import {
@@ -35,19 +37,10 @@ import { waterGoalL } from "@/lib/nutrition";
 import { uid } from "@/lib/uid";
 import { useToast } from "@/components/ui/Toast";
 
-type Totals = {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  burned: number;
-};
-
 export default function HoyTab({
   weight,
+  state,
   score,
-  totals,
-  goals,
   todayMetrics,
   todayFoods,
   todayEx,
@@ -78,9 +71,9 @@ export default function HoyTab({
   setSupplementQty,
 }: {
   weight: number;
+  /** Todo lo que se sabe del día visto, ya cruzado (ver `lib/athlete.ts`). */
+  state: AthleteState;
   score: DailyScore;
-  totals: Totals;
-  goals: { calories: number; protein: number; carbs: number; fat: number };
   todayMetrics?: DailyMetrics;
   todayFoods: FoodEntry[];
   todayEx: ExerciseEntry[];
@@ -127,6 +120,9 @@ export default function HoyTab({
   const toast = useToast();
   const isToday = viewDate === today;
   const waterGoal = waterGoalL(weight);
+  // Metas YA ajustadas al entrenamiento del día: el anillo y las barras tienen
+  // que mostrar la meta de hoy, no la de un día genérico.
+  const { consumed, goals, carbDelta } = state.nutrition;
   // Timestamp del día que se está viendo: hoy usa el instante real (preserva el
   // orden del timeline); un día pasado se ancla al mediodía para no saltar a hoy.
   const stamp = () => (isToday ? Date.now() : startOfLocalDayMs(viewDate));
@@ -171,26 +167,30 @@ export default function HoyTab({
           propia. No necesita un borde que lo separe de nada — ya es el foco. */}
       <section className="flex flex-col items-center gap-6">
         <CalorieRing
-          consumed={Math.round(totals.calories)}
-          burned={Math.round(totals.burned)}
+          consumed={consumed.calories}
+          burned={Math.round(state.training.cardioBurned)}
           goal={goals.calories}
         />
         <div className="flex w-full flex-col gap-3">
           <MacroBar
             label="Proteínas"
-            value={totals.protein}
+            value={consumed.protein}
             goal={goals.protein}
             color="var(--primary)"
           />
           <MacroBar
-            label="Carbohidratos"
-            value={totals.carbs}
+            label={
+              carbDelta === 0
+                ? "Carbohidratos"
+                : `Carbohidratos (${carbDelta > 0 ? "+" : "−"}${Math.abs(carbDelta)} por tu entreno)`
+            }
+            value={consumed.carbs}
             goal={goals.carbs}
             color="var(--accent)"
           />
           <MacroBar
             label="Grasas"
-            value={totals.fat}
+            value={consumed.fat}
             goal={goals.fat}
             color="var(--success)"
           />
@@ -220,6 +220,11 @@ export default function HoyTab({
           </Chip>
         </div>
       </section>
+
+      {/* Estado actual: recuperación, señales del día y qué hacer ahora. Es lo
+          primero que diría un entrenador, así que va apenas debajo del anillo y
+          de la carga rápida (que se ganó su lugar arriba y no se lo movemos). */}
+      <EstadoCard state={state} />
 
       <Timeline
         foods={todayFoods}

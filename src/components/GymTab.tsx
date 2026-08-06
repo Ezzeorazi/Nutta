@@ -1,6 +1,6 @@
 "use client";
 
-import { tooltipStyle } from "@/lib/chart";
+import { axisProps, chartMargin, tooltipStyle, yAxis } from "@/lib/chart";
 import { useMemo, useState } from "react";
 import {
   CartesianGrid,
@@ -28,6 +28,7 @@ import {
   personalRecords,
   totalVolume,
   usedExercises,
+  type Readiness,
 } from "@/lib/gym";
 import { matchExercise } from "@/lib/exerciseDb";
 import type { ObjectiveKey } from "@/lib/nutrition";
@@ -116,6 +117,7 @@ export default function GymTab({
   exercises = [],
   today,
   objective,
+  readiness,
   onAddSet,
   onRemoveSet,
   onEditSet,
@@ -126,6 +128,8 @@ export default function GymTab({
   exercises?: ExerciseEntry[];
   today: string;
   objective?: ObjectiveKey;
+  /** Cómo llega el usuario hoy (sueño, carga acumulada, recuperación). */
+  readiness?: Readiness;
   onAddSet: (
     exercise: string,
     reps: number,
@@ -184,8 +188,8 @@ export default function GymTab({
   const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
   const dayVolume = totalVolume(daySets);
   const routine = useMemo(
-    () => buildDailyRoutine(strengthSets, exercises, today, objective),
-    [strengthSets, exercises, today, objective],
+    () => buildDailyRoutine(strengthSets, exercises, today, objective, readiness),
+    [strengthSets, exercises, today, objective, readiness],
   );
   // Descarte por jornada: se guarda la clave del día en localStorage. Se lee en
   // el inicializador (GymTab solo monta al abrir el tab, nunca en SSR).
@@ -218,6 +222,10 @@ export default function GymTab({
           }))
         : [],
     [strengthSets, selectedProg],
+  );
+  const progAxis = useMemo(
+    () => yAxis(progData.map((p) => p.peso)),
+    [progData],
   );
 
   // Ejercicio del catálogo que matchea lo escrito (para mostrar su miniatura).
@@ -316,7 +324,13 @@ export default function GymTab({
                   ? "✅"
                   : "🎯"}
             </span>
-            <p className="flex-1 text-sm">{routine.headline}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm">{routine.headline}</p>
+              {/* El porqué de la sugerencia: sin esto es un oráculo. */}
+              {routine.why && (
+                <p className="mt-0.5 text-xs text-muted">{routine.why}</p>
+              )}
+            </div>
             <button
               type="button"
               onClick={dismissSuggestion}
@@ -629,26 +643,10 @@ export default function GymTab({
           <div className="rounded-card bg-card p-4 shadow-e1">
             {progData.length >= 2 ? (
               <ResponsiveContainer width="100%" height={180}>
-                <LineChart
-                  data={progData}
-                  margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
-                >
+                <LineChart data={progData} margin={chartMargin}>
                   <CartesianGrid vertical={false} stroke="var(--border)" />
-                  <XAxis
-                    dataKey="label"
-                    tickLine={false}
-                    axisLine={false}
-                    fontSize={11}
-                    stroke="var(--muted)"
-                  />
-                  <YAxis
-                    domain={["dataMin - 2", "dataMax + 2"]}
-                    tickLine={false}
-                    axisLine={false}
-                    fontSize={11}
-                    stroke="var(--muted)"
-                    width={40}
-                  />
+                  <XAxis dataKey="label" {...axisProps} />
+                  <YAxis {...axisProps} {...progAxis} />
                   <Tooltip
                     contentStyle={tooltipStyle}
                     formatter={(v) => [`${v} kg`, "Peso máx."]}

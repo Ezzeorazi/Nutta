@@ -1,153 +1,312 @@
+/**
+ * Tendencias: lo que se ve mirando semanas, no un día.
+ *
+ * Antes esto solo miraba comida y cardio, así que no podía detectar ni una
+ * mejora de fuerza ni un estancamiento ni la falta de recuperación —los datos
+ * estaban ahí, pero en otra tabla—. Ahora cruza fuerza, nutrición, sueño y
+ * agua, que es de donde salen los avisos que sirven de verdad.
+ */
+
+import { dayDiff, weeklyLoad, type Signal, type Tone } from "@/lib/athlete";
+import { MUSCLE_GROUPS, groupsOf } from "@/lib/gym";
 import { dailySupplementProtein } from "@/lib/supplements";
-import type {
-  ExerciseEntry,
-  FoodEntry,
-  Goals,
-  Supplement,
-  SupplementLog,
+import {
+  WATER_GOAL_L,
+  shiftISO,
+  type DailyMetrics,
+  type ExerciseEntry,
+  type FoodEntry,
+  type Goals,
+  type StrengthSet,
+  type Supplement,
+  type SupplementLog,
 } from "@/lib/types";
 
-export type InsightTone = "good" | "warn" | "info";
-export type Insight = { emoji: string; text: string; tone: InsightTone };
-
-/** Grupos musculares detectables por el nombre de la actividad. */
-const MUSCLE_GROUPS: { key: string; label: string; re: RegExp; emoji: string }[] =
-  [
-    {
-      key: "piernas",
-      label: "piernas",
-      emoji: "🦵",
-      re: /pierna|cuadri|sentadilla|prensa|gemelo|gl[uú]teo|zancada|femoral|desplante/i,
-    },
-    {
-      key: "espalda",
-      label: "espalda",
-      emoji: "🔙",
-      re: /espalda|dorsal|remo|jal[oó]n|pull|dominada/i,
-    },
-    {
-      key: "pecho",
-      label: "pecho",
-      emoji: "💪",
-      re: /pecho|pectoral|banca|fondos|apertura/i,
-    },
-  ];
+export type InsightTone = Tone;
+export type Insight = Signal;
 
 const ALCOHOL =
   /cerveza|birra|vino|fernet|whisky|whiskey|vodka|\bgin\b|trago|alcohol|champ[aá]n|licor|aperol/i;
 
-const isoOffset = (iso: string, delta: number) => {
-  const d = new Date(`${iso}T00:00:00`);
-  d.setDate(d.getDate() + delta);
-  return d.toISOString().slice(0, 10);
+/** Emoji del grupo muscular, para que el aviso se reconozca de un vistazo. */
+const GROUP_EMOJI: Record<string, string> = {
+  pecho: "💪",
+  espalda: "🔙",
+  piernas: "🦵",
+  hombros: "🎽",
+  brazos: "🦾",
 };
-const dayDiff = (a: string, b: string) =>
-  Math.round(
-    (Date.parse(`${a}T00:00:00`) - Date.parse(`${b}T00:00:00`)) / 86400000,
-  );
 
-/** Genera insights accionables a partir del historial. */
-export function buildInsights(
-  foods: FoodEntry[],
-  exercises: ExerciseEntry[],
-  goals: Goals,
-  today: string,
-  supplements: Supplement[] = [],
-  supplementLogs: SupplementLog[] = [],
-): Insight[] {
-  const out: Insight[] = [];
-  const exDates = new Set(exercises.map((e) => e.date));
+export type InsightsInput = {
+  foods: FoodEntry[];
+  exercises: ExerciseEntry[];
+  strengthSets: StrengthSet[];
+  metrics: DailyMetrics[];
+  supplements: Supplement[];
+  supplementLogs: SupplementLog[];
+  goals: Goals;
+  today: string;
+  waterGoal?: number;
+};
 
-  // Racha de entrenamiento (permite que hoy aún no esté hecho).
-  let streak = 0;
-  let cursor = exDates.has(today) ? today : isoOffset(today, -1);
-  while (exDates.has(cursor)) {
-    streak++;
-    cursor = isoOffset(cursor, -1);
-  }
-  if (streak >= 2) {
-    out.push({
+/** Insights accionables a partir del historial completo. */
+export function buildInsights(input: InsightsInput): Insight[] {
+  const {
+    foods,
+    exercises,
+    strengthSets,
+    metrics,
+    supplements,
+    supplementLogs,
+    goals,
+    today,
+  } = input;
+  const waterGoal = input.waterGoal ?? WATER_GOAL_L;
+
+  const good: Insight[] = [];
+  const warn: Insight[] = [];
+  const info: Insight[] = [];
+
+  const week = weeklyLoad(strengthSets, exercises, today);
+  const inLastDays = (d: string, n: number) => {
+    const diff = dayDiff(today, d);
+    return diff >= 0 && diff < n;
+  };
+
+  // --- Entrenamiento -------------------------------------------------------
+
+  if (week.streak >= 2) {
+    good.push({
       emoji: "🔥",
       tone: "good",
-      text: `Llevás ${streak} días seguidos entrenando.`,
+      text: `Llevás ${week.streak} días seguidos entrenando.`,
     });
-  }
-
-  // Entrenamientos en los últimos 7 días.
-  let weekTrain = 0;
-  for (let i = 0; i < 7; i++) if (exDates.has(isoOffset(today, -i))) weekTrain++;
-  if (weekTrain >= 1 && streak < 2) {
-    out.push({
+  } else if (week.days >= 1) {
+    info.push({
       emoji: "🏋️",
       tone: "info",
-      text: `Entrenaste ${weekTrain} ${
-        weekTrain === 1 ? "vez" : "veces"
-      } esta semana.`,
+      text: `Entrenaste ${week.days} ${week.days === 1 ? "vez" : "veces"} esta semana.`,
     });
   }
 
-  // Grupos musculares sin entrenar hace tiempo.
+  // Mejora de fuerza: PR reciente o salto de volumen contra la semana previa.
+  const recentPr = latestPr(strengthSets, today, 7);
+  if (recentPr) {
+    good.push({
+      emoji: "🏆",
+      tone: "good",
+      text: `Nuevo PR en ${recentPr.exercise}: ${recentPr.weight} kg (antes ${recentPr.prev} kg).`,
+    });
+  } else if (week.prevVolume > 0 && week.volume > week.prevVolume * 1.1) {
+    const pct = Math.round((week.volume / week.prevVolume - 1) * 100);
+    good.push({
+      emoji: "📈",
+      tone: "good",
+      text: `Tu volumen subió ${pct}% respecto de la semana pasada.`,
+    });
+  }
+
+  // Exceso de volumen: subir de golpe es la vía rápida a la lesión.
+  if (week.prevVolume > 0 && week.volume > week.prevVolume * 1.5) {
+    warn.push({
+      emoji: "⚠️",
+      tone: "warn",
+      text: `Subiste el volumen más de un 50% de una semana a la otra. Bajá un poco o vas derecho a la lesión.`,
+    });
+  } else if (week.streak >= 6) {
+    warn.push({
+      emoji: "🛌",
+      tone: "warn",
+      text: `${week.streak} días seguidos entrenando sin descanso. El músculo crece descansando.`,
+    });
+  }
+
+  // Estancamiento: mismo peso máximo dos ventanas seguidas.
+  for (const stuck of stagnantLifts(strengthSets, today).slice(0, 1)) {
+    warn.push({
+      emoji: "🧱",
+      tone: "warn",
+      text: `Estancado en ${stuck.exercise}: seguís en ${stuck.weight} kg hace ${stuck.weeks} semanas. Probá bajar reps y subir el peso.`,
+    });
+  }
+
+  // Grupos musculares abandonados (por las series reales, no por el nombre del
+  // cardio: la fuerza vive en strengthSets).
+  const lastByGroup = new Map<string, string>();
+  for (const s of strengthSets) {
+    for (const g of groupsOf(s.exercise)) {
+      const prev = lastByGroup.get(g);
+      if (!prev || s.date > prev) lastByGroup.set(g, s.date);
+    }
+  }
   for (const g of MUSCLE_GROUPS) {
-    const dates = exercises
-      .filter((e) => g.re.test(e.name))
-      .map((e) => e.date)
-      .sort();
-    if (dates.length === 0) continue;
-    const gap = dayDiff(today, dates[dates.length - 1]);
+    const last = lastByGroup.get(g);
+    if (!last) continue;
+    const gap = dayDiff(today, last);
     if (gap >= 7) {
-      out.push({
-        emoji: g.emoji,
+      warn.push({
+        emoji: GROUP_EMOJI[g] ?? "🏋️",
         tone: "warn",
-        text: `Hace ${gap} días que no entrenás ${g.label}.`,
+        text: `Hace ${gap} días que no entrenás ${g}.`,
       });
     }
   }
 
-  // Tendencia de proteína (promedio de días con comida en la última semana).
+  // --- Nutrición -----------------------------------------------------------
+
   const proteinByDay = new Map<string, number>();
-  for (const f of foods) {
-    if (dayDiff(today, f.date) < 0 || dayDiff(today, f.date) > 6) continue;
-    proteinByDay.set(f.date, (proteinByDay.get(f.date) ?? 0) + f.protein);
-  }
-  for (let i = 0; i <= 6; i++) {
-    const date = isoOffset(today, -i);
-    const supProtein = dailySupplementProtein(supplements, supplementLogs, date);
-    if (supProtein > 0) {
-      proteinByDay.set(date, (proteinByDay.get(date) ?? 0) + supProtein);
-    }
+  for (let i = 0; i < 7; i++) {
+    const date = shiftISO(today, -i);
+    const fromFood = foods
+      .filter((f) => f.date === date)
+      .reduce((s, f) => s + f.protein, 0);
+    const fromSup = dailySupplementProtein(supplements, supplementLogs, date);
+    if (fromFood > 0 || fromSup > 0) proteinByDay.set(date, fromFood + fromSup);
   }
   if (proteinByDay.size >= 2) {
     const avg =
-      [...proteinByDay.values()].reduce((s, v) => s + v, 0) /
-      proteinByDay.size;
+      [...proteinByDay.values()].reduce((s, v) => s + v, 0) / proteinByDay.size;
     if (avg >= goals.protein * 0.9) {
-      out.push({
+      good.push({
         emoji: "🥩",
         tone: "good",
         text: "Tu proteína viene excelente esta semana.",
       });
     } else if (avg < goals.protein * 0.6) {
-      out.push({
+      warn.push({
         emoji: "🥩",
         tone: "warn",
-        text: `Proteína baja: promediás ${Math.round(
-          avg,
-        )} g/día (meta ${goals.protein}).`,
+        text: `Proteína baja: promediás ${Math.round(avg)} g/día (meta ${goals.protein}).`,
       });
     }
   }
 
-  // Alcohol hoy.
-  const alcoholKcalToday = foods
-    .filter((f) => f.date === today && ALCOHOL.test(f.name))
-    .reduce((s, f) => s + f.calories, 0);
-  if (alcoholKcalToday > 0) {
-    out.push({
+  const alcoholDays = new Set(
+    foods.filter((f) => inLastDays(f.date, 7) && ALCOHOL.test(f.name)).map((f) => f.date),
+  ).size;
+  if (alcoholDays >= 3) {
+    warn.push({
       emoji: "🍺",
       tone: "warn",
-      text: `El alcohol sumó ~${Math.round(alcoholKcalToday)} kcal hoy.`,
+      text: `${alcoholDays} días con alcohol esta semana. Frena la recuperación y la síntesis de proteína.`,
     });
+  } else if (alcoholDays >= 1) {
+    const kcal = foods
+      .filter((f) => f.date === today && ALCOHOL.test(f.name))
+      .reduce((s, f) => s + f.calories, 0);
+    if (kcal > 0) {
+      info.push({
+        emoji: "🍺",
+        tone: "info",
+        text: `El alcohol sumó ~${Math.round(kcal)} kcal hoy.`,
+      });
+    }
   }
 
-  return out.slice(0, 4);
+  // --- Recuperación --------------------------------------------------------
+
+  const sleepDays = metrics.filter(
+    (m) => inLastDays(m.date, 7) && (m.sleepHours ?? 0) > 0,
+  );
+  if (sleepDays.length >= 3) {
+    const avg =
+      sleepDays.reduce((s, m) => s + (m.sleepHours ?? 0), 0) / sleepDays.length;
+    if (avg < 6.5) {
+      warn.push({
+        emoji: "😴",
+        tone: "warn",
+        text: `Dormís ${avg.toFixed(1)} h en promedio. Con menos de 7 no recuperás ni construís músculo.`,
+      });
+    } else if (avg >= 7) {
+      good.push({
+        emoji: "😴",
+        tone: "good",
+        text: `Venís durmiendo ${avg.toFixed(1)} h de promedio. Así se recupera.`,
+      });
+    }
+  }
+
+  const waterDays = metrics.filter(
+    (m) => inLastDays(m.date, 7) && (m.water ?? 0) > 0,
+  );
+  if (waterDays.length >= 3) {
+    const avg =
+      waterDays.reduce((s, m) => s + (m.water ?? 0), 0) / waterDays.length;
+    if (avg < waterGoal * 0.6) {
+      warn.push({
+        emoji: "💧",
+        tone: "warn",
+        text: `Promediás ${avg.toFixed(1)} L de agua (meta ${waterGoal} L). Te baja fuerza y concentración.`,
+      });
+    }
+  }
+
+  // Los avisos primero: lo que hay que corregir es más útil que la palmada.
+  return [...warn, ...good, ...info].slice(0, 5);
+}
+
+/** PR batido en los últimos `days` días (el más reciente). */
+function latestPr(
+  sets: StrengthSet[],
+  today: string,
+  days: number,
+): { exercise: string; weight: number; prev: number; date: string } | null {
+  const recent = sets.filter((s) => {
+    const d = dayDiff(today, s.date);
+    return d >= 0 && d < days;
+  });
+  let best: { exercise: string; weight: number; prev: number; date: string } | null =
+    null;
+  for (const s of recent) {
+    if (!(s.weight > 0)) continue;
+    const prev = sets
+      .filter((o) => o.exercise === s.exercise && o.date < s.date)
+      .reduce((m, o) => Math.max(m, o.weight), 0);
+    if (prev > 0 && s.weight > prev) {
+      if (!best || s.date > best.date) {
+        best = { exercise: s.exercise, weight: s.weight, prev, date: s.date };
+      }
+    }
+  }
+  return best;
+}
+
+/**
+ * Ejercicios trabados: el mejor peso de las últimas dos semanas no supera al de
+ * las dos anteriores. Se piden 4 días distintos para no llamar "estancamiento"
+ * a dos sesiones sueltas.
+ */
+function stagnantLifts(
+  sets: StrengthSet[],
+  today: string,
+): { exercise: string; weight: number; weeks: number }[] {
+  const byExercise = new Map<string, StrengthSet[]>();
+  for (const s of sets) {
+    const arr = byExercise.get(s.exercise) ?? [];
+    arr.push(s);
+    byExercise.set(s.exercise, arr);
+  }
+
+  const out: { exercise: string; weight: number; weeks: number }[] = [];
+  for (const [exercise, arr] of byExercise) {
+    const days = new Set(arr.map((s) => s.date));
+    if (days.size < 4) continue;
+    const maxIn = (from: number, to: number) =>
+      arr
+        .filter((s) => {
+          const d = dayDiff(today, s.date);
+          return d >= from && d < to;
+        })
+        .reduce((m, s) => Math.max(m, s.weight), 0);
+    const recent = maxIn(0, 14);
+    const before = maxIn(14, 28);
+    if (recent > 0 && before > 0 && recent <= before) {
+      out.push({ exercise, weight: recent, weeks: 4 });
+    }
+  }
+  return out.sort(
+    (a, b) =>
+      (byExercise.get(b.exercise)?.length ?? 0) -
+      (byExercise.get(a.exercise)?.length ?? 0),
+  );
 }

@@ -17,13 +17,14 @@ import { uid } from "@/lib/uid";
 import { formatLog } from "@/lib/chatLog";
 import { db } from "@/lib/db";
 import { computeGoals, waterGoalL } from "@/lib/nutrition";
+import { buildAthleteState } from "@/lib/athlete";
 import { dailyScore } from "@/lib/score";
 import { buildInsights } from "@/lib/insights";
 import { streakFromDates } from "@/lib/achievements";
 import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
-import { dailySupplementProtein } from "@/lib/supplements";
 import { useNutta } from "@/lib/useNutta";
+import type { Readiness } from "@/lib/gym";
 import {
   DEFAULT_GOALS,
   localDateFromMs,
@@ -130,41 +131,88 @@ export default function Home() {
   const todayMetrics = metrics.find((m) => m.date === today);
   const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
 
-  // Proteína aportada por suplementos (ej. proteína en polvo, colágeno) el día visto.
-  const viewSupplementProtein = useMemo(
-    () => dailySupplementProtein(supplements, supplementLogs, viewDate),
-    [supplements, supplementLogs, viewDate],
+  const waterGoal = profile ? waterGoalL(profile.weight) : undefined;
+
+  // --- Estado del atleta ---
+  // Todo lo que se sabe del usuario, cruzado en un solo lugar (lib/athlete.ts).
+  // De acá salen el score, el panel de estado, las metas dinámicas y la
+  // recomendación pre-entreno: antes cada módulo veía su rebanada y por eso el
+  // score ignoraba las series de fuerza y la rutina ignoraba el sueño.
+  const athleteBase = useMemo(
+    () => ({
+      foods,
+      exercises,
+      strengthSets,
+      metrics,
+      supplements,
+      supplementLogs,
+      goals,
+      bodyWeight: profile?.weight ?? 0,
+      today,
+    }),
+    [
+      foods,
+      exercises,
+      strengthSets,
+      metrics,
+      supplements,
+      supplementLogs,
+      goals,
+      profile?.weight,
+      today,
+    ],
+  );
+  // El estado de HOY manda la rutina del Gym; el del día VISTO, el tab Hoy.
+  const todayState = useMemo(
+    () => buildAthleteState({ ...athleteBase, date: today }),
+    [athleteBase, today],
+  );
+  const viewState = useMemo(
+    () =>
+      viewDate === today
+        ? todayState
+        : buildAthleteState({ ...athleteBase, date: viewDate }),
+    [athleteBase, todayState, viewDate, today],
   );
 
-  const totals = useMemo(() => {
-    const t = { calories: 0, protein: 0, carbs: 0, fat: 0, burned: 0 };
-    for (const f of viewFoods) {
-      t.calories += f.calories;
-      t.protein += f.protein;
-      t.carbs += f.carbs;
-      t.fat += f.fat;
-    }
-    for (const e of viewEx) t.burned += e.caloriesBurned;
-    t.protein += viewSupplementProtein;
-    return t;
-  }, [viewFoods, viewEx, viewSupplementProtein]);
-
-  const waterGoal = profile ? waterGoalL(profile.weight) : undefined;
   const score = useMemo(
-    () =>
-      dailyScore(
-        viewFoods,
-        viewEx,
-        goals,
-        viewMetrics,
-        waterGoal,
-        viewSupplementProtein,
-      ),
-    [viewFoods, viewEx, goals, viewMetrics, waterGoal, viewSupplementProtein],
+    () => dailyScore(viewState, viewFoods),
+    [viewState, viewFoods],
   );
   const insights = useMemo(
-    () => buildInsights(foods, exercises, goals, today, supplements, supplementLogs),
-    [foods, exercises, goals, today, supplements, supplementLogs],
+    () =>
+      buildInsights({
+        foods,
+        exercises,
+        strengthSets,
+        metrics,
+        supplements,
+        supplementLogs,
+        goals,
+        today,
+        waterGoal,
+      }),
+    [
+      foods,
+      exercises,
+      strengthSets,
+      metrics,
+      supplements,
+      supplementLogs,
+      goals,
+      today,
+      waterGoal,
+    ],
+  );
+  const readiness = useMemo<Readiness>(
+    () => ({
+      recovery: todayState.recovery.score,
+      sleepHours: todayMetrics?.sleepHours ?? null,
+      streak: todayState.week.streak,
+      weekVolume: todayState.week.volume,
+      prevWeekVolume: todayState.week.prevVolume,
+    }),
+    [todayState, todayMetrics],
   );
   // Racha de entrenamiento (días con cardio o fuerza) para mostrar en Hoy.
   const trainStreak = useMemo(() => {
@@ -311,14 +359,17 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          summary: weeklySummary(
+          summary: weeklySummary({
             foods,
             exercises,
             strengthSets,
+            metrics,
+            weights,
+            measures,
             goals,
-            profile.objective,
+            objective: profile.objective,
             today,
-          ),
+          }),
           memories: memories.map((m) => ({ kind: m.kind, text: m.text })),
         }),
       });
@@ -396,6 +447,7 @@ export default function Home() {
           exercises={exercises}
           today={today}
           objective={profile.objective}
+          readiness={readiness}
           onAddSet={addSet}
           onRemoveSet={removeSet}
           onEditSet={updateSet}
@@ -438,9 +490,8 @@ export default function Home() {
       ) : (
         <HoyTab
           weight={profile.weight}
+          state={viewState}
           score={score}
-          totals={totals}
-          goals={goals}
           todayMetrics={viewMetrics}
           todayFoods={viewFoods}
           todayEx={viewEx}

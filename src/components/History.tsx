@@ -1,6 +1,6 @@
 "use client";
 
-import { tooltipStyle } from "@/lib/chart";
+import { axisProps, chartMargin, tooltipStyle, yAxis } from "@/lib/chart";
 import { useMemo, useState } from "react";
 import {
   Bar,
@@ -102,6 +102,21 @@ export default function History({
         .sort((a, b) => b.volume - a.volume)
         .slice(0, 5),
     [strengthSets, fromISO, today],
+  );
+
+  // Ejes con dominio y marcas redondas. La meta entra en el dominio de las
+  // calorías para que su línea punteada nunca quede fuera del gráfico.
+  const netAxis = useMemo(
+    () => yAxis([...stats.map((s) => s.net), goals.calories], { zero: true }),
+    [stats, goals.calories],
+  );
+  const macroAxis = useMemo(
+    () =>
+      yAxis(
+        stats.flatMap((s) => [s.protein, s.carbs, s.fat]),
+        { zero: true },
+      ),
+    [stats],
   );
 
   return (
@@ -216,23 +231,15 @@ export default function History({
           </span>
         </div>
         <ResponsiveContainer width="100%" height={180}>
-          <BarChart data={stats} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
+          <BarChart data={stats} margin={chartMargin}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey={xKey}
               interval={xInterval}
-              tickLine={false}
-              axisLine={false}
+              {...axisProps}
               fontSize={12}
-              stroke="var(--muted)"
             />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              fontSize={11}
-              stroke="var(--muted)"
-              width={40}
-            />
+            <YAxis {...axisProps} {...netAxis} />
             <Tooltip
               contentStyle={tooltipStyle}
               cursor={{ fill: "var(--border)", opacity: 0.4 }}
@@ -261,23 +268,15 @@ export default function History({
       <section className="rounded-card bg-card p-4 shadow-e1">
         <h2 className="mb-2 font-semibold">Macros (g)</h2>
         <ResponsiveContainer width="100%" height={180}>
-          <LineChart data={stats} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
+          <LineChart data={stats} margin={chartMargin}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey={xKey}
               interval={xInterval}
-              tickLine={false}
-              axisLine={false}
+              {...axisProps}
               fontSize={12}
-              stroke="var(--muted)"
             />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              fontSize={11}
-              stroke="var(--muted)"
-              width={40}
-            />
+            <YAxis {...axisProps} {...macroAxis} />
             <Tooltip contentStyle={tooltipStyle} />
             <Legend iconType="plainline" wrapperStyle={{ fontSize: 12 }} />
             <Line

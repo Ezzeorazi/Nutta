@@ -1,6 +1,16 @@
+import { weeklyLoad } from "@/lib/athlete";
+import { readBody } from "@/lib/body";
 import { groupsOf, MUSCLE_GROUPS } from "@/lib/gym";
 import { OBJECTIVES, type ObjectiveKey } from "@/lib/nutrition";
-import type { ExerciseEntry, FoodEntry, Goals, StrengthSet } from "@/lib/types";
+import type {
+  DailyMetrics,
+  ExerciseEntry,
+  FoodEntry,
+  Goals,
+  MeasureEntry,
+  StrengthSet,
+  WeightEntry,
+} from "@/lib/types";
 
 /**
  * Resume los alimentos que el usuario repite por comida (histórico), para dar
@@ -36,18 +46,38 @@ const dayDiff = (a: string, b: string) =>
     (Date.parse(`${a}T00:00:00`) - Date.parse(`${b}T00:00:00`)) / 86400000,
   );
 
+export type WeeklySummaryInput = {
+  foods: FoodEntry[];
+  exercises: ExerciseEntry[];
+  strengthSets: StrengthSet[];
+  metrics: DailyMetrics[];
+  weights: WeightEntry[];
+  measures: MeasureEntry[];
+  goals: Goals;
+  objective?: ObjectiveKey;
+  today: string;
+};
+
 /**
  * Resumen compacto de la última semana para el Coach IA (función pura).
  * No usa el AI SDK: se computa en el cliente y se manda al endpoint.
+ *
+ * Incluye entrenamiento, nutrición, descanso Y composición corporal: si el
+ * resumen no trae sueño ni medidas, la IA no puede hacer otra cosa que hablar
+ * de calorías, que es justo lo que no queremos.
  */
-export function weeklySummary(
-  foods: FoodEntry[],
-  exercises: ExerciseEntry[],
-  strengthSets: StrengthSet[],
-  goals: Goals,
-  objective: ObjectiveKey | undefined,
-  today: string,
-): string {
+export function weeklySummary(input: WeeklySummaryInput): string {
+  const {
+    foods,
+    exercises,
+    strengthSets,
+    metrics,
+    weights,
+    measures,
+    goals,
+    objective,
+    today,
+  } = input;
   const inWeek = (d: string) => {
     const diff = dayDiff(today, d);
     return diff >= 0 && diff <= 6;
@@ -55,6 +85,7 @@ export function weeklySummary(
   const wFoods = foods.filter((f) => inWeek(f.date));
   const wEx = exercises.filter((e) => inWeek(e.date));
   const wSets = strengthSets.filter((s) => inWeek(s.date));
+  const wMetrics = metrics.filter((m) => inWeek(m.date));
 
   const trainDays = new Set([
     ...wEx.map((e) => e.date),
@@ -88,12 +119,33 @@ export function weeklySummary(
     wFoods.filter((f) => ALCOHOL_RE.test(f.name)).map((f) => f.date),
   ).size;
 
+  // Volumen de fuerza y su comparación con la semana anterior: es la métrica
+  // que dice si la persona está progresando, estancada o pasada de rosca.
+  const load = weeklyLoad(strengthSets, exercises, today);
+  const volumeTrend =
+    load.prevVolume > 0
+      ? `${Math.round((load.volume / load.prevVolume - 1) * 100)}% vs. la semana anterior`
+      : "sin semana previa para comparar";
+
+  const avgOf = (vals: number[]) =>
+    vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  const sleep = avgOf(
+    wMetrics.map((m) => m.sleepHours ?? 0).filter((h) => h > 0),
+  );
+  const water = avgOf(wMetrics.map((m) => m.water ?? 0).filter((l) => l > 0));
+  const steps = avgOf(wMetrics.map((m) => m.steps ?? 0).filter((s) => s > 0));
+
+  const body = readBody(weights, measures, today);
+
   return [
     `Objetivo: ${objLabel ?? "sin definir"}.`,
     `Entrenamientos: ${trainDays}/7 días${
       activities.length ? ` (cardio: ${activities.join(", ")})` : ""
     }${strengthNames.length ? ` (fuerza: ${strengthNames.join(", ")})` : ""}.`,
     `Grupos trabajados: ${groups.length ? groups.join(", ") : "ninguno detectado"}.`,
+    `Volumen de fuerza: ${Math.round(load.volume).toLocaleString("es-AR")} kg en ${
+      wSets.length
+    } series (${volumeTrend}). Racha: ${load.streak} días seguidos.`,
     `Promedio diario (${foodDays.size} días con registro): ${Math.round(
       sum.cal / n,
     )} kcal, ${Math.round(sum.prot / n)} g proteína (meta ${
@@ -101,6 +153,23 @@ export function weeklySummary(
     }), ${Math.round(sum.carb / n)} g carbos, ${Math.round(
       sum.fat / n,
     )} g grasa.`,
+    `Descanso e hidratación: ${
+      sleep != null ? `${sleep.toFixed(1)} h de sueño` : "sueño sin registrar"
+    }, ${water != null ? `${water.toFixed(1)} L de agua` : "agua sin registrar"}, ${
+      steps != null
+        ? `${Math.round(steps).toLocaleString("es-AR")} pasos`
+        : "pasos sin registrar"
+    } por día.`,
+    `Composición corporal: ${body.headline.toLowerCase()}${
+      body.deltas.length
+        ? ` (${body.deltas
+            .map(
+              (d) =>
+                `${d.label} ${d.delta > 0 ? "+" : "−"}${Math.abs(d.delta).toFixed(1)} ${d.unit}`,
+            )
+            .join(", ")})`
+        : ""
+    }.`,
     `Días con alcohol: ${alcoholDays}.`,
     `Metas: ${goals.calories} kcal, ${goals.protein} g proteína.`,
   ].join("\n");

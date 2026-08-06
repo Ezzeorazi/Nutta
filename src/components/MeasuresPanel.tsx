@@ -1,6 +1,6 @@
 "use client";
 
-import { tooltipStyle } from "@/lib/chart";
+import { axisProps, chartMargin, tooltipStyle, yAxis } from "@/lib/chart";
 import { useMemo, useState } from "react";
 import {
   CartesianGrid,
@@ -58,6 +58,10 @@ export default function MeasuresPanel({
         (p) => p.cm,
       ).map((w) => ({ label: shortDate(w.weekStart), cm: w.value })),
     [partPoints],
+  );
+  const yProps = useMemo(
+    () => yAxis(chartData.map((d) => d.cm)),
+    [chartData],
   );
 
   const meta = MEASURE_PARTS.find((p) => p.key === part)!;
@@ -121,26 +125,10 @@ export default function MeasuresPanel({
 
         {chartData.length >= 2 ? (
           <ResponsiveContainer width="100%" height={160}>
-            <LineChart
-              data={chartData}
-              margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
-            >
+            <LineChart data={chartData} margin={chartMargin}>
               <CartesianGrid vertical={false} stroke="var(--border)" />
-              <XAxis
-                dataKey="label"
-                tickLine={false}
-                axisLine={false}
-                fontSize={11}
-                stroke="var(--muted)"
-              />
-              <YAxis
-                domain={["dataMin - 1", "dataMax + 1"]}
-                tickLine={false}
-                axisLine={false}
-                fontSize={11}
-                stroke="var(--muted)"
-                width={40}
-              />
+              <XAxis dataKey="label" {...axisProps} />
+              <YAxis {...axisProps} {...yProps} />
               <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(v) => [`${v} cm`, meta.label]}

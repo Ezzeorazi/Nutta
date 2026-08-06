@@ -1,33 +1,35 @@
 import {
-  WATER_GOAL_L,
-  type DailyMetrics,
-  type ExerciseEntry,
-  type FoodEntry,
-  type Goals,
-} from "@/lib/types";
+  INTENSITY_LABEL,
+  clamp,
+  closeness,
+  rate,
+  type AthleteState,
+} from "@/lib/athlete";
+import { STEPS_GOAL, type FoodEntry } from "@/lib/types";
 
 /** Bebidas alcohólicas (penalizan el score). */
 const ALCOHOL =
   /cerveza|birra|vino|fernet|whisky|whiskey|vodka|\bgin\b|trago|alcohol|champ[aá]n|licor|aperol|c[au]ipi|daiquiri|margarita|ron\b|tequila/i;
 
-export type ScorePart = { label: string; points: number; max: number };
+export type ScorePart = {
+  label: string;
+  emoji: string;
+  points: number;
+  max: number;
+  /** Por qué sacó esos puntos. Siempre presente: el número solo no enseña nada. */
+  detail: string;
+  /** `false` cuando no hay dato: no suma pero tampoco resta. */
+  logged: boolean;
+};
 
 export type DailyScore = {
   score: number; // 0-100
   label: string;
+  /** Una frase que explica de dónde sale el número. */
+  summary: string;
   parts: ScorePart[];
   tips: string[];
 };
-
-const clamp = (n: number, lo: number, hi: number) =>
-  Math.max(lo, Math.min(hi, n));
-
-/** 1 cuando value ≈ goal, cae a 0 al desviarse más de `tol` (fracción). */
-function closeness(value: number, goal: number, tol: number) {
-  if (goal <= 0) return value > 0 ? 0.5 : 0;
-  const err = Math.abs(value - goal) / goal;
-  return clamp(1 - err / tol, 0, 1);
-}
 
 function label(score: number): string {
   if (score >= 85) return "Excelente";
@@ -37,108 +39,165 @@ function label(score: number): string {
   return "A arrancar";
 }
 
-/** Calidad del sueño según horas (ideal 7-9 h). */
-function sleepRatio(hours: number): number {
-  if (hours <= 0) return 0;
-  if (hours >= 7 && hours <= 9) return 1;
-  if (hours < 7) return clamp((hours / 7) * 0.95, 0, 0.95);
-  return clamp(1 - (hours - 9) * 0.1, 0.5, 0.9); // dormir de más resta un poco
-}
-
 /**
- * Score diario 0-100 a partir de lo registrado hoy y las metas.
- * Factores: proteína, calorías, macros, entrenamiento y —si se registran—
- * sueño y agua. El puntaje se normaliza sobre los factores presentes, así
- * que NO registrar sueño/agua no penaliza. El alcohol resta puntos.
+ * Score diario 0-100.
+ *
+ * Reparto: entrenamiento 30, proteína 25, sueño 20, agua 10, pasos 10 y
+ * calorías 5. Las calorías pesan poco a propósito: llegar a la meta calórica
+ * comiendo cualquier cosa y sin entrenar no es un buen día, y el score no
+ * debería decir que sí. El entrenamiento cuenta TANTO la fuerza como el cardio
+ * (antes solo miraba el cardio: una sesión entera de gym daba cero).
+ *
+ * Lo que no se registró se excluye del reparto en vez de puntuar cero: no
+ * cargar el sueño no es dormir mal. Cada factor explica por qué sacó lo que
+ * sacó, y eso también se le muestra al usuario.
  */
 export function dailyScore(
-  foods: FoodEntry[],
-  exercises: ExerciseEntry[],
-  goals: Goals,
-  metrics?: Pick<DailyMetrics, "water" | "sleepHours">,
-  waterGoal: number = WATER_GOAL_L,
-  extraProtein = 0, // proteína de suplementos (ej. proteína en polvo)
+  state: AthleteState,
+  foodsOfDay: FoodEntry[],
 ): DailyScore {
-  const protein = foods.reduce((s, f) => s + f.protein, 0) + extraProtein;
-  const calories = foods.reduce((s, f) => s + f.calories, 0);
-  const carbs = foods.reduce((s, f) => s + f.carbs, 0);
-  const fat = foods.reduce((s, f) => s + f.fat, 0);
-  const trained = exercises.length > 0;
-  const hasAlcohol = foods.some((f) => ALCOHOL.test(f.name));
+  const { training, nutrition, status } = state;
+  const goals = nutrition.goals;
+  const consumed = nutrition.consumed;
+  const hasAlcohol = foodsOfDay.some((f) => ALCOHOL.test(f.name));
 
-  const factors: { label: string; weight: number; ratio: number }[] = [
+  const row = (key: string) => status.find((s) => s.key === key)!;
+  const sleep = row("sueno");
+  const water = row("agua");
+  const steps = row("pasos");
+
+  const parts: ScorePart[] = [
+    {
+      label: "Entrenamiento",
+      emoji: "🏋️",
+      max: 30,
+      logged: true,
+      points: Math.round(30 * row("entrenamiento").ratio),
+      detail: training.trained
+        ? `Sesión ${INTENSITY_LABEL[training.intensity].toLowerCase()}${
+            training.volume > 0
+              ? ` · ${training.sets} series · ${Math.round(training.volume).toLocaleString("es-AR")} kg`
+              : ` · ${training.cardioMinutes} min`
+          }.`
+        : "No registraste entrenamiento (ni fuerza ni cardio).",
+    },
     {
       label: "Proteína",
-      weight: 30,
-      ratio: clamp(protein / (goals.protein || 1), 0, 1),
+      emoji: "🥩",
+      max: 25,
+      logged: true,
+      points: Math.round(
+        25 * clamp(consumed.protein / (goals.protein || 1), 0, 1),
+      ),
+      detail: `${consumed.protein} de ${goals.protein} g${
+        nutrition.remaining.protein > 0
+          ? ` · faltan ${Math.round(nutrition.remaining.protein)} g`
+          : " · meta cumplida"
+      }.`,
     },
-    { label: "Calorías", weight: 25, ratio: closeness(calories, goals.calories, 0.35) },
     {
-      label: "Macros",
-      weight: 15,
-      ratio:
-        (closeness(carbs, goals.carbs, 0.5) +
-          closeness(fat, goals.fat, 0.5)) /
-        2,
+      label: "Sueño",
+      emoji: "😴",
+      max: 20,
+      logged: sleep.logged,
+      points: sleep.logged ? Math.round(20 * sleep.ratio) : 0,
+      detail: sleep.logged
+        ? `${sleep.value} · ${rate(sleep.ratio).toLowerCase()} (ideal 7-9 h).`
+        : "Sin registrar: no suma ni resta.",
     },
-    { label: "Entrenamiento", weight: 30, ratio: trained ? 1 : 0 },
+    {
+      label: "Agua",
+      emoji: "💧",
+      max: 10,
+      logged: water.logged,
+      points: water.logged ? Math.round(10 * water.ratio) : 0,
+      detail: water.logged
+        ? `${water.value}.`
+        : "Sin registrar: no suma ni resta.",
+    },
+    {
+      label: "Pasos",
+      emoji: "👣",
+      max: 10,
+      logged: steps.logged,
+      points: steps.logged ? Math.round(10 * steps.ratio) : 0,
+      detail: steps.logged
+        ? `${steps.value} de ${STEPS_GOAL.toLocaleString("es-AR")}.`
+        : "Sin registrar: no suma ni resta.",
+    },
+    {
+      label: "Calorías",
+      emoji: "🔥",
+      max: 5,
+      logged: true,
+      points: Math.round(5 * closeness(consumed.calories, goals.calories, 0.35)),
+      detail: `${consumed.calories} de ${goals.calories} kcal${
+        nutrition.carbDelta !== 0 ? " (meta ajustada a tu entrenamiento)" : ""
+      }.`,
+    },
   ];
 
-  const hasSleep = metrics?.sleepHours != null && metrics.sleepHours > 0;
-  const hasWater = metrics?.water != null && metrics.water > 0;
-  if (hasSleep) {
-    factors.push({
-      label: "Sueño",
-      weight: 20,
-      ratio: sleepRatio(metrics!.sleepHours!),
-    });
-  }
-  if (hasWater) {
-    factors.push({
-      label: "Agua",
-      weight: 10,
-      ratio: clamp(metrics!.water! / waterGoal, 0, 1),
-    });
-  }
-
-  const totW = factors.reduce((s, f) => s + f.weight, 0);
-  const base = (factors.reduce((s, f) => s + f.weight * f.ratio, 0) / totW) * 100;
+  // Solo entran al reparto los factores con dato: no cargar el agua no puede
+  // costar 10 puntos, o el score castigaría no registrar en vez de no hacer.
+  const counted = parts.filter((p) => p.logged);
+  const totalMax = counted.reduce((s, p) => s + p.max, 0) || 1;
+  const base = (counted.reduce((s, p) => s + p.points, 0) / totalMax) * 100;
   const alcPen = hasAlcohol ? 15 : 0;
   const score = clamp(Math.round(base - alcPen), 0, 100);
 
-  const parts: ScorePart[] = factors.map((f) => ({
-    label: f.label,
-    points: Math.round(f.weight * f.ratio),
-    max: f.weight,
-  }));
-  if (alcPen) parts.push({ label: "Alcohol", points: -alcPen, max: 0 });
+  if (alcPen) {
+    parts.push({
+      label: "Alcohol",
+      emoji: "🍺",
+      points: -alcPen,
+      max: 0,
+      logged: true,
+      detail: "Registraste alcohol: −15 puntos.",
+    });
+  }
+
+  // La explicación: qué lo sostuvo y qué lo hundió.
+  const rated = counted
+    .filter((p) => p.max >= 10)
+    .map((p) => ({ ...p, ratio: p.points / p.max }));
+  const best = [...rated].sort((a, b) => b.ratio - a.ratio)[0];
+  const worst = [...rated].sort((a, b) => a.ratio - b.ratio)[0];
+  const omitted = parts.filter((p) => !p.logged).map((p) => p.label);
+  const summary =
+    best && worst && best.label !== worst.label
+      ? `${best.label} te sube el score y ${worst.label.toLowerCase()} te lo baja.`
+      : best
+        ? `${best.label} es lo que más pesa hoy.`
+        : "Registrá tu día para calcular el score.";
 
   const tips: string[] = [];
-  if (protein < goals.protein * 0.8) {
+  if (score >= 85) tips.push("Gran día, seguí así 💪");
+  if (nutrition.remaining.protein > goals.protein * 0.2) {
     tips.push(
-      `Te falta proteína: sumá ~${Math.max(
-        0,
-        Math.round(goals.protein - protein),
-      )} g.`,
+      `Te falta proteína: sumá ~${Math.round(nutrition.remaining.protein)} g.`,
     );
   }
-  if (!trained) tips.push("Hoy no registraste entrenamiento.");
-  if (calories > goals.calories * 1.15) {
+  if (!training.trained) tips.push("Hoy no registraste entrenamiento.");
+  if (consumed.calories > goals.calories * 1.15) {
     tips.push("Te pasaste de calorías; ojo con las porciones.");
-  } else if (calories > 0 && calories < goals.calories * 0.6) {
+  } else if (consumed.calories > 0 && consumed.calories < goals.calories * 0.6) {
     tips.push("Vas muy por debajo de tus calorías; comé algo más.");
   }
-  if (hasSleep && metrics!.sleepHours! < 6) {
-    tips.push(`Dormiste poco (${metrics!.sleepHours} h); apuntá a 7-8.`);
+  if (sleep.logged && sleep.ratio < 0.7) {
+    tips.push(`Dormiste poco (${sleep.value}); apuntá a 7-8.`);
   }
-  if (hasWater && metrics!.water! < waterGoal * 0.6) {
+  if (water.logged && water.ratio < 0.6) {
     tips.push("Tomá más agua para llegar a tu meta.");
   }
-  if (!hasSleep && !hasWater) {
-    tips.push("Registrá tu sueño y agua para un score más completo.");
+  if (steps.logged && steps.ratio < 0.6) {
+    tips.push("Te faltó movimiento fuera del gym: sumá una caminata.");
+  }
+  if (omitted.length) {
+    tips.push(
+      `${omitted.join(", ")} sin registrar: no cuentan en el score de hoy.`,
+    );
   }
   if (hasAlcohol) tips.push("El alcohol sumó calorías y bajó tu score.");
-  if (score >= 85) tips.unshift("Gran día, seguí así 💪");
 
-  return { score, label: label(score), parts, tips };
+  return { score, label: label(score), summary, parts, tips };
 }
