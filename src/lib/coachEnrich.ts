@@ -7,7 +7,7 @@
  *
  * Es client-safe (no importa groq), así que puede correr en la ruta o donde sea.
  */
-import { matchExercise } from "@/lib/exerciseDb";
+import { approxExercise, matchExercise } from "@/lib/exerciseDb";
 import { caloriesFromMet } from "@/lib/exercises";
 
 type ExItem = { name: string; minutes: number; caloriesBurned: number };
@@ -23,17 +23,21 @@ export function enrichExercises<T extends ExItem>(
   weight: number,
 ): T[] {
   return items.map((it) => {
-    const m = matchExercise(it.name);
-    if (!m) return it;
+    // Renombrar exige un match inequívoco; para el MET alcanza una variante
+    // cercana (correr 8 km/h y correr 11 km/h no son el mismo nombre, pero
+    // para estimar el gasto de "corrí 20 min" cualquiera de las dos sirve).
+    const exact = matchExercise(it.name);
+    const approx = exact ?? approxExercise(it.name);
+    if (!approx) return it;
     const minutes = it.minutes > 0 ? it.minutes : 0;
     // Solo estimamos cuando NO hay calorías cargadas (respeta el dato del reloj).
     const caloriesBurned =
       it.caloriesBurned > 0
         ? it.caloriesBurned
-        : m.met != null && minutes > 0
-          ? caloriesFromMet(m.met, weight, minutes)
+        : approx.met != null && minutes > 0
+          ? caloriesFromMet(approx.met, weight, minutes)
           : it.caloriesBurned;
-    return { ...it, name: m.name_es, caloriesBurned };
+    return { ...it, ...(exact ? { name: exact.name_es } : {}), caloriesBurned };
   });
 }
 

@@ -305,11 +305,13 @@ export default function History({
               strokeWidth={2}
               dot={false}
             />
+            {/* Azul, no verde: `success` y `primary` son dos verdes casi
+                iguales y esta línea era indistinguible de la de proteína. */}
             <Line
               type="monotone"
               dataKey="fat"
               name="Grasas"
-              stroke="var(--success)"
+              stroke="var(--info)"
               strokeWidth={2}
               dot={false}
             />

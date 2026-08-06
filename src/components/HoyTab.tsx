@@ -177,6 +177,7 @@ export default function HoyTab({
             value={consumed.protein}
             goal={goals.protein}
             color="var(--primary)"
+            overTone="ok"
           />
           <MacroBar
             label={
@@ -192,7 +193,7 @@ export default function HoyTab({
             label="Grasas"
             value={consumed.fat}
             goal={goals.fat}
-            color="var(--success)"
+            color="var(--info)"
           />
         </div>
       </section>

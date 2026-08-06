@@ -191,26 +191,31 @@ function tokenScore(q: string[], cand: string[]): number {
 const MATCH_THRESHOLD = 0.5;
 
 /**
- * Busca el ejercicio canónico que mejor matchea un nombre libre.
- * Devuelve null si no hay una coincidencia razonable.
+ * Mejor candidato del catálogo, más cuántos empataron con él.
+ *
+ * Se expone en dos sabores porque no es lo mismo IDENTIFICAR que RENOMBRAR:
+ * todas las variantes de sentadilla gastan calorías parecido y trabajan el
+ * mismo grupo, así que para MET o músculo alcanza con una aproximación; para
+ * reescribir el nombre que guardó el usuario, no.
  */
-export function matchExercise(name: string): DbExercise | null {
+function findMatch(name: string): { ex: DbExercise | null; tied: number } {
   const q = norm(name);
-  if (!q) return null;
+  if (!q) return { ex: null, tied: 0 };
 
   // 1) match exacto (es/en)
   const exact = EXACT.get(q);
-  if (exact) return exact;
+  if (exact) return { ex: exact, tied: 1 };
 
   // 2) mejor puntaje por tokens
   const qt = tokens(name);
-  if (qt.length === 0) return null;
+  if (qt.length === 0) return { ex: null, tied: 0 };
   // Consulta solo de palabras genéricas (músculo/sesión) → no matchear.
-  if (qt.every((t) => GENERIC.has(t))) return null;
+  if (qt.every((t) => GENERIC.has(t))) return { ex: null, tied: 0 };
 
   let best: DbExercise | null = null;
   let bestScore = 0;
   let bestLenDiff = Infinity;
+  let tied = 0; // cuántos candidatos comparten el mejor puntaje Y longitud
 
   for (const it of INDEX) {
     const score = Math.max(tokenScore(qt, it.tokEs), tokenScore(qt, it.tokEn));
@@ -224,9 +229,38 @@ export function matchExercise(name: string): DbExercise | null {
       best = it.ex;
       bestScore = score;
       bestLenDiff = lenDiff;
+      tied = 1;
+    } else if (score === bestScore && lenDiff === bestLenDiff) {
+      tied++;
     }
   }
-  return best;
+
+  return { ex: best, tied };
+}
+
+/**
+ * Ejercicio canónico de un nombre libre, SOLO si es inequívoco.
+ *
+ * "sentadilla" saca exactamente 0.5 (el umbral) contra decenas de variantes
+ * —Sentadilla con Banda, Sentadilla Búlgara, Sentadilla Frontal…— y ninguna es
+ * más "correcta" que otra: el desempate por longitud las deja iguales y ganaba
+ * la primera del índice, que es un orden arbitrario. Así, decir "hice
+ * sentadillas" guardaba "Sentadilla con Banda" y "dominadas" guardaba
+ * "Dominadas Arquero", reescribiendo el historial con ejercicios que el usuario
+ * nunca hizo. Si no se puede distinguir, se respeta lo que escribió: un nombre
+ * libre molesta menos que un dato falso.
+ */
+export function matchExercise(name: string): DbExercise | null {
+  const { ex, tied } = findMatch(name);
+  return tied === 1 ? ex : null;
+}
+
+/**
+ * Mejor aproximación aunque haya empate. Vale para MET y grupo muscular —donde
+ * cualquier variante cercana da lo mismo— y NUNCA para renombrar.
+ */
+export function approxExercise(name: string): DbExercise | null {
+  return findMatch(name).ex;
 }
 
 /** Nombre canónico en español (o el original si no hay match). */
@@ -234,14 +268,14 @@ export function canonicalName(name: string): string {
   return matchExercise(name)?.name_es ?? name;
 }
 
-/** MET real del ejercicio matcheado (o null). */
+/** MET del ejercicio (aproximado: las variantes cercanas gastan parecido). */
 export function metOf(name: string): number | null {
-  return matchExercise(name)?.met ?? null;
+  return approxExercise(name)?.met ?? null;
 }
 
-/** Grupo muscular del ejercicio matcheado (o null). */
+/** Grupo muscular del ejercicio (aproximado, por el mismo motivo). */
 export function groupOf(name: string): MuscleGroup | null {
-  const ex = matchExercise(name);
+  const ex = approxExercise(name);
   return ex ? groupOfMuscles(ex.primary_muscles) : null;
 }
 

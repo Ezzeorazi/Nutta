@@ -15,6 +15,10 @@
   --accent: #f97316; /* naranja — energía / ejercicio */
   --accent-foreground: #ffffff;
   --success: #22c55e;
+  /* Azul para la TERCERA serie de datos (grasas). `primary` y `success` son
+     dos verdes casi idénticos: en el gráfico de macros las líneas de proteína
+     y grasas eran indistinguibles. */
+  --info: #2563eb;
 
   /* Superficie hundida: campos y celdas DENTRO de una tarjeta. Permite separar
      jerarquías sin dibujar un borde más (menos cajas = más limpio). */
@@ -38,6 +42,7 @@
   --accent: #fb923c;
   --accent-foreground: #1a0e04;
   --success: #34d399;
+  --info: #60a5fa;
 
   /* En oscuro la sombra no se ve: la profundidad se comunica con luminosidad,
      así que la superficie hundida es MÁS oscura que la tarjeta, no más clara. */
@@ -60,6 +65,7 @@
     --accent: #fb923c;
     --accent-foreground: #1a0e04;
     --success: #34d399;
+    --info: #60a5fa;
     --sunken: #0d1310;
     --elev-1: 0 1px 2px rgb(0 0 0 / 0.3);
     --elev-2: 0 4px 12px rgb(0 0 0 / 0.4);
@@ -79,6 +85,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-success: var(--success);
+  --color-info: var(--info);
 
   --shadow-e1: var(--elev-1);
   --shadow-e2: var(--elev-2);
