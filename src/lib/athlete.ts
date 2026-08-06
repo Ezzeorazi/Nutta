@@ -18,7 +18,7 @@
 import { caloriesFromMet } from "@/lib/exercises";
 import { groupsOf, setVolume } from "@/lib/gym";
 import { waterGoalL } from "@/lib/nutrition";
-import { carbIdeas, proteinIdeas } from "@/lib/meals";
+import { carbPlan, proteinPlan, type MealPlan } from "@/lib/meals";
 import { dailySupplementProtein } from "@/lib/supplements";
 import {
   STEPS_GOAL,
@@ -50,6 +50,20 @@ export const INTENSITY_LABEL: Record<Intensity, string> = {
   medio: "Medio",
   fuerte: "Fuerte",
 };
+
+/**
+ * La intensidad dentro de una frase. Existe porque `Sesión ${label}` producía
+ * "Sesión medio": el sustantivo es femenino y la etiqueta suelta, masculina.
+ */
+export const INTENSITY_PHRASE: Record<Intensity, string> = {
+  descanso: "Día de descanso",
+  suave: "Sesión suave",
+  medio: "Sesión media",
+  fuerte: "Sesión fuerte",
+};
+
+/** Orden de menor a mayor, para poder quedarse con la señal más alta. */
+const INTENSITY_RANK: Intensity[] = ["descanso", "suave", "medio", "fuerte"];
 
 /** Cuánto "vale" cada intensidad para el score y las metas. */
 const INTENSITY_RATIO: Record<Intensity, number> = {
@@ -235,19 +249,28 @@ function classifyIntensity(x: {
   effect: number | null;
 }): Intensity {
   if (!x.trained) return "descanso";
-  // Si el reloj dio su "efecto del entrenamiento", es el dato más directo que
-  // hay: mide el impacto real sobre el cuerpo, no lo que uno cree que hizo.
-  if (x.effect != null) {
-    if (x.effect >= 3.5) return "fuerte";
-    if (x.effect >= 2) return "medio";
-    return "suave";
-  }
-  // Si no, se compara contra las propias sesiones: 20 series son "fuerte" para
-  // uno y rutina para otro. Sin historial, se cae a umbrales absolutos.
+
+  // Volumen: se compara contra las propias sesiones, porque 20 series son
+  // "fuerte" para uno y rutina para otro. Sin historial, umbrales absolutos.
   const ratio = x.refVolume > 0 ? x.volume / x.refVolume : 0;
-  if (x.sets >= 16 || ratio >= 1.15 || x.cardioMinutes >= 60) return "fuerte";
-  if (x.sets >= 8 || ratio >= 0.7 || x.cardioMinutes >= 35) return "medio";
-  return "suave";
+  const byLoad: Intensity =
+    x.sets >= 16 || ratio >= 1.15 || x.cardioMinutes >= 60
+      ? "fuerte"
+      : x.sets >= 8 || ratio >= 0.7 || x.cardioMinutes >= 35
+        ? "medio"
+        : "suave";
+
+  if (x.effect == null) return byLoad;
+
+  // El "efecto del entrenamiento" del reloj mide SOLO la actividad que el reloj
+  // registró (el cardio), no las series de fuerza. Antes pisaba todo y un día
+  // de 26 series + 88 min de cardio salía "medio" porque el reloj dijo 2.5. Se
+  // toma la señal más alta de las dos, no la del reloj.
+  const byEffect: Intensity =
+    x.effect >= 3.5 ? "fuerte" : x.effect >= 2 ? "medio" : "suave";
+  return INTENSITY_RANK.indexOf(byEffect) > INTENSITY_RANK.indexOf(byLoad)
+    ? byEffect
+    : byLoad;
 }
 
 // ---------------------------------------------------------------------------
@@ -325,11 +348,17 @@ export function weeklyLoad(
 export type NutritionState = {
   /** Lo consumido ese día (proteína incluye la de suplementos). */
   consumed: Goals;
+  /** Calorías netas: consumidas − quemadas en cardio. Es lo que muestra el anillo. */
+  netCalories: number;
   /** Metas del día YA ajustadas por lo que se entrenó. */
   goals: Goals;
   /** Metas del perfil, sin ajustar. */
   base: Goals;
-  /** Lo que falta para llegar (puede ser negativo si se pasó). */
+  /**
+   * Lo que falta para llegar (negativo si se pasó). En `calories` se usa el
+   * NETO, igual que el anillo: si no, la tarjeta decía "faltan 1024 kcal"
+   * mientras el anillo de arriba decía 1505.
+   */
   remaining: Goals;
   /** Carbohidratos sumados (o restados) por el entrenamiento del día. */
   carbDelta: number;
@@ -374,6 +403,7 @@ function nutritionOfDay(
   base: Goals,
   intensity: Intensity,
   isToday: boolean,
+  cardioBurned: number,
 ): NutritionState {
   const day = foods.filter((f) => f.date === date);
   const consumed: Goals = {
@@ -386,14 +416,18 @@ function nutritionOfDay(
     fat: Math.round(sum(day, (f) => f.fat)),
   };
   const { goals, carbDelta, reason } = dynamicGoals(base, intensity, isToday);
+  // El neto es el mismo que muestra el anillo de calorías (consumidas menos
+  // quemadas). Los macros no se netean: el ejercicio no te devuelve proteína.
+  const netCalories = Math.max(0, consumed.calories - Math.round(cardioBurned));
   return {
     consumed,
+    netCalories,
     goals,
     base,
     carbDelta,
     reason,
     remaining: {
-      calories: goals.calories - consumed.calories,
+      calories: goals.calories - netCalories,
       protein: goals.protein - consumed.protein,
       carbs: goals.carbs - consumed.carbs,
       fat: goals.fat - consumed.fat,
@@ -576,9 +610,12 @@ export type AthleteState = {
   headline: string;
   /** Lectura del entrenamiento + nutrición, en tono entrenador. */
   coach: Signal[];
-  /** Comidas concretas para cerrar lo que falta. */
-  ideas: string[];
+  /** Qué comer para cerrar lo que falta. `null` si no falta nada relevante. */
+  meal: NextMeal | null;
 };
+
+/** El macro que hay que cerrar y cómo hacerlo en la próxima comida. */
+export type NextMeal = { macro: "proteína" | "carbohidratos"; plan: MealPlan };
 
 /** Cruza todos los datos del usuario y devuelve el estado del día. */
 export function buildAthleteState(input: AthleteInput): AthleteState {
@@ -602,6 +639,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     input.goals,
     training.intensity,
     isToday,
+    training.cardioBurned,
   );
 
   const yesterday = shiftISO(date, -1);
@@ -631,7 +669,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     metrics: dayMetrics,
     waterGoal,
   });
-  const { headline, coach, ideas } = buildCoach({
+  const { headline, coach, meal } = buildCoach({
     training,
     nutrition,
     recovery,
@@ -653,7 +691,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     status,
     headline,
     coach,
-    ideas,
+    meal,
   };
 }
 
@@ -729,7 +767,7 @@ function buildCoach(x: {
   waterGoal: number;
   isToday: boolean;
   foodsOfDay: FoodEntry[];
-}): { headline: string; coach: Signal[]; ideas: string[] } {
+}): { headline: string; coach: Signal[]; meal: NextMeal | null } {
   const { training, nutrition, recovery, week, metrics, isToday } = x;
   const coach: Signal[] = [];
   const falta = nutrition.remaining;
@@ -745,7 +783,7 @@ function buildCoach(x: {
     coach.push({
       emoji: training.intensity === "fuerte" ? "🔥" : "💪",
       tone: "good",
-      text: `Sesión ${INTENSITY_LABEL[training.intensity].toLowerCase()}: ${partes.join(" · ")}.`,
+      text: `${INTENSITY_PHRASE[training.intensity]}: ${partes.join(" · ")}.`,
     });
   }
 
@@ -768,7 +806,7 @@ function buildCoach(x: {
     coach.push({
       emoji: "🍚",
       tone: "warn",
-      text: `Entrenaste fuerte y vas ${nutrition.consumed.calories} de ${nutrition.goals.calories} kcal. Subí los carbohidratos ${momento} para recuperar bien.`,
+      text: `Entrenaste fuerte y vas ${nutrition.netCalories} de ${nutrition.goals.calories} kcal netas. Subí los carbohidratos ${momento} para recuperar bien.`,
     });
   } else if (training.trained && falta.protein > 25) {
     coach.push({
@@ -788,11 +826,15 @@ function buildCoach(x: {
     coach.push({ emoji: "🎯", tone: "info", text: nutrition.reason });
   }
 
-  // 3) Comidas concretas para cerrar lo que falta.
-  const ideas: string[] = [];
-  if (falta.protein >= 15) ideas.push(...proteinIdeas(falta.protein));
-  else if (training.intensity !== "descanso" && falta.carbs >= 40) {
-    ideas.push(...carbIdeas(falta.carbs));
+  // 3) Comidas concretas para cerrar lo que falta, topeadas a lo que entra en
+  //    UNA comida (ver meals.ts: sin tope salían cosas como "17 bananas").
+  let meal: NextMeal | null = null;
+  if (falta.protein >= 15) {
+    const p = proteinPlan(falta.protein);
+    if (p) meal = { macro: "proteína", plan: p };
+  } else if (training.intensity !== "descanso" && falta.carbs >= 40) {
+    const c = carbPlan(falta.carbs);
+    if (c) meal = { macro: "carbohidratos", plan: c };
   }
 
   // 4) La recomendación principal: una sola cosa, la que más mueve la aguja.
@@ -811,11 +853,20 @@ function buildCoach(x: {
     headline = `Vas ${water} L de agua: te falta más de la mitad de la meta.`;
   } else if (sleep == null) {
     headline = "Registrá cuánto dormiste: es el dato que más me falta para leerte bien.";
-  } else if (training.trained && falta.protein <= 10 && falta.calories > -200) {
+  } else if (
+    // "Llegaste con la comida" pide estar CERCA de la meta, no solo no haberse
+    // pasado: antes `falta.calories > -200` daba "día redondo" con 1000 kcal y
+    // 460 g de carbos faltando, justo arriba del cartel que decía lo contrario.
+    training.trained &&
+    Math.abs(falta.protein) <= 15 &&
+    Math.abs(falta.calories) <= 300
+  ) {
     headline = "Día redondo: entrenaste y llegaste con la comida. Seguí así 💪";
+  } else if (falta.calories > 500) {
+    headline = `Te faltan ${Math.round(falta.calories)} kcal para tu meta del día. Comé algo más.`;
   } else {
     headline = recovery.advice;
   }
 
-  return { headline, coach, ideas };
+  return { headline, coach, meal };
 }

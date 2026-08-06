@@ -29,15 +29,8 @@ const toneClasses = {
  */
 export default function EstadoCard({ state }: { state: AthleteState }) {
   const [open, setOpen] = useState(false);
-  const { recovery, status, headline, coach, ideas, nutrition } = state;
+  const { recovery, status, headline, coach, meal } = state;
   const recColor = ratioColor((recovery.score ?? 0) / 100, recovery.score != null);
-
-  const faltaProteina = Math.round(nutrition.remaining.protein);
-  const faltaCarbos = Math.round(nutrition.remaining.carbs);
-  const ideasTitle =
-    faltaProteina >= 15
-      ? `Te faltan ${faltaProteina} g de proteína. Lo cerrás con:`
-      : `Te faltan ${faltaCarbos} g de carbohidratos. Lo cerrás con:`;
 
   return (
     <section className="flex flex-col gap-4 rounded-card bg-card p-4 shadow-e1">
@@ -110,30 +103,36 @@ export default function EstadoCard({ state }: { state: AthleteState }) {
         )}
       </div>
 
-      {/* Las cinco señales del día */}
-      <ul className="flex flex-col gap-2 border-t border-border pt-3">
+      {/* Las cinco señales del día. El valor real va SIEMPRE visible: antes
+          vivía en un `title` y en un teléfono no hay hover, así que veías
+          "Excelente" y nunca los 158 / 150 g que lo justificaban. */}
+      <ul className="flex flex-col gap-2.5 border-t border-border pt-3">
         {status.map((s) => (
-          <li key={s.key} className="flex items-center gap-2.5 text-sm">
-            <span className="w-5 shrink-0 text-center leading-none" aria-hidden>
-              {s.emoji}
-            </span>
-            <span className="w-28 shrink-0 truncate">{s.label}</span>
-            <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-sunken">
+          <li key={s.key} className="flex flex-col gap-1">
+            <div className="flex items-baseline gap-2 text-sm">
+              <span className="shrink-0 leading-none" aria-hidden>
+                {s.emoji}
+              </span>
+              <span className="min-w-0 flex-1 truncate">{s.label}</span>
+              <span className="shrink-0 text-xs tabular-nums text-muted">
+                {s.value}
+              </span>
               <span
-                className="block h-full rounded-full transition-[width] duration-500"
+                className="w-16 shrink-0 text-right text-xs font-semibold"
+                style={{ color: ratioColor(s.ratio, s.logged) }}
+              >
+                {s.logged ? rate(s.ratio) : "—"}
+              </span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
+              <div
+                className="h-full rounded-full transition-[width] duration-500"
                 style={{
                   width: `${(s.logged ? s.ratio : 0) * 100}%`,
                   backgroundColor: ratioColor(s.ratio, s.logged),
                 }}
               />
-            </span>
-            <span
-              className="w-20 shrink-0 truncate text-right text-xs tabular-nums"
-              style={{ color: ratioColor(s.ratio, s.logged) }}
-              title={s.value}
-            >
-              {s.logged ? rate(s.ratio) : "—"}
-            </span>
+            </div>
           </li>
         ))}
       </ul>
@@ -160,12 +159,17 @@ export default function EstadoCard({ state }: { state: AthleteState }) {
         </ul>
       )}
 
-      {/* Comida concreta para cerrar lo que falta */}
-      {ideas.length > 0 && (
+      {/* Comida concreta para cerrar lo que falta. Si el hueco no entra en una
+          comida se dice, en vez de sugerir "17 bananas" y quedarse tan pancho. */}
+      {meal && meal.plan.ideas.length > 0 && (
         <div className="flex flex-col gap-2 border-t border-border pt-3">
-          <p className="text-xs font-semibold text-muted">{ideasTitle}</p>
+          <p className="text-xs font-semibold text-muted">
+            {meal.plan.split
+              ? `Te faltan ${meal.plan.missing} g de ${meal.macro}: repartilos en ${meal.plan.meals} comidas. Para la próxima, ~${meal.plan.target} g:`
+              : `Te faltan ${meal.plan.missing} g de ${meal.macro}. Lo cerrás con:`}
+          </p>
           <ul className="flex flex-wrap gap-2">
-            {ideas.map((idea) => (
+            {meal.plan.ideas.map((idea) => (
               <li
                 key={idea}
                 className="rounded-full bg-sunken px-3 py-1.5 text-xs font-medium"

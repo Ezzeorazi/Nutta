@@ -1,5 +1,5 @@
 import {
-  INTENSITY_LABEL,
+  INTENSITY_PHRASE,
   clamp,
   closeness,
   rate,
@@ -74,7 +74,7 @@ export function dailyScore(
       logged: true,
       points: Math.round(30 * row("entrenamiento").ratio),
       detail: training.trained
-        ? `Sesión ${INTENSITY_LABEL[training.intensity].toLowerCase()}${
+        ? `${INTENSITY_PHRASE[training.intensity]}${
             training.volume > 0
               ? ` · ${training.sets} series · ${Math.round(training.volume).toLocaleString("es-AR")} kg`
               : ` · ${training.cardioMinutes} min`
@@ -130,8 +130,11 @@ export function dailyScore(
       emoji: "🔥",
       max: 5,
       logged: true,
-      points: Math.round(5 * closeness(consumed.calories, goals.calories, 0.35)),
-      detail: `${consumed.calories} de ${goals.calories} kcal${
+      // Netas (consumidas − quemadas), igual que el anillo de arriba.
+      points: Math.round(
+        5 * closeness(nutrition.netCalories, goals.calories, 0.35),
+      ),
+      detail: `${nutrition.netCalories} de ${goals.calories} kcal netas${
         nutrition.carbDelta !== 0 ? " (meta ajustada a tu entrenamiento)" : ""
       }.`,
     },
@@ -178,9 +181,12 @@ export function dailyScore(
     );
   }
   if (!training.trained) tips.push("Hoy no registraste entrenamiento.");
-  if (consumed.calories > goals.calories * 1.15) {
+  if (nutrition.netCalories > goals.calories * 1.15) {
     tips.push("Te pasaste de calorías; ojo con las porciones.");
-  } else if (consumed.calories > 0 && consumed.calories < goals.calories * 0.6) {
+  } else if (
+    consumed.calories > 0 &&
+    nutrition.netCalories < goals.calories * 0.6
+  ) {
     tips.push("Vas muy por debajo de tus calorías; comé algo más.");
   }
   if (sleep.logged && sleep.ratio < 0.7) {
