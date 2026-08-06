@@ -1,4 +1,4 @@
-import type { Goals } from "./types";
+import type { Goals, WeightEntry } from "./types";
 
 export type Sex = "masculino" | "femenino";
 export type ActivityKey =
@@ -23,12 +23,44 @@ export const ACTIVITIES: {
   label: string;
   desc: string;
   factor: number;
+  /** Días de entrenamiento por semana que describe el nivel (para contrastar). */
+  daysPerWeek: [number, number];
 }[] = [
-  { key: "sedentario", label: "Sedentario", desc: "Poco o nada de ejercicio", factor: 1.2 },
-  { key: "ligero", label: "Ligero", desc: "1–3 días/semana", factor: 1.375 },
-  { key: "moderado", label: "Moderado", desc: "3–5 días/semana", factor: 1.55 },
-  { key: "activo", label: "Activo", desc: "6–7 días/semana", factor: 1.725 },
-  { key: "muy_activo", label: "Muy activo", desc: "Físico intenso / 2x día", factor: 1.9 },
+  {
+    key: "sedentario",
+    label: "Sedentario",
+    desc: "Poco o nada de ejercicio",
+    factor: 1.2,
+    daysPerWeek: [0, 0.5],
+  },
+  {
+    key: "ligero",
+    label: "Ligero",
+    desc: "1–3 días/semana",
+    factor: 1.375,
+    daysPerWeek: [0.5, 3],
+  },
+  {
+    key: "moderado",
+    label: "Moderado",
+    desc: "3–5 días/semana",
+    factor: 1.55,
+    daysPerWeek: [3, 5.5],
+  },
+  {
+    key: "activo",
+    label: "Activo",
+    desc: "6–7 días/semana",
+    factor: 1.725,
+    daysPerWeek: [5.5, 7],
+  },
+  {
+    key: "muy_activo",
+    label: "Muy activo",
+    desc: "Físico intenso / 2x día",
+    factor: 1.9,
+    daysPerWeek: [7, 14],
+  },
 ];
 
 export const OBJECTIVES: {
@@ -58,6 +90,80 @@ export function mifflinStJeor(p: Profile): number {
 export function waterGoalL(weightKg: number): number {
   if (!(weightKg > 0)) return 2.5;
   return Math.max(2, Math.round(weightKg * 0.035 * 10) / 10);
+}
+
+/**
+ * Peso corporal para TODOS los cálculos: metas, agua y calorías de ejercicio.
+ *
+ * Sale de la balanza, no del formulario. El `weight` del perfil se completa una
+ * vez en el onboarding y queda viejo para siempre —el usuario se pesa en
+ * Progreso y ninguna meta se enteraba—, así que ahora manda el registro de
+ * peso y el perfil queda solo como respaldo.
+ *
+ * Se promedian los pesajes de la última semana para que la meta no salte 200
+ * kcal porque te pesaste después de cenar.
+ */
+export function effectiveWeight(
+  profileWeight: number,
+  weights: Pick<WeightEntry, "date" | "kg">[],
+  today: string,
+): number {
+  if (weights.length === 0) return profileWeight;
+  const dayDiff = (a: string, b: string) =>
+    Math.round(
+      (Date.parse(`${a}T00:00:00`) - Date.parse(`${b}T00:00:00`)) / 86400000,
+    );
+  const recent = weights.filter((w) => {
+    const d = dayDiff(today, w.date);
+    return d >= 0 && d < 7;
+  });
+  const pool = recent.length ? recent : [weights[weights.length - 1]];
+  const avg = pool.reduce((s, w) => s + w.kg, 0) / pool.length;
+  return Math.round(avg * 10) / 10;
+}
+
+export type ActivityMismatch = {
+  declared: ActivityKey;
+  suggested: ActivityKey;
+  /** Días de entrenamiento por semana medidos de verdad. */
+  actual: number;
+  /** Cuánto bajaría (o subiría) la meta diaria si se corrigiera. */
+  kcalDelta: number;
+};
+
+/**
+ * Contrasta el nivel de actividad declarado con los días que la persona
+ * REALMENTE entrena. Si no coinciden, todas las metas están corridas: el
+ * factor de actividad multiplica el metabolismo basal entero, así que una
+ * casilla de más son cientos de kcal y ~100 g de carbos fantasma por día.
+ *
+ * Solo avisa cuando la diferencia es de al menos dos niveles: uno solo entra
+ * dentro del error de una fórmula que ya es una estimación.
+ */
+export function activityMismatch(
+  p: Profile,
+  trainingDays: number,
+  windowDays: number,
+): ActivityMismatch | null {
+  if (windowDays < 14) return null; // sin historial suficiente no se opina
+  const actual = (trainingDays / windowDays) * 7;
+  const declaredIdx = ACTIVITIES.findIndex((a) => a.key === p.activity);
+  if (declaredIdx < 0) return null;
+  const suggestedIdx = ACTIVITIES.findIndex(
+    (a) => actual >= a.daysPerWeek[0] && actual < a.daysPerWeek[1],
+  );
+  if (suggestedIdx < 0 || Math.abs(suggestedIdx - declaredIdx) < 2) return null;
+
+  const suggested = ACTIVITIES[suggestedIdx];
+  const kcalDelta =
+    computeGoals({ ...p, activity: suggested.key }).calories -
+    computeGoals(p).calories;
+  return {
+    declared: p.activity,
+    suggested: suggested.key,
+    actual: Math.round(actual * 10) / 10,
+    kcalDelta,
+  };
 }
 
 /** Calcula metas diarias de calorías y macros a partir del perfil. */

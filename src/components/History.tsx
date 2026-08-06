@@ -216,10 +216,20 @@ export default function History({
       </section>
 
       {/* Promedios */}
-      <section className="grid grid-cols-3 gap-3">
-        <StatTile label="Días" value={avg.daysLogged} suffix={`/${days}`} />
-        <StatTile label="Prom. kcal" value={avg.calories} />
-        <StatTile label="Prom. prot." value={avg.protein} suffix="g" />
+      <section className="flex flex-col gap-2">
+        <div className="grid grid-cols-3 gap-3">
+          <StatTile label="Días" value={avg.daysLogged} suffix={`/${days}`} />
+          <StatTile label="Prom. kcal" value={avg.calories} />
+          <StatTile label="Prom. prot." value={avg.protein} suffix="g" />
+        </div>
+        {/* Sobre qué se promedia. Sin esto, "Prom. kcal" con la mitad de los
+            días sin comida registrada parece un diagnóstico y es un vacío. */}
+        {avg.daysWithFood > 0 && avg.daysWithFood < avg.daysLogged && (
+          <p className="text-center text-xs text-muted">
+            kcal y proteína promedian los {avg.daysWithFood} días con comida
+            registrada, no los {avg.daysLogged} con actividad.
+          </p>
+        )}
       </section>
 
       {/* Calorías netas por día */}

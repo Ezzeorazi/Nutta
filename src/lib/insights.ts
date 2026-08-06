@@ -9,6 +9,7 @@
 
 import { dayDiff, weeklyLoad, type Signal, type Tone } from "@/lib/athlete";
 import { MUSCLE_GROUPS, groupsOf } from "@/lib/gym";
+import { ACTIVITIES, activityMismatch, type Profile } from "@/lib/nutrition";
 import { dailySupplementProtein } from "@/lib/supplements";
 import {
   WATER_GOAL_L,
@@ -47,6 +48,8 @@ export type InsightsInput = {
   goals: Goals;
   today: string;
   waterGoal?: number;
+  /** Para contrastar el nivel de actividad declarado con el real. */
+  profile?: Profile | null;
 };
 
 /** Insights accionables a partir del historial completo. */
@@ -72,6 +75,38 @@ export function buildInsights(input: InsightsInput): Insight[] {
     const diff = dayDiff(today, d);
     return diff >= 0 && diff < n;
   };
+
+  // --- Perfil vs. realidad ---------------------------------------------------
+  // Va primero porque, si está mal, TODO lo demás está calculado sobre una
+  // meta equivocada: el factor de actividad multiplica el metabolismo entero.
+  if (input.profile) {
+    const trainDays = new Set(
+      [
+        ...strengthSets.map((s) => s.date),
+        ...exercises.map((e) => e.date),
+      ].filter((d) => inLastDays(d, 28)),
+    ).size;
+    const firstLog = [...foods, ...exercises, ...strengthSets]
+      .map((x) => x.date)
+      .sort()[0];
+    const historyDays = firstLog
+      ? Math.min(28, dayDiff(today, firstLog) + 1)
+      : 0;
+    const mismatch = activityMismatch(input.profile, trainDays, historyDays);
+    if (mismatch) {
+      const label = (k: string) =>
+        ACTIVITIES.find((a) => a.key === k)?.label ?? k;
+      warn.push({
+        emoji: "⚙️",
+        tone: "warn",
+        text: `Tu perfil dice "${label(mismatch.declared)}" pero entrenás ${mismatch.actual} días/semana. Con "${label(
+          mismatch.suggested,
+        )}" tu meta sería ${Math.abs(mismatch.kcalDelta)} kcal ${
+          mismatch.kcalDelta < 0 ? "más baja" : "más alta"
+        }. Revisalo en tu perfil 👤`,
+      });
+    }
+  }
 
   // --- Entrenamiento -------------------------------------------------------
 

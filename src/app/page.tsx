@@ -16,7 +16,7 @@ import Onboarding from "@/components/Onboarding";
 import { uid } from "@/lib/uid";
 import { formatLog } from "@/lib/chatLog";
 import { db } from "@/lib/db";
-import { computeGoals, waterGoalL } from "@/lib/nutrition";
+import { computeGoals, effectiveWeight, waterGoalL } from "@/lib/nutrition";
 import { buildAthleteState } from "@/lib/athlete";
 import { dailyScore } from "@/lib/score";
 import { buildInsights } from "@/lib/insights";
@@ -129,9 +129,16 @@ export default function Home() {
   const viewMetrics = metrics.find((m) => m.date === viewDate);
   // HOY real: el chat siempre registra en el día de hoy.
   const todayMetrics = metrics.find((m) => m.date === today);
-  const goals = profile ? computeGoals(profile) : DEFAULT_GOALS;
 
-  const waterGoal = profile ? waterGoalL(profile.weight) : undefined;
+  // El peso que manda es el de la BALANZA, no el del formulario del onboarding
+  // (que se completa una vez y queda viejo). De él dependen las metas, el agua
+  // y las calorías de todo el ejercicio.
+  const bodyWeight = effectiveWeight(profile?.weight ?? 0, weights, today);
+  const goals = profile
+    ? computeGoals({ ...profile, weight: bodyWeight })
+    : DEFAULT_GOALS;
+
+  const waterGoal = bodyWeight > 0 ? waterGoalL(bodyWeight) : undefined;
 
   // --- Estado del atleta ---
   // Todo lo que se sabe del usuario, cruzado en un solo lugar (lib/athlete.ts).
@@ -147,7 +154,7 @@ export default function Home() {
       supplements,
       supplementLogs,
       goals,
-      bodyWeight: profile?.weight ?? 0,
+      bodyWeight,
       today,
     }),
     [
@@ -158,7 +165,7 @@ export default function Home() {
       supplements,
       supplementLogs,
       goals,
-      profile?.weight,
+      bodyWeight,
       today,
     ],
   );
@@ -191,6 +198,7 @@ export default function Home() {
         goals,
         today,
         waterGoal,
+        profile,
       }),
     [
       foods,
@@ -202,6 +210,7 @@ export default function Home() {
       goals,
       today,
       waterGoal,
+      profile,
     ],
   );
   const readiness = useMemo<Readiness>(
@@ -236,7 +245,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          weight: profile.weight,
+          weight: bodyWeight,
           hour: new Date().getHours(),
           memories: memories.map((m) => ({ kind: m.kind, text: m.text })),
           frequent: frequentFoodsSummary(foods),
@@ -489,7 +498,7 @@ export default function Home() {
         />
       ) : (
         <HoyTab
-          weight={profile.weight}
+          weight={bodyWeight}
           state={viewState}
           score={score}
           todayMetrics={viewMetrics}

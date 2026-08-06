@@ -63,15 +63,29 @@ export function lastNDays(
   return out;
 }
 
+/**
+ * Promedios del período.
+ *
+ * Cada promedio se calcula SOLO sobre los días que tienen ese dato. Antes el
+ * denominador era "días con actividad", así que un día en el que registraste el
+ * entrenamiento pero no la comida entraba como 0 kcal comidas y hundía el
+ * promedio: mostraba 1383 kcal/día a alguien que los días que registró comió
+ * 2500. Un promedio que mezcla "comí poco" con "no anoté" no dice nada.
+ */
 export function averages(stats: DayStats[]) {
-  const logged = stats.filter((s) => s.calories > 0 || s.burned > 0);
-  const n = logged.length || 1;
-  const sum = (k: keyof DayStats) =>
-    logged.reduce((acc, s) => acc + (s[k] as number), 0);
+  const withFood = stats.filter((s) => s.calories > 0);
+  const withTraining = stats.filter((s) => s.burned > 0);
+  const active = stats.filter((s) => s.calories > 0 || s.burned > 0);
+  const avg = (rows: DayStats[], k: keyof DayStats) =>
+    rows.length
+      ? Math.round(rows.reduce((acc, s) => acc + (s[k] as number), 0) / rows.length)
+      : 0;
   return {
-    daysLogged: logged.length,
-    calories: Math.round(sum("calories") / n),
-    protein: Math.round(sum("protein") / n),
-    burned: Math.round(sum("burned") / n),
+    daysLogged: active.length,
+    /** Días con comida registrada: es la base de `calories` y `protein`. */
+    daysWithFood: withFood.length,
+    calories: avg(withFood, "calories"),
+    protein: avg(withFood, "protein"),
+    burned: avg(withTraining, "burned"),
   };
 }

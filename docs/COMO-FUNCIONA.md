@@ -99,6 +99,15 @@ Los **5 tabs**:
 - Cuando falta proteína (o carbos) propone **comida concreta**: *"250 g de pechuga · 1 lata de atún + 150 g de pollo · 2 scoops de proteína"*. Tabla de alimentos en [`src/lib/meals.ts`](../src/lib/meals.ts).
 - UI en [`EstadoCard.tsx`](../src/components/EstadoCard.tsx).
 
+### El peso corporal: una sola fuente de verdad
+- Había **dos pesos que no se hablaban**: el `weight` del perfil (se completa una vez en el onboarding y queda viejo) y la serie `weights` de Progreso (se actualiza cada vez que te pesás). Las metas, la meta de agua y **todas** las calorías de ejercicio usaban el del formulario, así que podías pesarte todos los días y ninguna meta se enteraba.
+- `effectiveWeight()` en [nutrition.ts](../src/lib/nutrition.ts) resuelve el peso a usar: promedio de los pesajes de la última semana (para que la meta no salte 200 kcal porque te pesaste después de cenar), con fallback al último registro y, si no hay ninguno, al perfil.
+- El peso del onboarding **siembra** la serie de la balanza (`saveProfile` en [useNutta.ts](../src/lib/useNutta.ts)) solo si todavía no hay ningún pesaje, así los dos no nacen separados.
+
+### Perfil vs. realidad
+- El factor de actividad multiplica el metabolismo basal **entero**: una casilla de más son cientos de kcal y ~100 g de carbos fantasma por día. Y es un dato que se elige una vez, de memoria, antes de haber entrenado nada.
+- `activityMismatch()` contrasta el nivel declarado con los días que realmente entrenás en los últimos 28. Si difieren en **dos niveles o más**, aparece un insight con el número real y cuánto cambiaría la meta. Uno solo de diferencia no avisa: entra dentro del error de una fórmula que ya es una estimación.
+
 ### Objetivos dinámicos
 - Las metas del día se ajustan a lo que se entrenó: sesión fuerte **+20% de carbos**, media +10%, día sin entrenar **−15%**. La **proteína no se toca nunca** (es la que sostiene el músculo) y la grasa tampoco.
 - El anillo de calorías y la barra de carbos muestran la meta ajustada, y la barra dice por qué (*"Carbohidratos (+85 por tu entreno)"*).
@@ -180,8 +189,9 @@ Los **5 tabs**:
 - **Agua** (botones rápidos), **sueño** (horas) y **pasos**, con barras de progreso. La **meta de agua se escala al peso** (~35 ml/kg, piso 2 L) y también cuenta en el score. Se puede registrar en días pasados. En [`WellbeingCard.tsx`](../src/components/WellbeingCard.tsx).
 - **Suplementos**: lista propia con checklist diario y horario (**referencia visual**, sin notificación). Opcionalmente cada suplemento puede definir una **cantidad habitual** (ej. 30 g, 2 cápsulas) y la **proteína que aporta esa cantidad**; al marcarlo se puede ajustar la cantidad realmente tomada ese día (± cápsulas/gramos) con un stepper, y la proteína se **escala proporcionalmente** y se suma al total de proteína del día (Hoy, score e Historial). Cálculo puro en [`src/lib/supplements.ts`](../src/lib/supplements.ts); UI en [`SupplementsCard.tsx`](../src/components/SupplementsCard.tsx).
 
-### Historial (últimos 7 días)
+### Historial (últimos 7/30 días)
 - Promedios + gráfico de calorías netas por día (con línea de meta) + gráfico de macros. En [`History.tsx`](../src/components/History.tsx) y [`src/lib/analytics.ts`](../src/lib/analytics.ts).
+- **Cada promedio se calcula sobre los días que tienen ESE dato.** Antes el denominador era "días con actividad", así que un día en el que registrabas el entrenamiento pero no la comida entraba como 0 kcal comidas: mostraba 1383 kcal/día a alguien que los días que registró comió 2500. Un promedio que mezcla "comí poco" con "no anoté" no dice nada, y la tarjeta ahora aclara sobre cuántos días promedia.
 
 ---
 

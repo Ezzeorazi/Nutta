@@ -306,6 +306,23 @@ export function useNutta() {
     if (!user) return;
     if (profileId) db.transact(db.tx.profiles[profileId].update(p));
     else db.transact(db.tx.profiles[id()].update({ owner: user.id, ...p }));
+
+    // El peso del onboarding siembra la serie de la balanza. Sin esto los dos
+    // valores nacen separados: el perfil dice 94 para siempre y la balanza
+    // arranca vacía, y todas las metas se calculan con un número que nadie
+    // volvió a tocar. A partir del primer pesaje manda `weights` (ver
+    // `effectiveWeight`), así que solo se siembra si todavía no hay ninguno.
+    if (weights.length === 0 && p.weight > 0) {
+      const todayISO = localDateFromMs(Date.now());
+      db.transact(
+        db.tx.weights[id()].update({
+          owner: user.id,
+          date: todayISO,
+          kg: p.weight,
+          createdAt: Date.now(),
+        }),
+      );
+    }
   };
 
   /** Agrega un alimento. Devuelve el id creado (para deshacer). */
