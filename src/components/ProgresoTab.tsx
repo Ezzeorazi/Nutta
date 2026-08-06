@@ -61,6 +61,7 @@ export default function ProgresoTab({
       <WeightPanel
         weights={weights}
         targetWeight={targetWeight}
+        bodyVerdict={body.verdict}
         onAdd={addWeight}
         onSetTarget={setTargetWeight}
         today={today}

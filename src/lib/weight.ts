@@ -1,3 +1,4 @@
+import type { BodyVerdict } from "@/lib/body";
 import type { WeightEntry } from "@/lib/types";
 
 export type WeightPoint = { date: string; kg: number; t: number };
@@ -38,9 +39,19 @@ function slopePerDay(points: WeightPoint[]): number {
   return den === 0 ? 0 : num / den;
 }
 
+/**
+ * Tendencia de peso y estimación hacia la meta.
+ *
+ * `bodyVerdict` es la lectura de las MEDIDAS ([`body.ts`](./body.ts)). Sin él,
+ * el panel decía "a este ritmo te estás alejando de tu meta" justo encima de
+ * la tarjeta que decía "estás recomponiendo: seguí igual" — las dos mías, y
+ * ninguna enterada de la otra. Cuando las medidas muestran que el kilo que
+ * subiste es músculo, la balanza sola no alcanza para llamarlo un retroceso.
+ */
 export function weightTrend(
   points: WeightPoint[],
   target?: number,
+  bodyVerdict?: BodyVerdict,
 ): WeightTrend | null {
   if (points.length === 0) return null;
   const current = points[points.length - 1].kg;
@@ -48,12 +59,19 @@ export function weightTrend(
   const perDay = slopePerDay(points);
   const slopePerWeek = perDay * 7;
 
+  const gainingIsFine =
+    bodyVerdict === "recomposicion" || bodyVerdict === "musculo";
+
   let toTarget: number | null = null;
   let etaText: string | null = null;
   if (typeof target === "number" && target > 0) {
     toTarget = target - current;
     if (Math.abs(toTarget) < 0.1) {
       etaText = "¡Estás en tu meta! 🎯";
+    } else if (toTarget < 0 && perDay > 0 && gainingIsFine) {
+      // Querés bajar y estás subiendo, pero las medidas dicen que es músculo.
+      etaText =
+        "Estás subiendo, pero tus medidas dicen que ese peso es músculo. Mirá la lectura de abajo antes de juzgar la balanza.";
     } else if (points.length < 2 || Math.abs(perDay) < 0.001) {
       etaText = "Registrá unos días más para estimar cuándo llegás.";
     } else {

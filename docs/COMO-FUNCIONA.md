@@ -179,6 +179,9 @@ Los **5 tabs**:
 - **Recomposición corporal** ([`src/lib/body.ts`](../src/lib/body.ts) + [`RecompCard.tsx`](../src/components/RecompCard.tsx)): peso y medidas se leen **juntos**, nunca el peso solo. Compara el promedio de las últimas 3 semanas contra las 3 anteriores (promediar evita que un pesaje malo dé vuelta la conclusión) y dictamina *recomposición · músculo · definición · grasa · estable*.
   - Si el peso sube pero la cintura baja y los brazos crecen → **recomposición**, con mensaje positivo.
   - **Regla dura**: nunca concluir que el usuario está peor solo porque subió de peso. Recién se habla de grasa cuando peso **y** cintura suben juntos y ninguna medida de músculo se mueve, y aun así con una acción concreta, no con un reto.
+  - **La confianza acompaña a los datos.** Sin dos ventanas completas la comparación cae a "primera contra última medición", y eso ahora se informa en vez de disimularse: con pocas mediciones el veredicto se anuncia como *"Señal preliminar"*, el tono baja de verde a informativo y el pie dice qué se comparó de verdad (antes decía siempre "las 3 semanas anteriores", incluso cuando eran dos tomas con 14 días de diferencia). Medio centímetro de brazo entre dos tomas suele ser la cinta puesta distinto, no músculo.
+  - **También cuenta lo que baja**: si una medida de músculo cayó, se nombra aunque el veredicto sea bueno.
+  - El panel de peso recibe el veredicto: cuando las medidas dicen que el kilo que subiste es músculo, deja de decir *"a este ritmo te estás alejando de tu meta"* y el delta deja de pintarse en naranja. Antes esas dos frases convivían en la misma pantalla.
 
 ### Gráficos: dominio y escala del eje Y
 - El eje Y se calcula con `niceScale`/`yAxis` en [`src/lib/chart.ts`](../src/lib/chart.ts): ajusta el dominio a múltiplos de un escalón redondo (1, 2, 5, 10 × 10ⁿ) y genera las marcas, así el peso muestra `92 · 93 · 94 · 95 · 96` y la cintura `95 · 100 · 105` en vez de decimales arbitrarios.

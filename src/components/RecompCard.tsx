@@ -57,9 +57,10 @@ export default function RecompCard({ body }: { body: BodyReadout }) {
         </ul>
       )}
 
-      {body.deltas.length > 0 && (
+      {body.basis && (
         <p className="text-[11px] text-muted">
-          Comparado con las {Math.round(body.windowDays / 7)} semanas anteriores.
+          {body.basis}
+          {body.confidence === "baja" && " Señal todavía preliminar."}
         </p>
       )}
     </section>

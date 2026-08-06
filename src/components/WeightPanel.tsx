@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import Button from "@/components/ui/Button";
 import { Field, inputCls } from "@/components/ui/Field";
+import type { BodyVerdict } from "@/lib/body";
 import type { WeightEntry } from "@/lib/types";
 import { weightPoints, weightTrend } from "@/lib/weight";
 import { weeklyAverages } from "@/lib/week";
@@ -26,21 +27,28 @@ const shortDate = (iso: string) => {
 export default function WeightPanel({
   weights,
   targetWeight,
+  bodyVerdict,
   onAdd,
   onSetTarget,
   today,
 }: {
   weights: WeightEntry[];
   targetWeight?: number;
+  /** Lectura de las medidas: sin ella el panel juzga con la balanza sola. */
+  bodyVerdict?: BodyVerdict;
   onAdd: (kg: number, date: string) => void;
   onSetTarget: (kg: number) => void;
   today: string;
 }) {
   const points = useMemo(() => weightPoints(weights), [weights]);
   const trend = useMemo(
-    () => weightTrend(points, targetWeight),
-    [points, targetWeight],
+    () => weightTrend(points, targetWeight, bodyVerdict),
+    [points, targetWeight, bodyVerdict],
   );
+
+  // Subir de peso no es rojo cuando las medidas dicen que es músculo.
+  const gainingIsFine =
+    bodyVerdict === "recomposicion" || bodyVerdict === "musculo";
 
   const last = weights.length ? weights[weights.length - 1].kg : "";
   const [kg, setKg] = useState<string>(String(last || ""));
@@ -92,7 +100,9 @@ export default function WeightPanel({
           {trend && weights.length >= 2 && (
             <span
               className={`ml-auto text-sm font-semibold tabular-nums ${
-                trend.deltaTotal <= 0 ? "text-success" : "text-accent"
+                trend.deltaTotal <= 0 || gainingIsFine
+                  ? "text-success"
+                  : "text-accent"
               }`}
             >
               {trend.deltaTotal > 0 ? "+" : ""}
