@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Camera, ChevronDown, PenLine, Search, Sparkles, Star } from "lucide-react";
-import { normalizeProduct, type FoodProduct, type OffProduct } from "@/lib/off";
-import BarcodeScanner from "@/components/BarcodeScanner";
+import { useMemo, useState } from "react";
+import { ChevronDown, PenLine, Search, Sparkles, Star } from "lucide-react";
+import type { FoodProduct } from "@/lib/food";
 import MacroSplit from "@/components/MacroSplit";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Sheet from "@/components/ui/Sheet";
-import Skeleton from "@/components/ui/Skeleton";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
 import { uid } from "@/lib/uid";
@@ -41,6 +39,11 @@ function scale(per100: Per100, qty: number) {
  * Es lo que permite que un favorito o un reciente sigan escalando al cambiar la
  * cantidad. Antes se cargaban con sus totales fijos y mover los gramos no
  * recalculaba nada, así que había que corregir los cuatro campos a mano.
+ *
+ * NO se redondea a propósito: es un valor interno que nadie ve, y redondearlo
+ * rompía la edición manual. Con 200 g, escribir "9" kcal guardaba `round(4.5)`
+ * = 5 por 100 g, que al volver a escalar daba 10 — el campo te "corregía" el
+ * 9 por un 10 en cada tecla y no había forma de escribir 900.
  */
 function per100From(item: {
   qty: number;
@@ -52,15 +55,34 @@ function per100From(item: {
   if (item.qty <= 0) return null;
   const k = 100 / item.qty;
   return {
-    calories: Math.round(item.calories * k),
-    protein: round1(item.protein * k),
-    carbs: round1(item.carbs * k),
-    fat: round1(item.fat * k),
+    calories: item.calories * k,
+    protein: item.protein * k,
+    carbs: item.carbs * k,
+    fat: item.fat * k,
   };
 }
 
 /** Cantidades típicas, para no abrir el teclado por 50 gramos. */
 const QUICK_QTY = [50, 100, 150, 200];
+
+/** Normaliza para comparar sin tildes ni mayúsculas. */
+const norm = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim();
+
+type Known = {
+  key: string;
+  name: string;
+  qty: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fav: boolean;
+};
 
 export default function FoodForm({
   meal,
@@ -85,79 +107,82 @@ export default function FoodForm({
   const [step, setStep] = useState<"buscar" | "cantidad">("buscar");
 
   const [name, setName] = useState("");
-  const [brand, setBrand] = useState<string | null>(null);
   const [qty, setQty] = useState("100");
   // Fuente de verdad de los macros. Todo lo mostrado sale de acá × cantidad,
   // así los números se mueven solos mientras ajustás los gramos.
   const [per100, setPer100] = useState<Per100 | null>(null);
   const [editing, setEditing] = useState(false);
+  /**
+   * Lo que el usuario está escribiendo en cada campo de macros, tal cual. El
+   * valor mostrado no puede ser el recalculado: entre tecla y tecla pasaba por
+   * `per100` y volvía distinto, y además "0" o "9." desaparecían al no ser
+   * números "válidos" todavía.
+   */
+  const [draft, setDraft] = useState<Partial<Record<keyof Per100, string>>>({});
 
   const [query, setQuery] = useState("");
   const q = query.trim();
-  // Los resultados se guardan junto a la búsqueda que los produjo: así nunca se
-  // muestran los de una consulta anterior mientras llega la nueva.
-  const [res, setRes] = useState<{ q: string; items: FoodProduct[] }>({
-    q: "",
-    items: [],
-  });
-  const items = res.q === q ? res.items : [];
-  const [loading, setLoading] = useState(false);
-  const [down, setDown] = useState(false); // OFF no respondió (503/HTML)
   const [estimating, setEstimating] = useState(false);
-  const [scanning, setScanning] = useState(false);
-  const [scanMsg, setScanMsg] = useState<string | null>(null);
+  const [estimateError, setEstimateError] = useState<string | null>(null);
 
   const qtyNum = Number(qty) || 0;
   const macros = per100
     ? scale(per100, qtyNum)
     : { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
-  // Comidas recientes (únicas por nombre, más nuevas primero).
-  const recents = useMemo(() => {
+  /**
+   * Tus alimentos: favoritos y comidas ya registradas. Es lo único que se
+   * "sugiere", porque es lo único que sabemos que comés de verdad. Antes acá
+   * se buscaba en Open Food Facts y devolvía productos envasados de otros
+   * países que no tenían nada que ver con lo que uno estaba cargando.
+   */
+  const known = useMemo<Known[]>(() => {
     const seen = new Set<string>();
-    const out: FoodEntry[] = [];
+    const out: Known[] = [];
+    for (const fav of favorites) {
+      const key = norm(fav.name);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ ...fav, key, fav: true });
+    }
     for (const item of [...foods].sort(
       (a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0),
     )) {
-      const key = item.name.toLowerCase();
+      const key = norm(item.name);
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push(item);
-      if (out.length >= 8) break;
+      out.push({ ...item, key, fav: false });
     }
     return out;
-  }, [foods]);
+  }, [foods, favorites]);
+
+  const matches = useMemo(() => {
+    if (q.length < 2) return [];
+    const nq = norm(q);
+    return known.filter((k) => k.key.includes(nq)).slice(0, 8);
+  }, [known, q]);
 
   /** Pasa al paso de cantidad con un alimento ya elegido. */
   const choose = (
     label: string,
-    productBrand: string | null,
     base: Per100 | null,
     startQty?: number,
   ) => {
     setName(label);
-    setBrand(productBrand);
     setPer100(base);
     if (startQty != null) setQty(String(startQty));
     setEditing(base === null);
+    setDraft({});
     setQuery("");
+    setEstimateError(null);
     setStep("cantidad");
   };
 
-  const selectProduct = (p: FoodProduct) =>
-    choose(p.name, p.brand, p.per100, qtyNum || 100);
-
-  const fillFrom = (item: {
-    name: string;
-    qty: number;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  }) => choose(item.name, null, per100From(item), item.qty);
+  const fillFrom = (item: Known) =>
+    choose(item.name, per100From(item), item.qty);
 
   const currentFav = favorites.find(
-    (x) => x.name.toLowerCase() === name.trim().toLowerCase(),
+    (x) => norm(x.name) === norm(name),
   );
   const toggleFav = () => {
     if (currentFav) return onRemoveFavorite(currentFav.id);
@@ -172,96 +197,52 @@ export default function FoodForm({
       });
   };
 
+  /** Cambiar la cantidad invalida lo que se estaba tipeando a mano. */
+  const changeQty = (v: string) => {
+    setQty(v);
+    setDraft({});
+  };
+
   /**
    * Edición manual de un macro. Se reconstruye `per100` a partir del total
    * escrito y la cantidad actual, para que seguir moviendo los gramos siga
    * escalando bien en vez de pisar lo que acabás de corregir.
    */
-  const editMacro = (key: keyof Per100, value: string) => {
-    const next = { ...macros, [key]: Number(value) || 0 };
+  const editMacro = (key: keyof Per100, raw: string) => {
+    setDraft((d) => ({ ...d, [key]: raw }));
+    const next = { ...macros, [key]: Number(raw) || 0 };
     setPer100(per100From({ qty: qtyNum || 100, ...next }));
   };
+  const macroValue = (key: keyof Per100) =>
+    draft[key] ?? (macros[key] ? String(macros[key]) : "");
 
-  // Búsqueda con debounce contra Open Food Facts.
-  useEffect(() => {
-    if (q.length < 2) return;
-    const ctrl = new AbortController();
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        // Se consulta OFF directo desde el navegador: usa la IP del usuario
-        // (las IPs de datacenter de Vercel suelen ser bloqueadas por OFF).
-        const url =
-          "https://world.openfoodfacts.org/api/v2/search?" +
-          new URLSearchParams({
-            search_terms: q,
-            page_size: "40",
-            sort_by: "popularity_key",
-            fields: "code,product_name,product_name_es,brands,nutriments",
-          }).toString();
-        const r = await fetch(url, { signal: ctrl.signal });
-        const ct = r.headers.get("content-type") ?? "";
-        // OFF suele responder 503/HTML cuando está saturado: no es "sin
-        // resultados", es que el servicio no está disponible.
-        if (!r.ok || !ct.includes("json")) throw new Error("OFF no disponible");
-        const data = (await r.json()) as { products?: OffProduct[] };
-        const products = (data.products ?? [])
-          .map(normalizeProduct)
-          .filter((p): p is FoodProduct => p !== null)
-          .slice(0, 15);
-        setRes({ q, items: products });
-        setDown(false);
-      } catch {
-        if (!ctrl.signal.aborted) {
-          setRes({ q, items: [] });
-          setDown(true);
-        }
-      } finally {
-        if (!ctrl.signal.aborted) setLoading(false);
-      }
-    }, 350);
-    return () => {
-      ctrl.abort();
-      clearTimeout(timer);
-    };
-  }, [q]);
-
-  // Fallback cuando OFF no tiene (o está caído): la IA estima los macros/100g.
+  /** La IA estima los macros por 100 g del alimento escrito. */
   const estimateWithAI = async () => {
     if (!q || estimating) return;
     setEstimating(true);
+    setEstimateError(null);
     try {
       const r = await fetch("/api/foods/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: q }),
       });
-      const data = (await r.json()) as { product?: FoodProduct };
-      if (data.product) selectProduct(data.product);
-    } catch {
-      // silencioso: siempre queda la carga manual
-    } finally {
-      setEstimating(false);
-    }
-  };
-
-  const lookupBarcode = async (code: string) => {
-    setScanning(false);
-    setScanMsg("Buscando producto…");
-    try {
-      const r = await fetch(`/api/foods/barcode?code=${code}`);
       const data = (await r.json()) as {
-        product?: FoodProduct | null;
+        product?: FoodProduct;
         error?: string;
       };
-      if (data.product) {
-        selectProduct(data.product);
-        setScanMsg(null);
-      } else {
-        setScanMsg(data.error ?? "Producto no encontrado");
+      if (!r.ok || !data.product) {
+        throw new Error(data?.error ?? "No pude estimarlo");
       }
-    } catch {
-      setScanMsg("No se pudo consultar el código");
+      choose(data.product.name, data.product.per100, qtyNum || 100);
+    } catch (err) {
+      setEstimateError(
+        err instanceof Error
+          ? err.message
+          : "No pude estimarlo. Cargalo a mano.",
+      );
+    } finally {
+      setEstimating(false);
     }
   };
 
@@ -281,7 +262,6 @@ export default function FoodForm({
   return (
     <Sheet
       title={step === "buscar" ? `Agregar a ${mealLabel}` : name || "Cantidad"}
-      description={step === "cantidad" ? (brand ?? undefined) : undefined}
       onClose={onClose}
       footer={
         step === "cantidad" ? (
@@ -293,124 +273,119 @@ export default function FoodForm({
     >
       {step === "buscar" ? (
         <div className="flex flex-col gap-4">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search
-                size={18}
-                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
-                aria-hidden
-              />
-              <input
-                className={`${inputCls} pl-11`}
-                placeholder="Buscar alimento…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                aria-label="Buscar alimento"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setScanMsg(null);
-                setScanning(true);
+          <div className="relative">
+            <Search
+              size={18}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+              aria-hidden
+            />
+            <input
+              className={`${inputCls} pl-11`}
+              placeholder="¿Qué comiste?"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setEstimateError(null);
               }}
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-sunken text-foreground transition-transform duration-(--duration-fast) active:scale-90"
-              aria-label="Escanear código de barras"
-            >
-              <Camera size={20} strokeWidth={2} aria-hidden />
-            </button>
+              aria-label="Nombre del alimento"
+            />
           </div>
-          {scanMsg && <p className="-mt-2 text-sm text-accent">{scanMsg}</p>}
 
           {/* Sin búsqueda: acceso directo a lo de siempre. */}
           {q === "" && (
             <>
-              {favorites.length > 0 && (
+              {known.filter((k) => k.fav).length > 0 && (
                 <section className="flex flex-col gap-2">
                   <h3 className="text-xs font-medium text-muted">Favoritos</h3>
                   <div className="flex flex-wrap gap-2">
-                    {favorites.slice(0, 8).map((fav) => (
-                      <Chip key={fav.id} selected onClick={() => fillFrom(fav)}>
-                        <Star size={13} strokeWidth={2.5} aria-hidden />
-                        {fav.name}
-                      </Chip>
-                    ))}
+                    {known
+                      .filter((k) => k.fav)
+                      .slice(0, 8)
+                      .map((fav) => (
+                        <Chip key={fav.key} selected onClick={() => fillFrom(fav)}>
+                          <Star size={13} strokeWidth={2.5} aria-hidden />
+                          {fav.name}
+                        </Chip>
+                      ))}
                   </div>
                 </section>
               )}
-              {recents.length > 0 && (
+              {known.filter((k) => !k.fav).length > 0 && (
                 <section className="flex flex-col gap-2">
                   <h3 className="text-xs font-medium text-muted">Recientes</h3>
                   <div className="flex flex-wrap gap-2">
-                    {recents.map((rec) => (
-                      <Chip key={rec.id} onClick={() => fillFrom(rec)}>
-                        {rec.name}
-                      </Chip>
-                    ))}
+                    {known
+                      .filter((k) => !k.fav)
+                      .slice(0, 8)
+                      .map((rec) => (
+                        <Chip key={rec.key} onClick={() => fillFrom(rec)}>
+                          {rec.name}
+                        </Chip>
+                      ))}
                   </div>
                 </section>
               )}
             </>
           )}
 
-          {/* Resultados en lista, no en un desplegable que tapa el formulario. */}
           {q.length >= 2 && (
-            <div className="flex flex-col">
-              {loading && items.length === 0 && (
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-14 w-full" />
-                  <Skeleton className="h-14 w-full" />
-                  <Skeleton className="h-14 w-full" />
-                </div>
+            <div className="flex flex-col gap-4">
+              {matches.length > 0 && (
+                <section className="flex flex-col">
+                  <h3 className="mb-1 text-xs font-medium text-muted">
+                    Tus alimentos
+                  </h3>
+                  {matches.map((k) => (
+                    <button
+                      key={k.key}
+                      type="button"
+                      onClick={() => fillFrom(k)}
+                      className="flex items-center justify-between gap-3 border-b border-border py-3 text-left last:border-0 active:scale-[0.99]"
+                    >
+                      <span className="flex min-w-0 items-center gap-2">
+                        {k.fav && (
+                          <Star
+                            size={13}
+                            strokeWidth={2.5}
+                            className="shrink-0 text-primary"
+                            aria-hidden
+                          />
+                        )}
+                        <span className="truncate text-sm font-medium">
+                          {k.name}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-xs text-muted tabular-nums">
+                        {k.qty} g · {Math.round(k.calories)} kcal
+                      </span>
+                    </button>
+                  ))}
+                </section>
               )}
 
-              {items.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => selectProduct(p)}
-                  className="flex items-center justify-between gap-3 border-b border-border py-3 text-left last:border-0 active:scale-[0.99]"
-                >
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium">
-                      {p.name}
-                    </span>
-                    {p.brand && (
-                      <span className="block truncate text-xs text-muted">
-                        {p.brand}
-                      </span>
-                    )}
-                  </span>
-                  <span className="shrink-0 text-xs text-muted tabular-nums">
-                    {p.per100.calories} kcal/100g
-                  </span>
-                </button>
-              ))}
-
-              {!loading && items.length === 0 && (
-                <div className="flex flex-col items-start gap-3 rounded-card border border-dashed border-border p-4">
-                  <p className="text-sm text-muted">
-                    {down
-                      ? "Open Food Facts no responde ahora."
-                      : `Sin resultados para «${q}».`}
-                  </p>
-                  <Button
-                    variant="secondary"
-                    onClick={estimateWithAI}
-                    disabled={estimating}
-                  >
-                    <Sparkles size={16} aria-hidden />
-                    {estimating ? "Estimando…" : "Estimar con IA"}
-                  </Button>
-                </div>
+              {/* La vía principal para algo nuevo. La app ya no inventa una
+                  lista de productos envasados que no tienen que ver: o es algo
+                  que ya comiste, o lo calcula la IA. */}
+              <Button
+                variant="primary"
+                size="lg"
+                full
+                onClick={estimateWithAI}
+                disabled={estimating}
+              >
+                <Sparkles size={17} aria-hidden />
+                {estimating ? "Calculando…" : `Calcular «${q}» con IA`}
+              </Button>
+              {estimateError && (
+                <p className="-mt-2 text-sm text-accent">{estimateError}</p>
               )}
             </div>
           )}
 
-          {/* Salida siempre disponible: cargar algo que no está en ningún lado. */}
+          {/* Salida siempre disponible: cargar algo con tus propios números. */}
           <button
             type="button"
-            onClick={() => choose(q, null, null, 100)}
+            onClick={() => choose(q, null, 100)}
             className="flex items-center gap-2 self-start text-sm font-medium text-muted transition-colors hover:text-primary"
           >
             <PenLine size={15} aria-hidden />
@@ -466,7 +441,7 @@ export default function FoodForm({
                 <Chip
                   key={g}
                   selected={qtyNum === g}
-                  onClick={() => setQty(String(g))}
+                  onClick={() => changeQty(String(g))}
                 >
                   {g} g
                 </Chip>
@@ -474,7 +449,7 @@ export default function FoodForm({
             </div>
             <Stepper
               value={qty}
-              onChange={setQty}
+              onChange={changeQty}
               step={10}
               min={0}
               max={5000}
@@ -512,7 +487,7 @@ export default function FoodForm({
                     type="number"
                     inputMode="numeric"
                     className={inputCls}
-                    value={macros.calories || ""}
+                    value={macroValue("calories")}
                     onChange={(e) => editMacro("calories", e.target.value)}
                   />
                 </Field>
@@ -521,7 +496,7 @@ export default function FoodForm({
                     type="number"
                     inputMode="decimal"
                     className={inputCls}
-                    value={macros.protein || ""}
+                    value={macroValue("protein")}
                     onChange={(e) => editMacro("protein", e.target.value)}
                   />
                 </Field>
@@ -530,7 +505,7 @@ export default function FoodForm({
                     type="number"
                     inputMode="decimal"
                     className={inputCls}
-                    value={macros.carbs || ""}
+                    value={macroValue("carbs")}
                     onChange={(e) => editMacro("carbs", e.target.value)}
                   />
                 </Field>
@@ -539,7 +514,7 @@ export default function FoodForm({
                     type="number"
                     inputMode="decimal"
                     className={inputCls}
-                    value={macros.fat || ""}
+                    value={macroValue("fat")}
                     onChange={(e) => editMacro("fat", e.target.value)}
                   />
                 </Field>
@@ -547,13 +522,6 @@ export default function FoodForm({
             )}
           </div>
         </div>
-      )}
-
-      {scanning && (
-        <BarcodeScanner
-          onDetected={lookupBarcode}
-          onClose={() => setScanning(false)}
-        />
       )}
     </Sheet>
   );

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { estimateFood } from "@/lib/coach";
-import type { FoodProduct } from "@/lib/off";
+import type { FoodProduct } from "@/lib/food";
 
 export const maxDuration = 30;
 

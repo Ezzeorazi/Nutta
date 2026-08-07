@@ -93,7 +93,7 @@ Sumar a la paleta que ya existe:
 
 ### 1.3 El botón atrás
 
-Un hook `useDismissable` que empuja una entrada en el historial cuando se abre un overlay y la consume al cerrar. Se conecta al `Sheet`, al `BarcodeScanner` y al `Onboarding`. Con esto, en la PWA instalada el botón atrás cierra el sheet en lugar de salir de la app.
+Un hook `useDismissable` que empuja una entrada en el historial cuando se abre un overlay y la consume al cerrar. Se conecta al `Sheet` y al `Onboarding` (también al escáner de códigos, ya retirado). Con esto, en la PWA instalada el botón atrás cierra el sheet en lugar de salir de la app.
 
 ### 1.4 Navegación
 

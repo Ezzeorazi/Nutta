@@ -31,9 +31,8 @@ Además lleva **memoria** de tus hábitos ("hice lo de siempre"), te da un **sco
 | Estilos | Tailwind CSS v4 (config en `globals.css`, dark mode incluido) |
 | Base de datos + Auth | InstantDB (sync en tiempo real + login por código mágico) |
 | IA (coach) | Vercel AI SDK v7 + Groq (modelo `openai/gpt-oss-20b`, gratis) |
-| Datos de alimentos | Open Food Facts (API pública) |
+| Datos de alimentos | IA (Groq) — estimación de macros por 100 g |
 | Datos de ejercicios | RepDB (catálogo de +400 ejercicios, licencia free; bundleado en `src/data/`) |
-| Escaneo de códigos | ZXing (`@zxing/browser`, carga diferida) |
 | Voz | Web Speech API (dictado, es-AR) |
 | Gráficos | Recharts |
 | Hosting | Vercel (deploy automático desde GitHub) |
@@ -138,8 +137,10 @@ Los **5 tabs**:
 - Solo los **insights** quedan atados a hoy (miran el estado actual). No hay edición directa de un registro: se **borra y se vuelve a cargar**.
 
 ### Comidas y ejercicio (alta manual, además del chat)
-- **Comidas**: búsqueda en Open Food Facts (desde el navegador) + escaneo de código de barras; los macros se escalan por gramos. Formularios en [`FoodForm.tsx`](../src/components/FoodForm.tsx).
-- **Estimación con IA (fallback)**: cuando OFF no tiene el alimento **o está caído** (responde 503/HTML, cosa frecuente), el buscador avisa y ofrece un botón **"🤖 Estimar con IA"** que pide los macros por 100 g y rellena el form (los escala por cantidad igual que un producto). Motor en [`coach.ts`](../src/lib/coach.ts) (`estimateFood`), vía [`/api/foods/estimate`](../src/app/api/foods/estimate/route.ts).
+- **Comidas** ([`FoodForm.tsx`](../src/components/FoodForm.tsx)): dos pasos —qué comiste, después cuánto—; los macros se escalan por gramos.
+  - **O es tuyo, o lo calcula la IA.** Lo único que se sugiere son tus **favoritos** y tus **comidas ya registradas** (filtrado local, instantáneo y offline). Para algo nuevo, un botón **"Calcular ‹X› con IA"** pide los macros por 100 g y rellena el formulario. Motor en [`coach.ts`](../src/lib/coach.ts) (`estimateFood`), vía [`/api/foods/estimate`](../src/app/api/foods/estimate/route.ts).
+  - **Antes** el buscador consultaba Open Food Facts y devolvía productos envasados de otros países que no tenían que ver con lo que uno estaba cargando —cuando respondía, porque tiraba 503 seguido—. La estimación por IA era el plan B; ahora es el plan A y OFF se quitó por completo (junto con el escaneo de código de barras, que tampoco funcionaba).
+  - **Ojo con la edición manual de macros**: `per100` se guarda **sin redondear**. Es un valor interno que nadie ve, y redondearlo rompía el campo: con 200 g, escribir `9` kcal guardaba `round(4.5)` = 5 por 100 g, que al volver a escalar daba `10`. El campo te "corregía" el 9 por un 10 en cada tecla y era imposible escribir 900. Además, mientras editás se conserva el texto **tal cual lo escribís** (`draft`), porque si no `0` o `9.` desaparecían al no ser números completos todavía.
 - **Ejercicio (cardio)**: actividades con valores **MET** (`MET × peso × horas`) en [`ExerciseForm.tsx`](../src/components/ExerciseForm.tsx) y [`src/lib/exercises.ts`](../src/lib/exercises.ts).
 - Onboarding y metas (Mifflin-St Jeor → TDEE → macros) en [`src/lib/nutrition.ts`](../src/lib/nutrition.ts).
 
@@ -267,7 +268,6 @@ src/
 │     ├─ chat/            Coach IA: mensaje → registros (generateObject)
 │     ├─ coach/           Coach IA: análisis semanal (generateText)
 │     ├─ foods/
-│     │  ├─ barcode/      Producto por código de barras (OFF)
 │     │  └─ estimate/     Estimación IA de macros por 100 g
 │     └─ watch/scan/      Lectura IA de una captura del reloj
 ├─ components/
@@ -303,7 +303,6 @@ src/
 │  ├─ AppHeader.tsx        Encabezado común a los cinco tabs (sticky)
 │  ├─ DayNavigator.tsx     Navegador de días, compartido por Hoy y Entreno
 │  ├─ BottomNav.tsx        Navegación de tabs (con safe-area)
-│  ├─ BarcodeScanner.tsx   Escáner de códigos de barras (ZXing, por portal)
 │  ├─ ServiceWorker.tsx    Registro del service worker (PWA)
 │  ├─ ui/                  Sistema de diseño (ver abajo)
 │  └─ Login.tsx / Onboarding.tsx
@@ -337,7 +336,7 @@ src/
    ├─ nutrition.ts        Mifflin-St Jeor y metas
    ├─ exercises.ts        Tabla MET (cardio)
    ├─ analytics.ts        Agregación del historial
-   ├─ off.ts              Normalización de Open Food Facts
+   ├─ food.ts             Tipo del alimento (macros por 100 g)
    └─ types.ts            Tipos compartidos
 ```
 
@@ -371,7 +370,7 @@ viven en [`app/globals.css`](../src/app/globals.css). Regla de radios:
 
 ## 10. Detalles a tener en cuenta
 
-- La **búsqueda de alimentos se hace desde el navegador** (Open Food Facts bloquea las IPs de datacenter de Vercel). El endpoint de producto por código sí funciona server-side porque está cacheado en el edge.
+- **Open Food Facts y el escaneo de código de barras se quitaron** (2026-08-07). OFF bloquea las IPs de datacenter de Vercel —había que consultarlo desde el navegador—, respondía 503 seguido y, cuando respondía, devolvía productos envasados que no coincidían con lo que el usuario cargaba. El escaneo de códigos directamente no funcionaba. La estimación por IA cubre el caso mejor y con menos piezas.
 - Groq **no ofrece visión gratis** en esta cuenta, por eso no hay análisis de fotos: el registro es por texto o voz.
 - Sin `GROQ_API_KEY` el chat/coach no funcionan (el resto de la app sí).
 - Los datos requieren estar **logueado**; sin sesión no hay acceso.

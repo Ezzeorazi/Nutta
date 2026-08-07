@@ -7,7 +7,7 @@ App **mobile-first** para registrar alimentación y ejercicio: calorías, prote�
 ## Funcionalidades
 
 - **Onboarding** con cálculo automático de metas (Mifflin-St Jeor → TDEE → macros).
-- **Comidas**: búsqueda en [Open Food Facts](https://world.openfoodfacts.org/) y escaneo de código de barras.
+- **Comidas**: tus favoritos y lo que ya registraste (búsqueda local, instantánea y offline); para algo nuevo, la IA estima los macros por 100 g.
 - **Ejercicio**: actividades con valores MET, calorías quemadas según tu peso, y catálogo de +400 ejercicios ([RepDB](https://repdb.co)) para el chat y el registro de fuerza.
 - **Reloj / smartband**: le sacás una captura a la pantalla del reloj (Xiaomi y cía.) y la IA carga el entrenamiento, los pasos o el sueño. Ver [Vincular el reloj](#vincular-el-reloj-xiaomi-amazfit).
 - **Dashboard**: anillo de calorías (in/out) y barras de macros.
@@ -19,7 +19,6 @@ App **mobile-first** para registrar alimentación y ejercicio: calorías, prote�
 - [Next.js 16](https://nextjs.org/) (App Router) + React 19
 - [Tailwind CSS v4](https://tailwindcss.com/)
 - [Recharts](https://recharts.org/) para gráficos
-- [ZXing](https://github.com/zxing-js/browser) para el escaneo de códigos
 - Persistencia local con `localStorage`
 
 ## Desarrollo
@@ -68,10 +67,9 @@ Ninguna de las otras vías cierra:
 
 ## Créditos
 
-- Datos de alimentos: [Open Food Facts](https://world.openfoodfacts.org/).
 - **Exercise data by [RepDB](https://repdb.co)** — catálogo de ejercicios usado en el chat, el registro de fuerza y el autocompletado del Gym.
 
 ## Notas
 
 - Los datos se guardan en el navegador (local-first). Una fase futura sumará login y base de datos en la nube.
-- La búsqueda de alimentos se hace desde el navegador (Open Food Facts bloquea IPs de datacenter).
+- **Open Food Facts y el escaneo de código de barras se quitaron** (2026-08-07): OFF bloquea las IPs de datacenter, respondía 503 seguido y devolvía productos que no coincidían con lo que uno cargaba; el escaneo directamente no funcionaba. La estimación por IA cubre el caso con menos piezas.
