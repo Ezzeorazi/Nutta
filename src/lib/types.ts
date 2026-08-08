@@ -36,6 +36,19 @@ export type ExerciseEntry = {
   source?: string;
 };
 
+export type DrinkEntry = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  catalogId: string; // id en lib/drinks.ts (para el ranking por consumo)
+  name: string;
+  brand: string;
+  category: "cerveza" | "trago";
+  ml: number;
+  calories: number;
+  emoji: string;
+  createdAt?: number; // epoch ms (para el timeline)
+};
+
 export type ChatRole = "user" | "assistant";
 
 export type ChatMessage = {

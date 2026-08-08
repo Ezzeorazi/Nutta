@@ -48,6 +48,7 @@ export default function Home() {
     dataLoading,
     user,
     foods,
+    drinks,
     exercises,
     messages,
     memories,
@@ -66,6 +67,8 @@ export default function Home() {
     saveProfile,
     addFood,
     removeFood,
+    addDrink,
+    removeDrink,
     addFavorite,
     removeFavorite,
     addRecipe,
@@ -125,6 +128,7 @@ export default function Home() {
     e.createdAt ? localDateFromMs(e.createdAt) : e.date;
   // Registros del día VISTO (tab Hoy).
   const viewFoods = foods.filter((f) => dayOf(f) === viewDate);
+  const viewDrinks = drinks.filter((d) => dayOf(d) === viewDate);
   const viewEx = exercises.filter((e) => dayOf(e) === viewDate);
   const viewMetrics = metrics.find((m) => m.date === viewDate);
   // HOY real: el chat siempre registra en el día de hoy.
@@ -148,6 +152,7 @@ export default function Home() {
   const athleteBase = useMemo(
     () => ({
       foods,
+      drinks,
       exercises,
       strengthSets,
       metrics,
@@ -159,6 +164,7 @@ export default function Home() {
     }),
     [
       foods,
+      drinks,
       exercises,
       strengthSets,
       metrics,
@@ -504,7 +510,9 @@ export default function Home() {
           todayMetrics={viewMetrics}
           todayFoods={viewFoods}
           todayEx={viewEx}
+          todayDrinks={viewDrinks}
           foods={foods}
+          drinks={drinks}
           favorites={favorites}
           recipes={recipes}
           supplements={supplements}
@@ -518,6 +526,8 @@ export default function Home() {
           onSignOut={() => db.auth.signOut()}
           addFood={addFood}
           removeFood={removeFood}
+          addDrink={addDrink}
+          removeDrink={removeDrink}
           addFavorite={addFavorite}
           removeFavorite={removeFavorite}
           addRecipe={addRecipe}

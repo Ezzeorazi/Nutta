@@ -6,6 +6,7 @@ import Chip from "@/components/ui/Chip";
 import AppHeader from "@/components/AppHeader";
 import DayNavigator from "@/components/DayNavigator";
 import CalorieRing from "@/components/CalorieRing";
+import DrinksCard from "@/components/DrinksCard";
 import EstadoCard from "@/components/EstadoCard";
 import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
@@ -17,6 +18,7 @@ import SupplementsCard from "@/components/SupplementsCard";
 import Timeline from "@/components/Timeline";
 import WellbeingCard from "@/components/WellbeingCard";
 import type { AthleteState } from "@/lib/athlete";
+import type { DrinkOption } from "@/lib/drinks";
 import type { Insight } from "@/lib/insights";
 import type { DailyScore } from "@/lib/score";
 import {
@@ -24,6 +26,7 @@ import {
   dayLabel,
   startOfLocalDayMs,
   type DailyMetrics,
+  type DrinkEntry,
   type ExerciseEntry,
   type FavoriteFood,
   type FoodEntry,
@@ -44,7 +47,9 @@ export default function HoyTab({
   todayMetrics,
   todayFoods,
   todayEx,
+  todayDrinks,
   foods,
+  drinks,
   favorites,
   recipes,
   supplements,
@@ -58,6 +63,8 @@ export default function HoyTab({
   onSignOut,
   addFood,
   removeFood,
+  addDrink,
+  removeDrink,
   addFavorite,
   removeFavorite,
   addRecipe,
@@ -77,7 +84,9 @@ export default function HoyTab({
   todayMetrics?: DailyMetrics;
   todayFoods: FoodEntry[];
   todayEx: ExerciseEntry[];
+  todayDrinks: DrinkEntry[];
   foods: FoodEntry[];
+  drinks: DrinkEntry[];
   favorites: FavoriteFood[];
   recipes: Recipe[];
   supplements: Supplement[];
@@ -92,6 +101,8 @@ export default function HoyTab({
   // Devuelven el id del registro creado: es lo que permite ofrecer "Deshacer".
   addFood: (e: FoodEntry) => string | null;
   removeFood: (id: string) => void;
+  addDrink: (opt: DrinkOption, date: string, createdAt?: number) => string | null;
+  removeDrink: (id: string) => void;
   addFavorite: (fav: Omit<FavoriteFood, "id" | "createdAt">) => void;
   removeFavorite: (id: string) => void;
   addRecipe: (name: string, items: RecipeItem[]) => void;
@@ -229,8 +240,10 @@ export default function HoyTab({
 
       <Timeline
         foods={todayFoods}
+        drinks={todayDrinks}
         exercises={todayEx}
         onRemoveFood={removeFood}
+        onRemoveDrink={removeDrink}
         onRemoveExercise={removeExercise}
       />
 
@@ -247,6 +260,22 @@ export default function HoyTab({
         onSetWater={(l) => setMetric(viewDate, { water: l })}
         onSetSleep={(h, date) => setMetric(date ?? viewDate, { sleepHours: h })}
         onSetSteps={(n, date) => setMetric(date ?? viewDate, { steps: n })}
+      />
+
+      {/* Tragos y chelas: registro rápido con botones, ordenados por lo que
+          más toma el usuario. */}
+      <DrinksCard
+        drinks={drinks}
+        todayDrinks={todayDrinks}
+        today={viewDate}
+        onAdd={(opt, date) => {
+          const did = addDrink(opt, date, stamp());
+          toast(
+            `${opt.emoji} ${opt.name} · ${opt.calories} kcal`,
+            did ? { label: "Deshacer", onAction: () => removeDrink(did) } : undefined,
+          );
+        }}
+        onRemove={removeDrink}
       />
 
       {/* Suplementos: cualquier día (permite completar/corregir días pasados) */}

@@ -5,11 +5,13 @@ import { db, id } from "@/lib/db";
 import { downscaleImage } from "@/lib/image";
 import { localDateFromMs, startOfLocalDayMs } from "@/lib/types";
 import type { Profile } from "@/lib/nutrition";
+import type { DrinkOption } from "@/lib/drinks";
 import type {
   BodyPart,
   ChatMessage,
   CustomGoal,
   DailyMetrics,
+  DrinkEntry,
   ExerciseEntry,
   FavoriteFood,
   FoodEntry,
@@ -44,6 +46,7 @@ export function useNutta() {
       ? {
           profiles: {},
           foods: {},
+          drinks: {},
           exercises: {},
           messages: {},
           memories: {},
@@ -71,6 +74,11 @@ export function useNutta() {
   )
     .filter((f) => f.owner === owner)
     .map((f) => (f.createdAt ? { ...f, date: localDateFromMs(f.createdAt) } : f));
+  const drinks = (
+    (data?.drinks ?? []) as unknown as (DrinkEntry & { owner: string })[]
+  )
+    .filter((d) => d.owner === owner)
+    .map((d) => (d.createdAt ? { ...d, date: localDateFromMs(d.createdAt) } : d));
   const exercises = (
     (data?.exercises ?? []) as unknown as (ExerciseEntry & { owner: string })[]
   )
@@ -346,6 +354,28 @@ export function useNutta() {
     return fid;
   };
   const removeFood = (fid: string) => db.transact(db.tx.foods[fid].delete());
+
+  /** Registra un trago/cerveza del catálogo. Devuelve el id creado (para deshacer). */
+  const addDrink = (opt: DrinkOption, date: string, createdAt?: number) => {
+    if (!user) return null;
+    const did = id();
+    db.transact(
+      db.tx.drinks[did].update({
+        owner: user.id,
+        date,
+        catalogId: opt.id,
+        name: opt.name,
+        brand: opt.brand,
+        category: opt.category,
+        ml: opt.ml,
+        calories: opt.calories,
+        emoji: opt.emoji,
+        createdAt: createdAt ?? Date.now(),
+      }),
+    );
+    return did;
+  };
+  const removeDrink = (did: string) => db.transact(db.tx.drinks[did].delete());
 
   const addFavorite = (fav: Omit<FavoriteFood, "id" | "createdAt">) => {
     if (!user || !fav.name.trim()) return;
@@ -679,6 +709,7 @@ export function useNutta() {
     dataLoading,
     user,
     foods,
+    drinks,
     exercises,
     messages,
     memories,
@@ -698,6 +729,8 @@ export function useNutta() {
     saveProfile,
     addFood,
     removeFood,
+    addDrink,
+    removeDrink,
     addFavorite,
     removeFavorite,
     addRecipe,

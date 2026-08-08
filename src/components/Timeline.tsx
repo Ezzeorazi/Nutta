@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
 import {
   MEALS,
+  type DrinkEntry,
   type ExerciseEntry,
   type FoodEntry,
   type MealType,
@@ -23,7 +24,7 @@ const mealLabel = (m: MealType) =>
 
 type TLEvent = {
   key: string;
-  kind: "food" | "exercise";
+  kind: "food" | "exercise" | "drink";
   emoji: string;
   name: string;
   detail: string;
@@ -48,13 +49,17 @@ const minuteFromMs = (ms: number) => {
 
 export default function Timeline({
   foods,
+  drinks,
   exercises,
   onRemoveFood,
+  onRemoveDrink,
   onRemoveExercise,
 }: {
   foods: FoodEntry[];
+  drinks: DrinkEntry[];
   exercises: ExerciseEntry[];
   onRemoveFood: (id: string) => void;
+  onRemoveDrink: (id: string) => void;
   onRemoveExercise: (id: string) => void;
 }) {
   const events: TLEvent[] = [
@@ -69,6 +74,18 @@ export default function Timeline({
       timeLabel: f.createdAt ? timeFmt(f.createdAt) : null,
       fallbackLabel: mealLabel(f.meal),
       onRemove: () => onRemoveFood(f.id),
+    })),
+    ...drinks.map<TLEvent>((d) => ({
+      key: `d-${d.id}`,
+      kind: "drink",
+      emoji: d.emoji,
+      name: d.name,
+      detail: `${d.ml} ml`,
+      kcal: Math.round(d.calories),
+      minute: d.createdAt ? minuteFromMs(d.createdAt) : 21 * 60,
+      timeLabel: d.createdAt ? timeFmt(d.createdAt) : null,
+      fallbackLabel: d.category === "cerveza" ? "Cerveza" : "Trago",
+      onRemove: () => onRemoveDrink(d.id),
     })),
     ...exercises.map<TLEvent>((e) => ({
       key: `e-${e.id}`,
@@ -110,7 +127,7 @@ export default function Timeline({
             <div className="relative flex flex-col items-center">
               <span
                 className={`z-10 mt-1 h-2.5 w-2.5 rounded-full ${
-                  ev.kind === "food" ? "bg-primary" : "bg-accent"
+                  ev.kind === "exercise" ? "bg-accent" : "bg-primary"
                 }`}
               />
               {i < events.length - 1 && (
@@ -131,10 +148,10 @@ export default function Timeline({
               <div className="flex shrink-0 items-center gap-2">
                 <span
                   className={`text-xs font-semibold tabular-nums ${
-                    ev.kind === "food" ? "text-foreground" : "text-accent"
+                    ev.kind === "exercise" ? "text-accent" : "text-foreground"
                   }`}
                 >
-                  {ev.kind === "food" ? "" : "−"}
+                  {ev.kind === "exercise" ? "−" : ""}
                   {ev.kcal} kcal
                 </span>
                 <button
