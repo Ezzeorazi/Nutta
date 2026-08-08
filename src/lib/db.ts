@@ -136,6 +136,19 @@ const schema = i.schema({
       protein: i.number().optional(), // g de proteína que aporta `defaultQty` unidades
       createdAt: i.number(),
     }),
+    // Registro de tragos y cervezas tomados (una fila por trago cargado).
+    drinks: i.entity({
+      owner: i.string().indexed(),
+      date: i.string().indexed(),
+      catalogId: i.string(), // id en lib/drinks.ts (para el ranking por consumo)
+      name: i.string(),
+      brand: i.string(),
+      category: i.string(), // cerveza | trago
+      ml: i.number(),
+      calories: i.number(),
+      emoji: i.string(),
+      createdAt: i.number().optional(), // epoch ms (para el timeline)
+    }),
     // Registro de toma de un suplemento en un día (presencia = tomado).
     supplementLogs: i.entity({
       owner: i.string().indexed(),

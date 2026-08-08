@@ -25,6 +25,7 @@ import {
   WATER_GOAL_L,
   shiftISO,
   type DailyMetrics,
+  type DrinkEntry,
   type ExerciseEntry,
   type FoodEntry,
   type Goals,
@@ -397,6 +398,7 @@ export function dynamicGoals(
 
 function nutritionOfDay(
   foods: FoodEntry[],
+  drinks: DrinkEntry[],
   supplements: Supplement[],
   supplementLogs: SupplementLog[],
   date: string,
@@ -406,8 +408,11 @@ function nutritionOfDay(
   cardioBurned: number,
 ): NutritionState {
   const day = foods.filter((f) => f.date === date);
+  const dayDrinks = drinks.filter((d) => d.date === date);
   const consumed: Goals = {
-    calories: Math.round(sum(day, (f) => f.calories)),
+    calories: Math.round(
+      sum(day, (f) => f.calories) + sum(dayDrinks, (d) => d.calories),
+    ),
     protein: Math.round(
       sum(day, (f) => f.protein) +
         dailySupplementProtein(supplements, supplementLogs, date),
@@ -583,6 +588,7 @@ export type StatusRow = {
 
 export type AthleteInput = {
   foods: FoodEntry[];
+  drinks: DrinkEntry[];
   exercises: ExerciseEntry[];
   strengthSets: StrengthSet[];
   metrics: DailyMetrics[];
@@ -633,6 +639,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
   );
   const nutrition = nutritionOfDay(
     input.foods,
+    input.drinks,
     input.supplements,
     input.supplementLogs,
     date,
@@ -644,9 +651,10 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
 
   const yesterday = shiftISO(date, -1);
   const yFoods = input.foods.filter((f) => f.date === yesterday);
-  const nutritionYesterday = yFoods.length
+  const yDrinks = input.drinks.filter((d) => d.date === yesterday);
+  const nutritionYesterday = yFoods.length || yDrinks.length
     ? {
-        calories: sum(yFoods, (f) => f.calories),
+        calories: sum(yFoods, (f) => f.calories) + sum(yDrinks, (d) => d.calories),
         protein:
           sum(yFoods, (f) => f.protein) +
           dailySupplementProtein(input.supplements, input.supplementLogs, yesterday),
