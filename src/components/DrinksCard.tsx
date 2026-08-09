@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
+import CollapsibleCard from "@/components/ui/CollapsibleCard";
 import { DRINKS, sortByUsage, type DrinkOption } from "@/lib/drinks";
 import type { DrinkEntry } from "@/lib/types";
 
@@ -63,25 +64,18 @@ export default function DrinksCard({
     drinks,
   );
   const kcalHoy = Math.round(todayDrinks.reduce((s, d) => s + d.calories, 0));
+  const summary =
+    kcalHoy > 0
+      ? `${todayDrinks.length} hoy · ${kcalHoy} kcal`
+      : "Cerveza, tequila, mezcal…";
 
   return (
-    <section className="rounded-card bg-card p-4 shadow-e1">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-semibold">🍻 Tragos y chelas</h2>
-        {kcalHoy > 0 && (
-          <span className="text-xs text-muted tabular-nums">
-            {todayDrinks.length} · {kcalHoy} kcal
-          </span>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <DrinkRow title="Cervezas" options={cervezas} onAdd={(opt) => onAdd(opt, today)} />
-        <DrinkRow title="Tragos" options={tragos} onAdd={(opt) => onAdd(opt, today)} />
-      </div>
+    <CollapsibleCard icon="🍻" title="Tragos y chelas" summary={summary}>
+      <DrinkRow title="Cervezas" options={cervezas} onAdd={(opt) => onAdd(opt, today)} />
+      <DrinkRow title="Tragos" options={tragos} onAdd={(opt) => onAdd(opt, today)} />
 
       {todayDrinks.length > 0 && (
-        <ul className="mt-4 flex flex-col gap-1.5 border-t border-border pt-3">
+        <ul className="flex flex-col gap-1.5 border-t border-border pt-3">
           {todayDrinks.map((d) => (
             <li
               key={d.id}
@@ -106,6 +100,6 @@ export default function DrinksCard({
           ))}
         </ul>
       )}
-    </section>
+    </CollapsibleCard>
   );
 }
