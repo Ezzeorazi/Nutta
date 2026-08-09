@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Brain, ChartColumn, Mic, Send, Undo2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Brain, ChartColumn, History, Mic, Send, Undo2 } from "lucide-react";
 import { parseLogLine, splitLog } from "@/lib/chatLog";
-import type { ChatMessage } from "@/lib/types";
+import { localDateFromMs, type ChatMessage } from "@/lib/types";
 
 /** Tipos mínimos de la Web Speech API (no están en lib.dom por defecto). */
 type SpeechRecognitionLike = {
@@ -55,10 +55,29 @@ export default function Chat({
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const recRef = useRef<SpeechRecognitionLike | null>(null);
 
+  // Por defecto solo se ve el día del último mensaje: cargar meses de charla
+  // entera cada vez que se abre el chat era lento y, sobre todo, ruido — casi
+  // nadie necesita desplazarse hasta ayer para seguir la conversación de hoy.
+  const lastDay =
+    messages.length > 0
+      ? localDateFromMs(messages[messages.length - 1].createdAt)
+      : null;
+  const visibleMessages = useMemo(
+    () =>
+      showAll || !lastDay
+        ? messages
+        : messages.filter((m) => localDateFromMs(m.createdAt) === lastDay),
+    [messages, showAll, lastDay],
+  );
+  const hasOlder = !showAll && visibleMessages.length < messages.length;
+
   // Auto-scroll al último mensaje (o al aparecer el indicador de escritura).
+  // Depende del total, no de `visibleMessages`: así tocar "Ver conversación
+  // anterior" no te tira de nuevo al final, dejándote leer desde donde abriste.
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, sending]);
@@ -163,7 +182,20 @@ export default function Chat({
           </div>
         )}
 
-        {messages.map((m) => {
+        {hasOlder && (
+          <div className="flex justify-center pb-1">
+            <button
+              type="button"
+              onClick={() => setShowAll(true)}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 text-xs font-medium text-muted transition-transform duration-(--duration-fast) active:scale-95 hover:text-foreground"
+            >
+              <History size={14} strokeWidth={2} aria-hidden />
+              Ver conversación anterior
+            </button>
+          </div>
+        )}
+
+        {visibleMessages.map((m) => {
           // El resumen de lo registrado viaja dentro del mismo string que la
           // respuesta (los mensajes se guardan como texto plano). Se separa acá
           // para dibujarlo como lista y no como un párrafo con saltos de línea.
