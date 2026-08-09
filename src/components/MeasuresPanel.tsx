@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
+import CollapsibleCard from "@/components/ui/CollapsibleCard";
 import { inputCls } from "@/components/ui/Field";
 import {
   MEASURE_PARTS,
@@ -65,6 +66,9 @@ export default function MeasuresPanel({
   );
 
   const meta = MEASURE_PARTS.find((p) => p.key === part)!;
+  const cintura = measures.filter((m) => m.part === "cintura").at(-1)?.cm;
+  const summary =
+    cintura != null ? `Cintura ${cintura} cm` : "Sin registros todavía";
 
   const submit = () => {
     const n = Number(cm);
@@ -75,9 +79,7 @@ export default function MeasuresPanel({
   };
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="font-semibold">Medidas corporales</h2>
-
+    <CollapsibleCard icon="📏" title="Medidas corporales" summary={summary}>
       {/* Selector de parte */}
       <div className="flex flex-wrap gap-2">
         {MEASURE_PARTS.map((p) => {
@@ -98,7 +100,7 @@ export default function MeasuresPanel({
         })}
       </div>
 
-      <div className="rounded-card bg-card p-4 shadow-e1">
+      <div className="rounded-control bg-sunken p-4">
         <div className="mb-2 flex items-baseline justify-between">
           <h3 className="font-semibold">
             {meta.emoji} {meta.label}
@@ -165,6 +167,6 @@ export default function MeasuresPanel({
           </Button>
         </div>
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }

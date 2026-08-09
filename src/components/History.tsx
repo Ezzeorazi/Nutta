@@ -19,6 +19,7 @@ import {
 import AchievementsCard from "@/components/AchievementsCard";
 import AppHeader from "@/components/AppHeader";
 import ExportPanel from "@/components/ExportPanel";
+import CollapsibleCard from "@/components/ui/CollapsibleCard";
 import { averages, lastNDays } from "@/lib/analytics";
 import { groupByExercise, groupStatsInRange } from "@/lib/gym";
 import type {
@@ -157,14 +158,11 @@ export default function History({
       />
 
       {/* Entrenamiento: qué grupos y ejercicios se trabajaron en la ventana */}
-      <section className="rounded-card bg-card p-4 shadow-e1">
-        <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="font-semibold">Entrenamiento</h2>
-          <span className="text-xs text-muted">
-            {strengthDaysInRange} días de fuerza
-          </span>
-        </div>
-
+      <CollapsibleCard
+        icon="🏋️"
+        title="Entrenamiento"
+        summary={`${strengthDaysInRange} días de fuerza`}
+      >
         {groupStats.length === 0 ? (
           <p className="py-2 text-center text-sm text-muted">
             Cargá series de fuerza para ver qué grupos entrenaste.
@@ -192,7 +190,7 @@ export default function History({
             </div>
 
             {topExercises.length > 0 && (
-              <div className="mt-4 flex flex-col gap-1.5 border-t border-border pt-3">
+              <div className="flex flex-col gap-1.5 border-t border-border pt-3">
                 <h3 className="text-xs font-semibold text-muted">
                   Top ejercicios
                 </h3>
@@ -213,7 +211,7 @@ export default function History({
             )}
           </>
         )}
-      </section>
+      </CollapsibleCard>
 
       {/* Promedios */}
       <section className="flex flex-col gap-2">
@@ -233,13 +231,12 @@ export default function History({
       </section>
 
       {/* Calorías netas por día */}
-      <section className="rounded-card bg-card p-4 shadow-e1">
-        <div className="mb-2 flex items-baseline justify-between">
-          <h2 className="font-semibold">Calorías netas</h2>
-          <span className="text-xs text-muted">
-            meta {goals.calories} kcal
-          </span>
-        </div>
+      <CollapsibleCard
+        icon="🔥"
+        title="Calorías netas"
+        summary={`Prom. ${avg.calories} kcal · meta ${goals.calories}`}
+        defaultOpen
+      >
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={stats} margin={chartMargin}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
@@ -272,11 +269,14 @@ export default function History({
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </section>
+      </CollapsibleCard>
 
       {/* Macros por día */}
-      <section className="rounded-card bg-card p-4 shadow-e1">
-        <h2 className="mb-2 font-semibold">Macros (g)</h2>
+      <CollapsibleCard
+        icon="🍽️"
+        title="Macros (g)"
+        summary={`Prom. proteína ${avg.protein} g`}
+      >
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={stats} margin={chartMargin}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
@@ -317,7 +317,7 @@ export default function History({
             />
           </LineChart>
         </ResponsiveContainer>
-      </section>
+      </CollapsibleCard>
 
       {avg.daysLogged === 0 && (
         <p className="text-center text-sm text-muted">

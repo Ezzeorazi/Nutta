@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play, Trash2 } from "lucide-react";
+import CollapsibleCard from "@/components/ui/CollapsibleCard";
 import type { ResolvedPhoto } from "@/lib/useNutta";
 import { weekIndexFrom, weekStartISO } from "@/lib/week";
 
@@ -65,11 +66,16 @@ export default function PhotosPanel({
   };
 
   const current = withUrl[Math.min(idx, withUrl.length - 1)];
+  const summary =
+    withUrl.length > 0 && !hasThisWeek
+      ? "📸 Te toca la foto de esta semana"
+      : withUrl.length > 0
+        ? `${withUrl.length} ${withUrl.length === 1 ? "foto" : "fotos"}`
+        : "Sin fotos todavía";
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold">Fotos de progreso</h2>
+    <CollapsibleCard icon="🖼️" title="Fotos de progreso" summary={summary}>
+      <div className="flex items-center justify-end -mt-1">
         <label className="cursor-pointer rounded-full bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground active:scale-95">
           {uploading ? "Subiendo…" : "+ Foto"}
           <input
@@ -101,7 +107,7 @@ export default function PhotosPanel({
         <>
           {/* Time-lapse: recorré toda tu evolución con el slider o dale play */}
           {withUrl.length >= 2 && current && (
-            <div className="flex flex-col gap-2 rounded-card bg-card p-4 shadow-e1">
+            <div className="flex flex-col gap-2 rounded-control bg-sunken p-4">
               <div className="relative aspect-3/4 w-full overflow-hidden rounded-xl bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -184,6 +190,6 @@ export default function PhotosPanel({
           </div>
         </>
       )}
-    </section>
+    </CollapsibleCard>
   );
 }

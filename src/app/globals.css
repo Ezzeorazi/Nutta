@@ -143,6 +143,19 @@ body {
    descuadrada. Se arregla agrandando el campo, no bloqueando el zoom con
    maximum-scale, que le saca el gesto a quien lo necesita para leer. */
 
+/* Sin flechas nativas en los campos numéricos: en Windows/Chrome salen
+   blancas y desentonan con la paleta (más en dark). El Stepper ya trae su
+   propio −/+ táctil de 44px; en los campos sueltos, el teclado numérico del
+   celular (inputMode) alcanza y sobra. */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

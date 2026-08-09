@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
+import CollapsibleCard from "@/components/ui/CollapsibleCard";
 import { inputCls } from "@/components/ui/Field";
 import { usedExercises } from "@/lib/gym";
 import {
@@ -83,6 +84,14 @@ export default function MetasPanel({
 
   const liftOptions = [...new Set([...usedExercises(strengthSets), ...COMMON_LIFTS])];
 
+  const reachedCount = goals.filter(
+    (g) => evalGoal(g, weights, strengthSets, measures).reached,
+  ).length;
+  const summary =
+    goals.length === 0
+      ? "Sin metas todavía"
+      : `${reachedCount}/${goals.length} cumplidas`;
+
   const submit = () => {
     const t = Number(target);
     if (!(t > 0)) return;
@@ -100,16 +109,15 @@ export default function MetasPanel({
   };
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold">Metas</h2>
+    <CollapsibleCard icon="🎯" title="Metas" summary={summary}>
+      <div className="flex items-center justify-end -mt-1">
         <Button variant="ghost" size="sm" onClick={() => setAdding((a) => !a)}>
           {adding ? "Cancelar" : "+ Nueva meta"}
         </Button>
       </div>
 
       {adding && (
-        <div className="flex flex-col gap-3 rounded-card bg-card p-4 shadow-e1">
+        <div className="flex flex-col gap-3 rounded-control bg-sunken p-4">
           <div className="flex flex-wrap gap-2">
             {GOAL_KINDS.map((k) => (
               <Chip
@@ -184,7 +192,7 @@ export default function MetasPanel({
             );
             const unit = unitOf(g.kind);
             return (
-              <li key={g.id} className="rounded-card bg-card p-4 shadow-e1">
+              <li key={g.id} className="rounded-control bg-sunken p-4">
                 <div className="flex items-center justify-between gap-2">
                   <span className="min-w-0 truncate font-medium">{g.label}</span>
                   <span className="flex shrink-0 items-center gap-1">
@@ -219,6 +227,6 @@ export default function MetasPanel({
           })}
         </ul>
       )}
-    </section>
+    </CollapsibleCard>
   );
 }
