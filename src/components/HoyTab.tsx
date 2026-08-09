@@ -11,6 +11,7 @@ import EstadoCard from "@/components/EstadoCard";
 import ExerciseForm from "@/components/ExerciseForm";
 import FoodForm from "@/components/FoodForm";
 import InsightsCard from "@/components/InsightsCard";
+import PlanCard from "@/components/PlanCard";
 import RecipesSheet from "@/components/RecipesSheet";
 import MacroBar from "@/components/MacroBar";
 import ScoreCard from "@/components/ScoreCard";
@@ -76,6 +77,11 @@ export default function HoyTab({
   removeSupplement,
   toggleSupplement,
   setSupplementQty,
+  planActive,
+  onTogglePlan,
+  notifPermission,
+  onRequestNotifPermission,
+  onTestNotif,
 }: {
   weight: number;
   /** Todo lo que se sabe del día visto, ya cruzado (ver `lib/athlete.ts`). */
@@ -124,6 +130,11 @@ export default function HoyTab({
   removeSupplement: (id: string) => void;
   toggleSupplement: (supId: string, date: string) => void;
   setSupplementQty: (supId: string, date: string, qty: number) => void;
+  planActive: boolean;
+  onTogglePlan: () => void;
+  notifPermission: NotificationPermission | "unsupported";
+  onRequestNotifPermission: () => void;
+  onTestNotif: () => void;
 }) {
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
@@ -237,6 +248,14 @@ export default function HoyTab({
           primero que diría un entrenador, así que va apenas debajo del anillo y
           de la carga rápida (que se ganó su lugar arriba y no se lo movemos). */}
       <EstadoCard state={state} />
+
+      <PlanCard
+        planActive={planActive}
+        onTogglePlan={onTogglePlan}
+        permission={notifPermission}
+        onRequestPermission={onRequestNotifPermission}
+        onTestNotif={onTestNotif}
+      />
 
       <Timeline
         foods={todayFoods}

@@ -17,6 +17,7 @@ import DayNavigator from "@/components/DayNavigator";
 import ExerciseImage from "@/components/ExerciseImage";
 import ExercisePickerSheet from "@/components/ExercisePickerSheet";
 import CardioSheet from "@/components/CardioSheet";
+import PlanDayCard from "@/components/PlanDayCard";
 import RestTimer from "@/components/RestTimer";
 import Button from "@/components/ui/Button";
 import Stepper from "@/components/ui/Stepper";
@@ -32,6 +33,7 @@ import {
 } from "@/lib/gym";
 import { matchExercise } from "@/lib/exerciseDb";
 import type { ObjectiveKey } from "@/lib/nutrition";
+import { getPlanDay } from "@/lib/plan";
 import {
   COMMON_LIFTS,
   dayLabel,
@@ -299,6 +301,13 @@ export default function GymTab({
             onChange={setViewDate}
           />
         }
+      />
+
+      {/* Rutina fija del plan del mes, para el día que se está viendo. */}
+      <PlanDayCard
+        planDay={getPlanDay(viewDate)}
+        daySets={daySets}
+        onSelectExercise={setExercise}
       />
 
       {/* Sugerencia de rutina. Va con su propio título: antes arrancaba con un

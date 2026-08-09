@@ -23,6 +23,8 @@ import { buildInsights } from "@/lib/insights";
 import { streakFromDates } from "@/lib/achievements";
 import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
+import { PLAN_GOALS, PLAN_TARGET_WEIGHT } from "@/lib/plan";
+import { usePlanReminders } from "@/lib/usePlanReminders";
 import { useNutta } from "@/lib/useNutta";
 import type { Readiness } from "@/lib/gym";
 import {
@@ -121,6 +123,25 @@ export default function Home() {
   // Día que se está mirando en el tab Hoy (hoy por defecto; se puede navegar).
   const [viewDate, setViewDate] = useState(today);
 
+  // Metas del plan de agosto activas por defecto (pisan a las calculadas del
+  // perfil). Preferencia local, como el descarte de sugerencia de rutina: no
+  // hace falta sincronizarla entre dispositivos para un solo usuario.
+  const [planActive, setPlanActive] = useState(() =>
+    typeof window === "undefined"
+      ? true
+      : localStorage.getItem("nutta.planActive") !== "0",
+  );
+  const togglePlan = () =>
+    setPlanActive((p) => {
+      const next = !p;
+      try {
+        localStorage.setItem("nutta.planActive", next ? "1" : "0");
+      } catch {
+        // sin localStorage: la preferencia no persiste, pero no rompe nada
+      }
+      return next;
+    });
+
   // --- Derivados del día ---
   // El día de un registro se toma del createdAt LOCAL (con fallback a date):
   // así se corrigen registros viejos mal-fechados por el bug de UTC.
@@ -138,11 +159,19 @@ export default function Home() {
   // (que se completa una vez y queda viejo). De él dependen las metas, el agua
   // y las calorías de todo el ejercicio.
   const bodyWeight = effectiveWeight(profile?.weight ?? 0, weights, today);
-  const goals = profile
-    ? computeGoals({ ...profile, weight: bodyWeight })
-    : DEFAULT_GOALS;
+  const goals = !profile
+    ? DEFAULT_GOALS
+    : planActive
+      ? PLAN_GOALS
+      : computeGoals({ ...profile, weight: bodyWeight });
 
   const waterGoal = bodyWeight > 0 ? waterGoalL(bodyWeight) : undefined;
+
+  // Semilla única de la meta de peso del plan: solo si el usuario todavía no
+  // cargó una propia (no la pisa si ya la eligió en Progreso).
+  useEffect(() => {
+    if (profile && targetWeight == null) setTargetWeight(PLAN_TARGET_WEIGHT);
+  }, [profile, targetWeight, setTargetWeight]);
 
   // --- Estado del atleta ---
   // Todo lo que se sabe del usuario, cruzado en un solo lugar (lib/athlete.ts).
@@ -187,6 +216,14 @@ export default function Home() {
         : buildAthleteState({ ...athleteBase, date: viewDate }),
     [athleteBase, todayState, viewDate, today],
   );
+
+  // Avisos del plan: se calculan siempre sobre HOY (no el día que se está
+  // navegando en el tab Hoy), y el hook decide cuándo dispararlos de verdad.
+  const {
+    permission: notifPermission,
+    requestPermission: requestNotifPermission,
+    sendTest: sendTestNotif,
+  } = usePlanReminders(todayState, today);
 
   const score = useMemo(
     () => dailyScore(viewState, viewFoods),
@@ -539,6 +576,11 @@ export default function Home() {
           removeSupplement={removeSupplement}
           toggleSupplement={toggleSupplement}
           setSupplementQty={setSupplementQty}
+          planActive={planActive}
+          onTogglePlan={togglePlan}
+          notifPermission={notifPermission}
+          onRequestNotifPermission={requestNotifPermission}
+          onTestNotif={sendTestNotif}
         />
         )}
       </motion.div>
