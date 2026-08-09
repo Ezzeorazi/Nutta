@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import Button from "@/components/ui/Button";
+import CollapsibleCard from "@/components/ui/CollapsibleCard";
 import { Field, inputCls } from "@/components/ui/Field";
 import type { BodyVerdict } from "@/lib/body";
 import type { WeightEntry } from "@/lib/types";
@@ -87,10 +88,20 @@ export default function WeightPanel({
     if (n > 0) onSetTarget(n);
   };
 
+  const summary = (
+    <>
+      {trend ? trend.current : "—"} kg
+      {targetWeight ? ` · meta ${targetWeight} kg` : ""}
+      {trend && weights.length >= 2
+        ? ` · ${trend.deltaTotal > 0 ? "+" : ""}${trend.deltaTotal.toFixed(1)} kg`
+        : ""}
+    </>
+  );
+
   return (
-    <section className="flex flex-col gap-4">
+    <CollapsibleCard icon="⚖️" title="Peso" summary={summary} defaultOpen>
       {/* Resumen */}
-      <div className="rounded-card bg-card p-5 shadow-e1">
+      <div>
         <p className="text-xs uppercase tracking-wide text-muted">Peso actual</p>
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-bold tabular-nums">
@@ -126,7 +137,7 @@ export default function WeightPanel({
 
       {/* Gráfico */}
       {chartData.length >= 2 ? (
-        <div className="rounded-card bg-card p-4 shadow-e1">
+        <div className="border-t border-border pt-4">
           <div className="mb-2 flex items-baseline justify-between">
             <h2 className="font-semibold">Evolución</h2>
             <span className="text-xs text-muted">por semana</span>
@@ -158,14 +169,14 @@ export default function WeightPanel({
           </ResponsiveContainer>
         </div>
       ) : (
-        <p className="rounded-card border border-dashed border-border p-6 text-center text-sm text-muted">
+        <p className="rounded-control border border-dashed border-border p-6 text-center text-sm text-muted">
           Registrá tu peso a lo largo de un par de semanas y vas a ver el
           gráfico y la predicción acá.
         </p>
       )}
 
       {/* Registrar / Meta */}
-      <div className="flex flex-col gap-4 rounded-card bg-card p-4 shadow-e1">
+      <div className="flex flex-col gap-4 border-t border-border pt-4">
         <Field label="Registrar peso de hoy (kg)">
           <div className="flex gap-2">
             <input
@@ -203,6 +214,6 @@ export default function WeightPanel({
           </div>
         </Field>
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }
