@@ -79,6 +79,7 @@ const schema = i.schema({
       sleepHours: i.number().optional(),
       sleepQuality: i.number().optional(), // 1-5
       steps: i.number().optional(),
+      restDay: i.boolean().optional(), // día de descanso declarado por el usuario
       createdAt: i.number().optional(), // epoch ms (para derivar el día local)
     }),
     // Metas personalizadas del usuario (peso, levantamiento, medida).

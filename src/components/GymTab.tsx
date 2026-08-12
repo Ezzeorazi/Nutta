@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Check, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Check, Moon, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import DayNavigator from "@/components/DayNavigator";
 import ExerciseImage from "@/components/ExerciseImage";
@@ -23,21 +23,19 @@ import Button from "@/components/ui/Button";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
 import {
-  buildDailyRoutine,
   exerciseProgress,
   groupByExercise,
   personalRecords,
   totalVolume,
   usedExercises,
-  type Readiness,
 } from "@/lib/gym";
 import { matchExercise } from "@/lib/exerciseDb";
-import type { ObjectiveKey } from "@/lib/nutrition";
 import { getPlanDay } from "@/lib/plan";
 import {
   COMMON_LIFTS,
   dayLabel,
   startOfLocalDayMs,
+  type DailyMetrics,
   type ExerciseEntry,
   type StrengthSet,
 } from "@/lib/types";
@@ -117,21 +115,20 @@ function SetForm({
 export default function GymTab({
   strengthSets,
   exercises = [],
+  metrics = [],
   today,
-  objective,
-  readiness,
   onAddSet,
   onRemoveSet,
   onEditSet,
   onAddExercise,
   onRemoveExercise,
+  onSetRestDay,
 }: {
   strengthSets: StrengthSet[];
   exercises?: ExerciseEntry[];
+  /** Métricas diarias: de acá sale si el día está marcado como descanso. */
+  metrics?: DailyMetrics[];
   today: string;
-  objective?: ObjectiveKey;
-  /** Cómo llega el usuario hoy (sueño, carga acumulada, recuperación). */
-  readiness?: Readiness;
   onAddSet: (
     exercise: string,
     reps: number,
@@ -143,6 +140,7 @@ export default function GymTab({
   onEditSet: (id: string, reps: number, weight: number) => void;
   onAddExercise: (e: ExerciseEntry) => void;
   onRemoveExercise: (id: string) => void;
+  onSetRestDay: (date: string, rest: boolean) => void;
 }) {
   const [exercise, setExercise] = useState("");
   const [reps, setReps] = useState("");
@@ -189,22 +187,12 @@ export default function GymTab({
   const groups = useMemo(() => groupByExercise(daySets), [daySets]);
   const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
   const dayVolume = totalVolume(daySets);
-  const routine = useMemo(
-    () => buildDailyRoutine(strengthSets, exercises, today, objective, readiness),
-    [strengthSets, exercises, today, objective, readiness],
+  // Descanso declarado para el día que se está viendo. Con series cargadas el
+  // día cuenta como entrenamiento igual (lo hecho manda sobre lo declarado).
+  const restDay = useMemo(
+    () => metrics.some((m) => m.date === viewDate && m.restDay),
+    [metrics, viewDate],
   );
-  // Descarte por jornada: se guarda la clave del día en localStorage. Se lee en
-  // el inicializador (GymTab solo monta al abrir el tab, nunca en SSR).
-  const [dismissedKey, setDismissedKey] = useState<string | null>(() =>
-    typeof window === "undefined"
-      ? null
-      : localStorage.getItem("nutta.routineDismissed"),
-  );
-  const showSuggestion = routine.key !== dismissedKey;
-  const dismissSuggestion = () => {
-    localStorage.setItem("nutta.routineDismissed", routine.key);
-    setDismissedKey(routine.key);
-  };
 
   const used = useMemo(() => usedExercises(strengthSets), [strengthSets]);
   // Historial y comunes primero (lo más relevante), luego el catálogo canónico
@@ -303,79 +291,53 @@ export default function GymTab({
         }
       />
 
+      {/* Descanso del día. Sin este botón, no cargar series era ambiguo: podía
+          ser "descansé" o "me olvidé", y la app siempre leía lo segundo (te
+          avisaba de días seguidos sin descanso aunque hubieras parado). */}
+      {restDay ? (
+        <section className="flex items-center gap-3 rounded-card border-l-4 border-l-primary bg-card px-4 py-3 shadow-e1">
+          <span className="text-lg leading-none" aria-hidden>
+            🧘
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">
+              {isToday ? "Hoy descansás" : `Descanso — ${dayLabel(viewDate)}`}
+            </p>
+            <p className="mt-0.5 text-xs text-muted">
+              {daySets.length > 0
+                ? "Cargaste series este día, así que cuenta como entrenamiento."
+                : "No cuenta como día sin entrenar y corta la racha de fatiga."}
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => onSetRestDay(viewDate, false)}
+          >
+            Quitar
+          </Button>
+        </section>
+      ) : (
+        daySets.length === 0 && (
+          <button
+            type="button"
+            onClick={() => onSetRestDay(viewDate, true)}
+            className="flex min-h-11 items-center justify-center gap-2 rounded-card border border-dashed border-border px-4 py-3 text-sm font-medium text-muted transition-colors active:scale-[0.99] hover:border-primary hover:text-primary"
+          >
+            <Moon size={16} strokeWidth={2} aria-hidden />
+            Marcar {isToday ? "hoy" : dayLabel(viewDate)} como día de descanso
+          </button>
+        )
+      )}
+
       {/* Rutina fija del plan del mes, para el día que se está viendo. */}
       <PlanDayCard
         planDay={getPlanDay(viewDate)}
         daySets={daySets}
+        isToday={isToday}
+        viewDate={viewDate}
         onSelectExercise={setExercise}
       />
-
-      {/* Sugerencia de rutina. Va con su propio título: antes arrancaba con un
-          emoji y una frase suelta, y no quedaba claro si era un consejo o algo
-          que ya habías cargado. */}
-      {isToday && showSuggestion && (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-semibold text-muted">Sugerencia de hoy</h2>
-        <div
-          className={`flex flex-col gap-3 rounded-card border-l-4 bg-card px-4 py-3 shadow-e1 ${
-            routine.tone === "recovery"
-              ? "border-l-primary"
-              : routine.tone === "done"
-                ? "border-l-success"
-                : "border-l-accent"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-lg leading-none">
-              {routine.tone === "recovery"
-                ? "🧘"
-                : routine.tone === "done"
-                  ? "✅"
-                  : "🎯"}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm">{routine.headline}</p>
-              {/* El porqué de la sugerencia: sin esto es un oráculo. */}
-              {routine.why && (
-                <p className="mt-0.5 text-xs text-muted">{routine.why}</p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={dismissSuggestion}
-              aria-label="Descartar sugerencia"
-              className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
-            >
-              <X size={17} strokeWidth={2.25} aria-hidden />
-            </button>
-          </div>
-
-          {routine.groups.map((g) => (
-            <div key={g.group} className="flex flex-col gap-1.5 pl-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-                {g.group}
-              </p>
-              {g.exercises.map((ex) => (
-                <button
-                  key={ex.name}
-                  onClick={() => setExercise(ex.name)}
-                  className="flex items-center justify-between rounded-xl border border-border bg-background px-3 py-2 text-left text-sm active:scale-[0.99] hover:border-primary"
-                >
-                  <span>{ex.name}</span>
-                  <span className="shrink-0 text-xs text-muted tabular-nums">
-                    {ex.sets} × {ex.reps}
-                  </span>
-                </button>
-              ))}
-            </div>
-          ))}
-
-          {routine.cardioTip && (
-            <p className="pl-1 text-xs text-muted">🏃 {routine.cardioTip}</p>
-          )}
-        </div>
-        </section>
-      )}
 
       {/* Alta de serie (hoy o un día pasado que estés completando) */}
       <section className="flex flex-col gap-4 rounded-card bg-card p-4 shadow-e1">

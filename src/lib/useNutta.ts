@@ -685,7 +685,12 @@ export function useNutta() {
   /** Actualiza (o crea) las métricas de bienestar de un día. */
   const setMetric = (
     date: string,
-    patch: Partial<Pick<DailyMetrics, "water" | "sleepHours" | "sleepQuality" | "steps">>,
+    patch: Partial<
+      Pick<
+        DailyMetrics,
+        "water" | "sleepHours" | "sleepQuality" | "steps" | "restDay"
+      >
+    >,
   ) => {
     if (!user) return;
     const existing = metrics.find((m) => m.date === date) as

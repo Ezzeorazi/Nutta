@@ -29,6 +29,8 @@ type TLEvent = {
   name: string;
   detail: string;
   kcal: number;
+  /** Proteína del registro (solo comida). Es el macro que se persigue. */
+  protein: number | null;
   minute: number; // minutos desde medianoche, para ordenar
   timeLabel: string | null;
   fallbackLabel: string | null;
@@ -70,6 +72,7 @@ export default function Timeline({
       name: f.name,
       detail: `${Math.round(f.qty)} g`,
       kcal: Math.round(f.calories),
+      protein: Math.round(f.protein),
       minute: f.createdAt ? minuteFromMs(f.createdAt) : MEAL_HOUR[f.meal] * 60,
       timeLabel: f.createdAt ? timeFmt(f.createdAt) : null,
       fallbackLabel: mealLabel(f.meal),
@@ -82,6 +85,7 @@ export default function Timeline({
       name: d.name,
       detail: `${d.ml} ml`,
       kcal: Math.round(d.calories),
+      protein: null,
       minute: d.createdAt ? minuteFromMs(d.createdAt) : 21 * 60,
       timeLabel: d.createdAt ? timeFmt(d.createdAt) : null,
       fallbackLabel: d.category === "cerveza" ? "Cerveza" : "Trago",
@@ -94,6 +98,7 @@ export default function Timeline({
       name: e.name,
       detail: `${Math.round(e.minutes)} min`,
       kcal: Math.round(e.caloriesBurned),
+      protein: null,
       minute: e.createdAt ? minuteFromMs(e.createdAt) : 12 * 60,
       timeLabel: e.createdAt ? timeFmt(e.createdAt) : null,
       fallbackLabel: "Ejercicio",
@@ -146,13 +151,24 @@ export default function Timeline({
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <span
-                  className={`text-xs font-semibold tabular-nums ${
-                    ev.kind === "exercise" ? "text-accent" : "text-foreground"
-                  }`}
-                >
-                  {ev.kind === "exercise" ? "−" : ""}
-                  {ev.kcal} kcal
+                {/* kcal y proteína juntas: la proteína es la meta que se
+                    persigue todos los días, y antes había que abrir el
+                    registro (o sumar de memoria) para saber cuánta traía cada
+                    alimento. */}
+                <span className="text-right">
+                  <span
+                    className={`block text-xs font-semibold tabular-nums ${
+                      ev.kind === "exercise" ? "text-accent" : "text-foreground"
+                    }`}
+                  >
+                    {ev.kind === "exercise" ? "−" : ""}
+                    {ev.kcal} kcal
+                  </span>
+                  {ev.protein != null && (
+                    <span className="block text-[11px] font-medium tabular-nums text-primary">
+                      {ev.protein} g proteína
+                    </span>
+                  )}
                 </span>
                 <button
                   type="button"
