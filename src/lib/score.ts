@@ -73,13 +73,15 @@ export function dailyScore(
       max: 30,
       logged: true,
       points: Math.round(30 * row("entrenamiento").ratio),
-      detail: training.trained
-        ? `${INTENSITY_PHRASE[training.intensity]}${
-            training.volume > 0
-              ? ` · ${training.sets} series · ${Math.round(training.volume).toLocaleString("es-AR")} kg`
-              : ` · ${training.cardioMinutes} min`
-          }.`
-        : "No registraste entrenamiento (ni fuerza ni cardio).",
+      detail: training.rest
+        ? "Día de descanso: cuenta como cumplido, es parte del plan."
+        : training.trained
+          ? `${INTENSITY_PHRASE[training.intensity]}${
+              training.volume > 0
+                ? ` · ${training.sets} series · ${Math.round(training.volume).toLocaleString("es-AR")} kg`
+                : ` · ${training.cardioMinutes} min`
+            }.`
+          : "No registraste entrenamiento (ni fuerza ni cardio).",
     },
     {
       label: "Proteína",
@@ -180,7 +182,9 @@ export function dailyScore(
       `Te falta proteína: sumá ~${Math.round(nutrition.remaining.protein)} g.`,
     );
   }
-  if (!training.trained) tips.push("Hoy no registraste entrenamiento.");
+  if (!training.trained && !training.rest) {
+    tips.push("Hoy no registraste entrenamiento.");
+  }
   if (nutrition.netCalories > goals.calories * 1.15) {
     tips.push("Te pasaste de calorías; ojo con las porciones.");
   } else if (

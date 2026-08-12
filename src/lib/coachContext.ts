@@ -1,4 +1,4 @@
-import { weeklyLoad } from "@/lib/athlete";
+import { restDaysOf, weeklyLoad } from "@/lib/athlete";
 import { readBody } from "@/lib/body";
 import { groupsOf, MUSCLE_GROUPS } from "@/lib/gym";
 import { OBJECTIVES, type ObjectiveKey } from "@/lib/nutrition";
@@ -121,7 +121,8 @@ export function weeklySummary(input: WeeklySummaryInput): string {
 
   // Volumen de fuerza y su comparación con la semana anterior: es la métrica
   // que dice si la persona está progresando, estancada o pasada de rosca.
-  const load = weeklyLoad(strengthSets, exercises, today);
+  const load = weeklyLoad(strengthSets, exercises, today, restDaysOf(metrics));
+  const restCount = wMetrics.filter((m) => m.restDay).length;
   const volumeTrend =
     load.prevVolume > 0
       ? `${Math.round((load.volume / load.prevVolume - 1) * 100)}% vs. la semana anterior`
@@ -140,6 +141,8 @@ export function weeklySummary(input: WeeklySummaryInput): string {
   return [
     `Objetivo: ${objLabel ?? "sin definir"}.`,
     `Entrenamientos: ${trainDays}/7 días${
+      restCount > 0 ? ` (${restCount} de descanso declarado)` : ""
+    }${
       activities.length ? ` (cardio: ${activities.join(", ")})` : ""
     }${strengthNames.length ? ` (fuerza: ${strengthNames.join(", ")})` : ""}.`,
     `Grupos trabajados: ${groups.length ? groups.join(", ") : "ninguno detectado"}.`,

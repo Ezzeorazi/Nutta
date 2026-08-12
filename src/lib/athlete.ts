@@ -133,6 +133,14 @@ export function rate(ratio: number): string {
 const sum = <T,>(arr: T[], f: (t: T) => number) =>
   arr.reduce((s, x) => s + f(x), 0);
 
+/**
+ * Días que el usuario marcó como descanso. Un día de descanso NO es un día sin
+ * datos: corta la racha, no cuenta como día de entrenamiento de la semana y no
+ * se lee como "te olvidaste de cargar".
+ */
+export const restDaysOf = (metrics: Pick<DailyMetrics, "date" | "restDay">[]) =>
+  new Set(metrics.filter((m) => m.restDay).map((m) => m.date));
+
 // ---------------------------------------------------------------------------
 // Entrenamiento del día
 // ---------------------------------------------------------------------------
@@ -141,6 +149,8 @@ export type PersonalRecord = { exercise: string; weight: number; prev: number };
 
 export type TrainingDay = {
   trained: boolean;
+  /** El usuario marcó el día como descanso (y no cargó series). */
+  rest: boolean;
   intensity: Intensity;
   /** Volumen de fuerza (reps × peso) del día, en kg. */
   volume: number;
@@ -169,6 +179,9 @@ export type TrainingDay = {
  * `bodyWeight` se usa para estimar el gasto de la sesión de fuerza, que nunca
  * se registra en ningún lado (nadie carga "musculación 50 min" además de sus
  * series) y sin embargo es la mitad del gasto de quien va al gym.
+ *
+ * `isRest` es el día marcado como descanso por el usuario. Se ignora si igual
+ * cargó series: lo que se hizo manda sobre lo que se declaró.
  */
 export function trainingOfDay(
   strengthSets: StrengthSet[],
@@ -176,6 +189,7 @@ export function trainingOfDay(
   date: string,
   bodyWeight: number,
   refVolume = 0,
+  isRest = false,
 ): TrainingDay {
   const daySets = strengthSets.filter((s) => s.date === date);
   const dayCardio = exercises.filter((e) => e.date === date);
@@ -213,7 +227,11 @@ export function trainingOfDay(
     if (prev > 0 && best > prev) prs.push({ exercise: name, weight: best, prev });
   }
 
-  const trained = sets > 0 || cardioMinutes > 0;
+  // Descanso declarado: vale mientras no haya series cargadas. Una caminata o
+  // un cardio suave no lo invalidan —eso ES un día de descanso activo—, pero
+  // ponerse a levantar sí.
+  const rest = isRest && sets === 0;
+  const trained = !rest && (sets > 0 || cardioMinutes > 0);
   const intensity = classifyIntensity({
     trained,
     volume,
@@ -225,6 +243,7 @@ export function trainingOfDay(
 
   return {
     trained,
+    rest,
     intensity,
     volume,
     sets,
@@ -296,6 +315,8 @@ export function weeklyLoad(
   strengthSets: StrengthSet[],
   exercises: ExerciseEntry[],
   date: string,
+  /** Días marcados como descanso: cortan la racha y no cuentan como entreno. */
+  restDays: Set<string> = new Set(),
 ): WeekLoad {
   const inRange = (d: string, from: number, to: number) => {
     const diff = dayDiff(date, d);
@@ -307,6 +328,11 @@ export function weeklyLoad(
   const trainDays = new Set<string>();
   for (const s of week) trainDays.add(s.date);
   for (const e of exercises) if (inRange(e.date, 0, 6)) trainDays.add(e.date);
+  // Un día declarado de descanso no es un día de entrenamiento, aunque tenga
+  // la caminata de recuperación cargada.
+  for (const d of restDays) {
+    if (!week.some((s) => s.date === d)) trainDays.delete(d);
+  }
 
   // Promedio por sesión de las últimas 4 semanas, SIN el día en curso: sirve de
   // vara para saber si la sesión de hoy fue fuerte para esta persona.
@@ -319,17 +345,26 @@ export function weeklyLoad(
     ? [...byDay.values()].reduce((a, b) => a + b, 0) / byDay.size
     : 0;
 
+  const strengthDays = new Set(strengthSets.map((s) => s.date));
   const allDays = new Set<string>([
-    ...strengthSets.map((s) => s.date),
+    ...strengthDays,
     ...exercises.map((e) => e.date),
   ]);
+  // El descanso declarado corta la racha aunque ese día haya un cardio suave
+  // cargado: es exactamente para eso que existe el botón.
+  const trainedOn = (d: string) =>
+    allDays.has(d) && (strengthDays.has(d) || !restDays.has(d));
   // Se permite que hoy todavía no esté entrenado: si no, a la mañana la racha
   // de cinco días seguidos aparecería como cero y perderíamos la señal de fatiga.
+  // Pero si el día se declaró de descanso, la racha ya está cortada: es el dato
+  // que el usuario acaba de dar y con el que se apaga el aviso de fatiga.
   let streak = 0;
-  let cursor = allDays.has(date) ? date : shiftISO(date, -1);
-  while (allDays.has(cursor)) {
-    streak++;
-    cursor = shiftISO(cursor, -1);
+  if (!restDays.has(date) || strengthDays.has(date)) {
+    let cursor = trainedOn(date) ? date : shiftISO(date, -1);
+    while (trainedOn(cursor)) {
+      streak++;
+      cursor = shiftISO(cursor, -1);
+    }
   }
 
   return {
@@ -378,6 +413,8 @@ export function dynamicGoals(
   base: Goals,
   intensity: Intensity,
   isToday: boolean,
+  /** Día declarado de descanso: cambia el porqué, no el número. */
+  rest = false,
 ): { goals: Goals; carbDelta: number; reason: string | null } {
   const factor = CARB_FACTOR[intensity];
   const carbDelta = Math.round(base.carbs * factor);
@@ -392,7 +429,13 @@ export function dynamicGoals(
   const reason =
     carbDelta > 0
       ? `Entrenaste ${intensity === "fuerte" ? "fuerte" : "hoy"}: +${carbDelta} g de carbos para reponer.`
-      : `${isToday ? "Todavía no entrenaste" : "Día sin entrenamiento"}: −${Math.abs(carbDelta)} g de carbos. La proteína se mantiene.`;
+      : `${
+          rest
+            ? "Día de descanso"
+            : isToday
+              ? "Todavía no entrenaste"
+              : "Día sin entrenamiento"
+        }: −${Math.abs(carbDelta)} g de carbos. La proteína se mantiene.`;
   return { goals, carbDelta, reason };
 }
 
@@ -406,6 +449,7 @@ function nutritionOfDay(
   intensity: Intensity,
   isToday: boolean,
   cardioBurned: number,
+  rest: boolean,
 ): NutritionState {
   const day = foods.filter((f) => f.date === date);
   const dayDrinks = drinks.filter((d) => d.date === date);
@@ -420,7 +464,12 @@ function nutritionOfDay(
     carbs: Math.round(sum(day, (f) => f.carbs)),
     fat: Math.round(sum(day, (f) => f.fat)),
   };
-  const { goals, carbDelta, reason } = dynamicGoals(base, intensity, isToday);
+  const { goals, carbDelta, reason } = dynamicGoals(
+    base,
+    intensity,
+    isToday,
+    rest,
+  );
   // El neto es el mismo que muestra el anillo de calorías (consumidas menos
   // quemadas). Los macros no se netean: el ejercicio no te devuelve proteína.
   const netCalories = Math.max(0, consumed.calories - Math.round(cardioBurned));
@@ -629,13 +678,15 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
   const isToday = date === today;
   const waterGoal = input.bodyWeight > 0 ? waterGoalL(input.bodyWeight) : WATER_GOAL_L;
 
-  const week = weeklyLoad(input.strengthSets, input.exercises, date);
+  const restDays = restDaysOf(input.metrics);
+  const week = weeklyLoad(input.strengthSets, input.exercises, date, restDays);
   const training = trainingOfDay(
     input.strengthSets,
     input.exercises,
     date,
     input.bodyWeight,
     week.avgSessionVolume,
+    restDays.has(date),
   );
   const nutrition = nutritionOfDay(
     input.foods,
@@ -647,6 +698,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     training.intensity,
     isToday,
     training.cardioBurned,
+    training.rest,
   );
 
   const yesterday = shiftISO(date, -1);
@@ -717,15 +769,21 @@ function buildStatus(x: {
   return [
     {
       key: "entrenamiento",
-      emoji: "🏋️",
+      emoji: training.rest ? "🧘" : "🏋️",
       label: "Entrenamiento",
-      ratio: INTENSITY_RATIO[training.intensity],
+      // El descanso elegido puntúa como día cumplido: descansar es parte del
+      // plan, no una falta. Sin esto, marcarlo te pintaba la barra en cero.
+      ratio: training.rest ? 1 : INTENSITY_RATIO[training.intensity],
       logged: true,
-      value: training.trained
-        ? training.volume > 0
-          ? `${INTENSITY_LABEL[training.intensity]} · ${Math.round(training.volume).toLocaleString("es-AR")} kg`
-          : `${INTENSITY_LABEL[training.intensity]} · ${training.cardioMinutes} min`
-        : "Sin registrar",
+      value: training.rest
+        ? training.cardioMinutes > 0
+          ? `Descanso · ${training.cardioMinutes} min suaves`
+          : "Descanso"
+        : training.trained
+          ? training.volume > 0
+            ? `${INTENSITY_LABEL[training.intensity]} · ${Math.round(training.volume).toLocaleString("es-AR")} kg`
+            : `${INTENSITY_LABEL[training.intensity]} · ${training.cardioMinutes} min`
+          : "Sin registrar",
     },
     {
       key: "proteina",
@@ -781,7 +839,16 @@ function buildCoach(x: {
   const falta = nutrition.remaining;
 
   // 1) Lectura del entrenamiento.
-  if (training.trained) {
+  if (training.rest) {
+    coach.push({
+      emoji: "🧘",
+      tone: "good",
+      text:
+        training.cardioMinutes > 0
+          ? `Día de descanso con ${training.cardioMinutes} min de movimiento suave. Así se recupera.`
+          : "Día de descanso. El músculo crece ahora, no en la sesión.",
+    });
+  } else if (training.trained) {
     const partes = [
       training.volume > 0 &&
         `${Math.round(training.volume).toLocaleString("es-AR")} kg de volumen en ${training.sets} ${training.sets === 1 ? "serie" : "series"}`,
@@ -855,6 +922,9 @@ function buildCoach(x: {
     headline = recovery.advice;
   } else if (falta.protein >= 30) {
     headline = `Te faltan ${Math.round(falta.protein)} g de proteína. Cerralo ${momento}.`;
+  } else if (training.rest) {
+    headline =
+      "Día de descanso: sostené la proteína y dormí bien, que es cuando se construye.";
   } else if (!training.trained && isToday && week.days < 5) {
     headline = "Estás listo para entrenar. Pasá al Gym y arrancá con lo que te falta esta semana.";
   } else if (water > 0 && water < x.waterGoal * 0.5) {

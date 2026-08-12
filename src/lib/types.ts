@@ -177,6 +177,13 @@ export type DailyMetrics = {
   sleepHours?: number;
   sleepQuality?: number; // 1-5
   steps?: number;
+  /**
+   * Descanso declarado por el usuario. Es un dato que no se puede deducir de la
+   * ausencia de registros: no cargar series puede ser "descansé" o "me olvidé
+   * de cargar", y la app venía tratando todo como lo segundo (te avisaba de 8
+   * días seguidos entrenando aunque hubieras parado el domingo).
+   */
+  restDay?: boolean;
   createdAt?: number; // epoch ms
 };
 

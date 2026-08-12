@@ -20,16 +20,15 @@ import { computeGoals, effectiveWeight, waterGoalL } from "@/lib/nutrition";
 import { buildAthleteState } from "@/lib/athlete";
 import { dailyScore } from "@/lib/score";
 import { buildInsights } from "@/lib/insights";
-import { streakFromDates } from "@/lib/achievements";
 import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
 import { PLAN_GOALS, PLAN_TARGET_WEIGHT } from "@/lib/plan";
 import { usePlanReminders } from "@/lib/usePlanReminders";
 import { useNutta } from "@/lib/useNutta";
-import type { Readiness } from "@/lib/gym";
 import {
   DEFAULT_GOALS,
   localDateFromMs,
+  shiftISO,
   todayISO,
   type ExerciseEntry,
   type FoodEntry,
@@ -256,23 +255,25 @@ export default function Home() {
       profile,
     ],
   );
-  const readiness = useMemo<Readiness>(
-    () => ({
-      recovery: todayState.recovery.score,
-      sleepHours: todayMetrics?.sleepHours ?? null,
-      streak: todayState.week.streak,
-      weekVolume: todayState.week.volume,
-      prevWeekVolume: todayState.week.prevVolume,
-    }),
-    [todayState, todayMetrics],
-  );
-  // Racha de entrenamiento (días con cardio o fuerza) para mostrar en Hoy.
+  // Racha de entrenamiento (días con cardio o fuerza) para mostrar en Hoy. Un
+  // día marcado como descanso no suma —no entrenaste— pero tampoco la corta:
+  // descansar cuando toca es seguir el plan, no abandonarlo. Por eso no alcanza
+  // con `streakFromDates`, que solo sabe de días presentes o ausentes.
   const trainStreak = useMemo(() => {
-    const days = new Set<string>();
-    for (const e of exercises) days.add(e.date);
-    for (const s of strengthSets) days.add(s.date);
-    return streakFromDates(days, today).current;
-  }, [exercises, strengthSets, today]);
+    const trained = new Set<string>();
+    for (const e of exercises) trained.add(e.date);
+    for (const s of strengthSets) trained.add(s.date);
+    const rest = new Set(metrics.filter((m) => m.restDay).map((m) => m.date));
+    const counts = (d: string) => trained.has(d) && !rest.has(d);
+    // Se permite que hoy todavía no tenga nada: la racha viene de ayer.
+    let cursor = trained.has(today) || rest.has(today) ? today : shiftISO(today, -1);
+    let n = 0;
+    while (trained.has(cursor) || rest.has(cursor)) {
+      if (counts(cursor)) n++;
+      cursor = shiftISO(cursor, -1);
+    }
+    return n;
+  }, [exercises, strengthSets, metrics, today]);
 
   // --- Coach IA ---
 
@@ -497,14 +498,14 @@ export default function Home() {
         <GymTab
           strengthSets={strengthSets}
           exercises={exercises}
+          metrics={metrics}
           today={today}
-          objective={profile.objective}
-          readiness={readiness}
           onAddSet={addSet}
           onRemoveSet={removeSet}
           onEditSet={updateSet}
           onAddExercise={addExercise}
           onRemoveExercise={removeExercise}
+          onSetRestDay={(date, rest) => setMetric(date, { restDay: rest })}
         />
       ) : tab === "progreso" ? (
         <ProgresoTab

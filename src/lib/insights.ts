@@ -7,7 +7,13 @@
  * agua, que es de donde salen los avisos que sirven de verdad.
  */
 
-import { dayDiff, weeklyLoad, type Signal, type Tone } from "@/lib/athlete";
+import {
+  dayDiff,
+  restDaysOf,
+  weeklyLoad,
+  type Signal,
+  type Tone,
+} from "@/lib/athlete";
 import { MUSCLE_GROUPS, groupsOf } from "@/lib/gym";
 import { ACTIVITIES, activityMismatch, type Profile } from "@/lib/nutrition";
 import { dailySupplementProtein } from "@/lib/supplements";
@@ -70,7 +76,8 @@ export function buildInsights(input: InsightsInput): Insight[] {
   const warn: Insight[] = [];
   const info: Insight[] = [];
 
-  const week = weeklyLoad(strengthSets, exercises, today);
+  const restDays = restDaysOf(metrics);
+  const week = weeklyLoad(strengthSets, exercises, today, restDays);
   const inLastDays = (d: string, n: number) => {
     const diff = dayDiff(today, d);
     return diff >= 0 && diff < n;
@@ -80,11 +87,12 @@ export function buildInsights(input: InsightsInput): Insight[] {
   // Va primero porque, si está mal, TODO lo demás está calculado sobre una
   // meta equivocada: el factor de actividad multiplica el metabolismo entero.
   if (input.profile) {
+    const strengthDays = new Set(strengthSets.map((s) => s.date));
     const trainDays = new Set(
-      [
-        ...strengthSets.map((s) => s.date),
-        ...exercises.map((e) => e.date),
-      ].filter((d) => inLastDays(d, 28)),
+      [...strengthDays, ...exercises.map((e) => e.date)].filter(
+        (d) =>
+          inLastDays(d, 28) && (strengthDays.has(d) || !restDays.has(d)),
+      ),
     ).size;
     const firstLog = [...foods, ...exercises, ...strengthSets]
       .map((x) => x.date)

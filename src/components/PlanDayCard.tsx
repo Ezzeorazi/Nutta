@@ -2,16 +2,24 @@
 
 import { Check } from "lucide-react";
 import type { PlanDay } from "@/lib/plan";
-import type { StrengthSet } from "@/lib/types";
+import { dayLabel, type StrengthSet } from "@/lib/types";
 
-/** Sesión fija del plan del mes, con tap-to-fill igual que la sugerencia dinámica. */
+/**
+ * Sesión fija del plan del mes, con tap-to-fill: tocar un ejercicio lo carga en
+ * el formulario de abajo. Es la única rutina que se muestra —antes convivía con
+ * una sugerencia generada por la app y no se sabía cuál seguir—.
+ */
 export default function PlanDayCard({
   planDay,
   daySets,
+  isToday = true,
+  viewDate,
   onSelectExercise,
 }: {
   planDay: PlanDay;
   daySets: StrengthSet[];
+  isToday?: boolean;
+  viewDate?: string;
   onSelectExercise: (name: string) => void;
 }) {
   const doneNames = new Set(
@@ -20,7 +28,11 @@ export default function PlanDayCard({
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-sm font-semibold text-muted">Tu plan de hoy</h2>
+      <h2 className="text-sm font-semibold text-muted">
+        {isToday || !viewDate
+          ? "Tu rutina de hoy"
+          : `Tu rutina — ${dayLabel(viewDate)}`}
+      </h2>
       <div className="flex flex-col gap-3 rounded-card border-l-4 border-l-primary bg-card px-4 py-3 shadow-e1">
         <div className="flex items-center gap-3">
           <span className="text-lg leading-none">{planDay.emoji}</span>
