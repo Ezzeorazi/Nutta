@@ -1094,6 +1094,13 @@ export type AthleteState = {
   yesterday: DaySummary;
   /** Cómo viene cada grupo muscular (lo fresco, lo cargado, lo abandonado). */
   muscles: MuscleState[];
+  /**
+   * Las señales de carga del día ("dormiste 6 h", "venís en déficit alto"…).
+   * Se exponen para que la sesión sugerida explique su ajuste con las MISMAS
+   * razones que da el panel: dos explicaciones distintas del mismo día es
+   * peor que ninguna.
+   */
+  signals: string[];
   recovery: Recovery;
   waterGoal: number;
   /** Las filas del panel "Objetivo del día". */
@@ -1191,12 +1198,20 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     waterGoal,
   });
   const muscles = muscleStates(input.strengthSets, date);
+  const signals = loadSignals({
+    sleep: dayMetrics?.sleepHours,
+    recovery,
+    week,
+    energy,
+    muscles,
+  });
   const { headline, coach, meal } = buildCoach({
     training,
     nutrition,
     energy,
     yesterday,
     muscles,
+    signals,
     recovery,
     week,
     metrics: dayMetrics,
@@ -1215,6 +1230,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     energy,
     yesterday,
     muscles,
+    signals,
     recovery,
     waterGoal,
     status,
@@ -1382,6 +1398,8 @@ function buildCoach(x: {
   energy: EnergyBalance;
   yesterday: DaySummary;
   muscles: MuscleState[];
+  /** Señales de carga ya calculadas (ver `loadSignals`). */
+  signals: string[];
   recovery: Recovery;
   week: WeekLoad;
   metrics?: DailyMetrics;
@@ -1523,7 +1541,7 @@ function buildCoach(x: {
   // "Dormiste 6 h" sin enterarse de que además venía con volumen alto y en
   // déficit: tres cosas que juntas piden lo mismo, pero que sueltas no lo
   // explican.
-  const señales = loadSignals({ sleep, recovery, week, energy, muscles });
+  const señales = x.signals;
   const sobrecargado = señales.length >= 2 && !training.trained && isToday;
   let headline: string;
   if (sobrecargado) {

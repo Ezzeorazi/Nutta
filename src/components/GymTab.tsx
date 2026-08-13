@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Check, Moon, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Check, Compass, Moon, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import DayNavigator from "@/components/DayNavigator";
 import ExerciseImage from "@/components/ExerciseImage";
@@ -19,6 +19,7 @@ import ExercisePickerSheet from "@/components/ExercisePickerSheet";
 import CardioSheet from "@/components/CardioSheet";
 import PlanDayCard from "@/components/PlanDayCard";
 import RestTimer from "@/components/RestTimer";
+import SessionSheet from "@/components/SessionSheet";
 import Button from "@/components/ui/Button";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
@@ -31,6 +32,8 @@ import {
 } from "@/lib/gym";
 import { matchExercise } from "@/lib/exerciseDb";
 import { getPlanDay } from "@/lib/plan";
+import { buildTodaySession } from "@/lib/session";
+import type { AthleteState } from "@/lib/athlete";
 import {
   COMMON_LIFTS,
   dayLabel,
@@ -116,6 +119,7 @@ export default function GymTab({
   strengthSets,
   exercises = [],
   metrics = [],
+  state,
   today,
   onAddSet,
   onRemoveSet,
@@ -128,6 +132,8 @@ export default function GymTab({
   exercises?: ExerciseEntry[];
   /** Métricas diarias: de acá sale si el día está marcado como descanso. */
   metrics?: DailyMetrics[];
+  /** Estado de HOY: recuperación, carga y grupos, para armar la sesión. */
+  state: AthleteState;
   today: string;
   onAddSet: (
     exercise: string,
@@ -192,6 +198,17 @@ export default function GymTab({
   const restDay = useMemo(
     () => metrics.some((m) => m.date === viewDate && m.restDay),
     [metrics, viewDate],
+  );
+  // La sesión sugerida se arma sobre HOY (no sobre el día que se esté mirando):
+  // es una decisión sobre lo que hay que hacer ahora, no sobre el pasado.
+  const [sessionOpen, setSessionOpen] = useState(false);
+  const todaySets = useMemo(
+    () => strengthSets.filter((s) => s.date === today),
+    [strengthSets, today],
+  );
+  const session = useMemo(
+    () => buildTodaySession({ state, today, daySets: todaySets }),
+    [state, today, todaySets],
   );
 
   const used = useMemo(() => usedExercises(strengthSets), [strengthSets]);
@@ -290,6 +307,20 @@ export default function GymTab({
           />
         }
       />
+
+      {/* "¿Qué hago hoy?". Va a pedido, en un sheet: la rutina del plan ya está
+          abajo, y dos rutinas compitiendo en la misma pantalla fue justamente
+          el problema que sacamos. */}
+      {isToday && (
+        <button
+          type="button"
+          onClick={() => setSessionOpen(true)}
+          className="flex min-h-14 items-center justify-center gap-2.5 rounded-card bg-primary px-4 py-3 text-base font-semibold text-primary-foreground shadow-e1 transition-transform duration-(--duration-fast) active:scale-[0.98]"
+        >
+          <Compass size={20} strokeWidth={2.25} aria-hidden />
+          ¿Qué hago hoy?
+        </button>
+      )}
 
       {/* Descanso del día. Sin este botón, no cargar series era ambiguo: podía
           ser "descansé" o "me olvidé", y la app siempre leía lo segundo (te
@@ -659,6 +690,14 @@ export default function GymTab({
           date={viewDate}
           onAdd={onAddExercise}
           onClose={() => setCardioOpen(false)}
+        />
+      )}
+
+      {sessionOpen && (
+        <SessionSheet
+          session={session}
+          onSelectExercise={setExercise}
+          onClose={() => setSessionOpen(false)}
         />
       )}
 

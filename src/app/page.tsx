@@ -492,6 +492,7 @@ export default function Home() {
           strengthSets={strengthSets}
           exercises={exercises}
           metrics={metrics}
+          state={todayState}
           today={today}
           onAddSet={addSet}
           onRemoveSet={removeSet}
