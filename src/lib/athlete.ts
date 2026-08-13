@@ -16,7 +16,7 @@
  */
 
 import { caloriesFromMet } from "@/lib/exercises";
-import { groupsOf, setVolume } from "@/lib/gym";
+import { MUSCLE_GROUPS, groupsOf, setVolume } from "@/lib/gym";
 import { waterGoalL, type ObjectiveKey } from "@/lib/nutrition";
 import { carbPlan, proteinPlan, type MealPlan } from "@/lib/meals";
 import { dailySupplementProtein } from "@/lib/supplements";
@@ -406,6 +406,52 @@ function classifyIntensity(x: {
   return INTENSITY_RANK.indexOf(byEffect) > INTENSITY_RANK.indexOf(byLoad)
     ? byEffect
     : byLoad;
+}
+
+// ---------------------------------------------------------------------------
+// Estado de cada grupo muscular
+// ---------------------------------------------------------------------------
+
+/**
+ * Cómo viene cada grupo muscular. Es lo que un entrenador tiene en la cabeza
+ * cuando decide qué toca hoy: qué está fresco, qué está cargado y qué hace
+ * rato que no se toca. La app tenía los datos y no los cruzaba.
+ */
+export type MuscleState = {
+  group: string;
+  /** Días desde la última vez que se entrenó. `null` si nunca. */
+  daysSince: number | null;
+  /** Series en los últimos 7 días. */
+  weekSets: number;
+};
+
+export function muscleStates(
+  strengthSets: StrengthSet[],
+  today: string,
+): MuscleState[] {
+  const last = new Map<string, string>();
+  const weekSets = new Map<string, number>();
+  for (const s of strengthSets) {
+    const diff = dayDiff(today, s.date);
+    if (diff < 0) continue; // registros futuros: no existen todavía
+    for (const g of groupsOf(s.exercise)) {
+      const prev = last.get(g);
+      if (!prev || s.date > prev) last.set(g, s.date);
+      if (diff <= 6) weekSets.set(g, (weekSets.get(g) ?? 0) + 1);
+    }
+  }
+
+  return MUSCLE_GROUPS.map((group) => {
+    const d = last.get(group);
+    return {
+      group,
+      daysSince: d ? dayDiff(today, d) : null,
+      weekSets: weekSets.get(group) ?? 0,
+    };
+  }).sort(
+    (a, b) =>
+      (b.daysSince ?? 99) - (a.daysSince ?? 99) || a.weekSets - b.weekSets,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -961,6 +1007,37 @@ function buildRecovery(x: {
 }
 
 // ---------------------------------------------------------------------------
+// El día anterior
+// ---------------------------------------------------------------------------
+
+/**
+ * Cómo cerró el día anterior. Ya se calculaba a medias (solo las calorías, y
+ * solo para la recuperación); acá se completa y se muestra, porque leer el
+ * "hoy" sin el "ayer" es la diferencia entre un tablero y un entrenador.
+ */
+export type DaySummary = {
+  date: string;
+  kind: DayKind;
+  /** Grupos musculares trabajados ese día. */
+  groups: string[];
+  volume: number;
+  cardioMinutes: number;
+  protein: number;
+  calories: number;
+  sleepHours: number | null;
+};
+
+/** El resumen de un día en una línea: "Fuerza · espalda, brazos · 148 g P · 7 h". */
+export function daySummaryLine(d: DaySummary): string {
+  const partes: string[] = [DAY_KIND_LABEL[d.kind]];
+  if (d.groups.length) partes.push(d.groups.join(" + "));
+  else if (d.cardioMinutes > 0) partes.push(`${d.cardioMinutes} min`);
+  if (d.protein > 0) partes.push(`${Math.round(d.protein)} g P`);
+  if (d.sleepHours) partes.push(`${d.sleepHours} h de sueño`);
+  return partes.join(" · ");
+}
+
+// ---------------------------------------------------------------------------
 // Estado completo
 // ---------------------------------------------------------------------------
 
@@ -1013,6 +1090,10 @@ export type AthleteState = {
   nutrition: NutritionState;
   /** Qué tan bien cerró el día en calorías (ver `energyStatus`). */
   energy: EnergyBalance;
+  /** Cómo cerró el día anterior: sin eso, el consejo de hoy no tiene contexto. */
+  yesterday: DaySummary;
+  /** Cómo viene cada grupo muscular (lo fresco, lo cargado, lo abandonado). */
+  muscles: MuscleState[];
   recovery: Recovery;
   waterGoal: number;
   /** Las filas del panel "Objetivo del día". */
@@ -1066,17 +1147,31 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     hasFood: nutrition.consumed.calories > 0,
   });
 
-  const yesterday = shiftISO(date, -1);
-  const yFoods = input.foods.filter((f) => f.date === yesterday);
-  const yDrinks = input.drinks.filter((d) => d.date === yesterday);
-  const nutritionYesterday = yFoods.length || yDrinks.length
-    ? {
-        calories: sum(yFoods, (f) => f.calories) + sum(yDrinks, (d) => d.calories),
-        protein:
-          sum(yFoods, (f) => f.protein) +
-          dailySupplementProtein(input.supplements, input.supplementLogs, yesterday),
-      }
-    : null;
+  const yDate = shiftISO(date, -1);
+  const yTraining = trainingOfDay(
+    input.strengthSets,
+    input.exercises,
+    yDate,
+    input.bodyWeight,
+    week.avgSessionVolume,
+    restDays.has(yDate),
+  );
+  const yFoods = input.foods.filter((f) => f.date === yDate);
+  const yDrinks = input.drinks.filter((d) => d.date === yDate);
+  const yesterday: DaySummary = {
+    date: yDate,
+    kind: yTraining.kind,
+    groups: yTraining.groups,
+    volume: yTraining.volume,
+    cardioMinutes: yTraining.cardioMinutes,
+    protein:
+      sum(yFoods, (f) => f.protein) +
+      dailySupplementProtein(input.supplements, input.supplementLogs, yDate),
+    calories: sum(yFoods, (f) => f.calories) + sum(yDrinks, (d) => d.calories),
+    sleepHours: input.metrics.find((m) => m.date === yDate)?.sleepHours ?? null,
+  };
+  const nutritionYesterday =
+    yesterday.calories > 0 || yesterday.protein > 0 ? yesterday : null;
 
   const recovery = buildRecovery({
     metrics: input.metrics,
@@ -1095,15 +1190,19 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     metrics: dayMetrics,
     waterGoal,
   });
+  const muscles = muscleStates(input.strengthSets, date);
   const { headline, coach, meal } = buildCoach({
     training,
     nutrition,
     energy,
+    yesterday,
+    muscles,
     recovery,
     week,
     metrics: dayMetrics,
     waterGoal,
     isToday,
+    hour: input.hour ?? DAY_CLOSE_HOUR,
     foodsOfDay: input.foods.filter((f) => f.date === date),
   });
 
@@ -1114,6 +1213,8 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     week,
     nutrition,
     energy,
+    yesterday,
+    muscles,
     recovery,
     waterGoal,
     status,
@@ -1225,6 +1326,53 @@ function buildStatus(x: {
 }
 
 /**
+ * Las señales que explican el consejo del día, de la que más pesa a la que
+ * menos. Existen para que la recomendación deje de ser una frase suelta
+ * ("Excelente", "te falta proteína") y pase a decir POR QUÉ: "mucho volumen +
+ * dormiste poco + déficit alto → hoy bajá la intensidad".
+ */
+function loadSignals(x: {
+  sleep?: number;
+  recovery: Recovery;
+  week: WeekLoad;
+  energy: EnergyBalance;
+  muscles: MuscleState[];
+}): string[] {
+  // El orden es el de importancia: solo se muestran las primeras, así que lo
+  // sistémico (sueño, energía, carga acumulada) va antes que lo local.
+  const out: string[] = [];
+  if (x.sleep != null && x.sleep > 0 && x.sleep < 6.5) {
+    out.push(`dormiste ${x.sleep} h`);
+  }
+  if (
+    x.energy.closed &&
+    (x.energy.level === "deficit-alto" || x.energy.level === "deficit-excesivo")
+  ) {
+    out.push(`venís en ${x.energy.label.toLowerCase()}`);
+  }
+  if (x.week.streak >= 4) {
+    out.push(`${x.week.streak} días seguidos entrenando`);
+  }
+  if (x.week.prevVolume > 0 && x.week.volume > x.week.prevVolume * 1.4) {
+    const pct = Math.round((x.week.volume / x.week.prevVolume - 1) * 100);
+    out.push(`subiste el volumen ${pct}% en la semana`);
+  }
+  // El grupo más castigado de la semana: es el que explica la fatiga local.
+  const cargado = [...x.muscles].sort((a, b) => b.weekSets - a.weekSets)[0];
+  if (cargado && cargado.weekSets >= 12) {
+    out.push(`mucho volumen de ${cargado.group} esta semana`);
+  }
+  // La recuperación va última porque resume a las anteriores: nombrarla antes
+  // sería decir dos veces lo mismo.
+  if (x.recovery.score != null && x.recovery.score < 55) {
+    out.push(`recuperación ${x.recovery.score}%`);
+  }
+  return out;
+}
+
+const capFirst = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
  * Lo que diría un entrenador mirando la pantalla: primero lee el
  * entrenamiento, después lo cruza con lo que comió y recién ahí recomienda.
  */
@@ -1232,14 +1380,19 @@ function buildCoach(x: {
   training: TrainingDay;
   nutrition: NutritionState;
   energy: EnergyBalance;
+  yesterday: DaySummary;
+  muscles: MuscleState[];
   recovery: Recovery;
   week: WeekLoad;
   metrics?: DailyMetrics;
   waterGoal: number;
   isToday: boolean;
+  /** Hora local, para no dar como consejo lo que a esa hora es obvio. */
+  hour: number;
   foodsOfDay: FoodEntry[];
 }): { headline: string; coach: Signal[]; meal: NextMeal | null } {
-  const { training, nutrition, energy, recovery, week, metrics, isToday } = x;
+  const { training, nutrition, energy, muscles, recovery, week, metrics, isToday } =
+    x;
   const coach: Signal[] = [];
   const falta = nutrition.remaining;
 
@@ -1335,7 +1488,23 @@ function buildCoach(x: {
     coach.push({ emoji: "🎯", tone: "info", text: nutrition.reason });
   }
 
-  // 3) Comidas concretas para cerrar lo que falta, topeadas a lo que entra en
+  // 3) Qué músculo está esperando. Solo si todavía no entrenaste hoy: después
+  //    de la sesión ya no es accionable, es ruido.
+  const pendiente = muscles.find(
+    (m) => m.daysSince == null || m.daysSince >= 4,
+  );
+  if (isToday && !training.trained && pendiente) {
+    coach.push({
+      emoji: "🧭",
+      tone: "info",
+      text:
+        pendiente.daysSince == null
+          ? `Nunca registraste ${pendiente.group}: es el hueco más grande de tu semana.`
+          : `Hace ${pendiente.daysSince} días que no entrenás ${pendiente.group}. Es lo que más falta.`,
+    });
+  }
+
+  // 4) Comidas concretas para cerrar lo que falta, topeadas a lo que entra en
   //    UNA comida (ver meals.ts: sin tope salían cosas como "17 bananas").
   let meal: NextMeal | null = null;
   if (falta.protein >= 15) {
@@ -1346,15 +1515,31 @@ function buildCoach(x: {
     if (c) meal = { macro: "carbohidratos", plan: c };
   }
 
-  // 4) La recomendación principal: una sola cosa, la que más mueve la aguja.
+  // 5) La recomendación principal: una sola cosa, la que más mueve la aguja.
   const sleep = metrics?.sleepHours;
   const water = metrics?.water ?? 0;
+  // Cuando se juntan dos o más señales de carga, el consejo las nombra y baja
+  // la intensidad. Antes ganaba la primera regla de la lista y el usuario veía
+  // "Dormiste 6 h" sin enterarse de que además venía con volumen alto y en
+  // déficit: tres cosas que juntas piden lo mismo, pero que sueltas no lo
+  // explican.
+  const señales = loadSignals({ sleep, recovery, week, energy, muscles });
+  const sobrecargado = señales.length >= 2 && !training.trained && isToday;
   let headline: string;
-  if (sleep != null && sleep > 0 && sleep < 6) {
+  if (sobrecargado) {
+    // Con el día terminado, "hoy bajá la intensidad" ya no se puede cumplir:
+    // el consejo se corre a mañana.
+    const accion = energy.closed
+      ? "mañana entrená liviano y priorizá dormir"
+      : "hoy bajá la intensidad: menos series por ejercicio y cardio suave";
+    headline = `${capFirst(señales.slice(0, 3).join(" + "))} → ${accion}.`;
+  } else if (sleep != null && sleep > 0 && sleep < 6) {
     headline = `Dormiste ${sleep} h. Priorizá dormir 7-8 h hoy: sin eso no rendís ni recuperás.`;
   } else if (recovery.score != null && recovery.score < 45) {
     headline = recovery.advice;
-  } else if (falta.protein >= 30) {
+  } else if (falta.protein >= 30 && (!isToday || x.hour >= 15)) {
+    // A la mañana faltan 150 g de proteína SIEMPRE: decirlo como consejo es
+    // gastar el único renglón importante de la pantalla en una obviedad.
     headline = energy.closed
       ? `El día cerró con ${Math.round(falta.protein)} g de proteína por debajo de la meta. Es lo que sostiene el músculo: mañana arrancá temprano con ella.`
       : `Te faltan ${Math.round(falta.protein)} g de proteína. Cerralo ${momento}.`;
@@ -1362,7 +1547,12 @@ function buildCoach(x: {
     headline =
       "Día de descanso: sostené la proteína y dormí bien, que es cuando se construye.";
   } else if (!training.trained && isToday && week.days < 5) {
-    headline = "Estás listo para entrenar. Pasá al Gym y arrancá con lo que te falta esta semana.";
+    // Ya que sabemos qué grupo viene esperando, se dice: "arrancá con lo que
+    // te falta" obliga al usuario a hacer la cuenta que la app ya hizo.
+    const fresco = recovery.score != null && recovery.score >= 80;
+    headline = pendiente
+      ? `Estás listo para entrenar y ${pendiente.group} es lo que más falta${fresco ? ". Venís fresco: buen día para ir por un PR" : ""}.`
+      : "Estás listo para entrenar. Pasá al Gym y arrancá con lo que te falta esta semana.";
   } else if (water > 0 && water < x.waterGoal * 0.5) {
     headline = `Vas ${water} L de agua: te falta más de la mitad de la meta.`;
   } else if (sleep == null) {

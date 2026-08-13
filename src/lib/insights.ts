@@ -11,12 +11,12 @@ import {
   dayDiff,
   isTrainingKind,
   kindByDay,
+  muscleStates,
   restDaysOf,
   weeklyLoad,
   type Signal,
   type Tone,
 } from "@/lib/athlete";
-import { MUSCLE_GROUPS, groupsOf } from "@/lib/gym";
 import { ACTIVITIES, activityMismatch, type Profile } from "@/lib/nutrition";
 import { dailySupplementProtein } from "@/lib/supplements";
 import {
@@ -184,24 +184,15 @@ export function buildInsights(input: InsightsInput): Insight[] {
     });
   }
 
-  // Grupos musculares abandonados (por las series reales, no por el nombre del
-  // cardio: la fuerza vive en strengthSets).
-  const lastByGroup = new Map<string, string>();
-  for (const s of strengthSets) {
-    for (const g of groupsOf(s.exercise)) {
-      const prev = lastByGroup.get(g);
-      if (!prev || s.date > prev) lastByGroup.set(g, s.date);
-    }
-  }
-  for (const g of MUSCLE_GROUPS) {
-    const last = lastByGroup.get(g);
-    if (!last) continue;
-    const gap = dayDiff(today, last);
-    if (gap >= 7) {
+  // Grupos musculares abandonados. Sale de `muscleStates` para que el aviso y
+  // la recomendación del día cuenten los mismos días (antes cada uno tenía su
+  // propia cuenta y podían no coincidir).
+  for (const m of muscleStates(strengthSets, today)) {
+    if (m.daysSince != null && m.daysSince >= 7) {
       warn.push({
-        emoji: GROUP_EMOJI[g] ?? "🏋️",
+        emoji: GROUP_EMOJI[m.group] ?? "🏋️",
         tone: "warn",
-        text: `Hace ${gap} días que no entrenás ${g}.`,
+        text: `Hace ${m.daysSince} días que no entrenás ${m.group}.`,
       });
     }
   }

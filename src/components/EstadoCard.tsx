@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import {
+  DAY_KIND_EMOJI,
+  daySummaryLine,
   rate,
   weekBreakdown,
   type AthleteState,
@@ -45,8 +47,11 @@ const toneClasses = {
  */
 export default function EstadoCard({ state }: { state: AthleteState }) {
   const [open, setOpen] = useState(false);
-  const { recovery, status, headline, coach, meal, week } = state;
+  const { recovery, status, headline, coach, meal, week, yesterday } = state;
   const semana = weekBreakdown(week);
+  // "Ayer" solo si hubo algo que contar: una línea que dice "Sin registrar" es
+  // ruido, no contexto.
+  const ayer = yesterday.kind === "sin-registro" ? null : yesterday;
   const recColor = ratioColor((recovery.score ?? 0) / 100, recovery.score != null);
 
   return (
@@ -165,6 +170,15 @@ export default function EstadoCard({ state }: { state: AthleteState }) {
         {semana && (
           <p className="text-xs text-muted">
             <span className="font-medium">Últimos 7 días:</span> {semana}
+          </p>
+        )}
+        {/* De dónde venís. El consejo de hoy se apoya en esto, así que se
+            muestra: si no, la recomendación parece salida de la nada. */}
+        {ayer && (
+          <p className="text-xs text-muted">
+            <span className="font-medium">Ayer:</span>{" "}
+            <span aria-hidden>{DAY_KIND_EMOJI[ayer.kind]}</span>{" "}
+            {daySummaryLine(ayer)}
           </p>
         )}
       </div>

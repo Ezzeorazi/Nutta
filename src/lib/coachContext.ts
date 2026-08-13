@@ -1,4 +1,9 @@
-import { restDaysOf, weekBreakdown, weeklyLoad } from "@/lib/athlete";
+import {
+  muscleStates,
+  restDaysOf,
+  weekBreakdown,
+  weeklyLoad,
+} from "@/lib/athlete";
 import { readBody } from "@/lib/body";
 import { groupsOf, MUSCLE_GROUPS } from "@/lib/gym";
 import { OBJECTIVES, type ObjectiveKey } from "@/lib/nutrition";
@@ -142,7 +147,15 @@ export function weeklySummary(input: WeeklySummaryInput): string {
     `Entrenamientos: ${trainDays}/7 días de entrenamiento real — ${weekBreakdown(load) || "sin registros"}${
       activities.length ? ` (cardio: ${activities.join(", ")})` : ""
     }${strengthNames.length ? ` (fuerza: ${strengthNames.join(", ")})` : ""}.`,
-    `Grupos trabajados: ${groups.length ? groups.join(", ") : "ninguno detectado"}.`,
+    `Grupos trabajados esta semana: ${groups.length ? groups.join(", ") : "ninguno detectado"}.`,
+    // Cuánto hace que no se toca cada grupo: es el dato con el que se decide
+    // qué toca hoy, y antes no llegaba al coach.
+    `Días sin entrenar cada grupo: ${muscleStates(strengthSets, today)
+      .map(
+        (m) =>
+          `${m.group} ${m.daysSince == null ? "nunca" : `hace ${m.daysSince} d`}`,
+      )
+      .join(", ")}.`,
     `Volumen de fuerza: ${Math.round(load.volume).toLocaleString("es-AR")} kg en ${
       wSets.length
     } series (${volumeTrend}). Racha: ${load.streak} días seguidos.`,
