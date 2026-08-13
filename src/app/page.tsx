@@ -28,7 +28,6 @@ import { useNutta } from "@/lib/useNutta";
 import {
   DEFAULT_GOALS,
   localDateFromMs,
-  shiftISO,
   todayISO,
   type ExerciseEntry,
   type FoodEntry,
@@ -265,25 +264,9 @@ export default function Home() {
       profile,
     ],
   );
-  // Racha de entrenamiento (días con cardio o fuerza) para mostrar en Hoy. Un
-  // día marcado como descanso no suma —no entrenaste— pero tampoco la corta:
-  // descansar cuando toca es seguir el plan, no abandonarlo. Por eso no alcanza
-  // con `streakFromDates`, que solo sabe de días presentes o ausentes.
-  const trainStreak = useMemo(() => {
-    const trained = new Set<string>();
-    for (const e of exercises) trained.add(e.date);
-    for (const s of strengthSets) trained.add(s.date);
-    const rest = new Set(metrics.filter((m) => m.restDay).map((m) => m.date));
-    const counts = (d: string) => trained.has(d) && !rest.has(d);
-    // Se permite que hoy todavía no tenga nada: la racha viene de ayer.
-    let cursor = trained.has(today) || rest.has(today) ? today : shiftISO(today, -1);
-    let n = 0;
-    while (trained.has(cursor) || rest.has(cursor)) {
-      if (counts(cursor)) n++;
-      cursor = shiftISO(cursor, -1);
-    }
-    return n;
-  }, [exercises, strengthSets, metrics, today]);
+  // Racha de constancia para la chip 🔥 (ver `WeekLoad.habitStreak`): cuenta
+  // días entrenados, y los días ligeros o de descanso ni suman ni la cortan.
+  const trainStreak = todayState.week.habitStreak;
 
   // --- Coach IA ---
 

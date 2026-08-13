@@ -9,6 +9,8 @@
 
 import {
   dayDiff,
+  isTrainingKind,
+  kindByDay,
   restDaysOf,
   weeklyLoad,
   type Signal,
@@ -78,6 +80,7 @@ export function buildInsights(input: InsightsInput): Insight[] {
 
   const restDays = restDaysOf(metrics);
   const week = weeklyLoad(strengthSets, exercises, today, restDays);
+  const kinds = kindByDay(strengthSets, exercises, restDays);
   const inLastDays = (d: string, n: number) => {
     const diff = dayDiff(today, d);
     return diff >= 0 && diff < n;
@@ -87,13 +90,11 @@ export function buildInsights(input: InsightsInput): Insight[] {
   // Va primero porque, si está mal, TODO lo demás está calculado sobre una
   // meta equivocada: el factor de actividad multiplica el metabolismo entero.
   if (input.profile) {
-    const strengthDays = new Set(strengthSets.map((s) => s.date));
-    const trainDays = new Set(
-      [...strengthDays, ...exercises.map((e) => e.date)].filter(
-        (d) =>
-          inLastDays(d, 28) && (strengthDays.has(d) || !restDays.has(d)),
-      ),
-    ).size;
+    // Solo entrenamiento real: contar caminatas acá inflaba el nivel de
+    // actividad declarado y, con él, la meta calórica de todo el mes.
+    const trainDays = [...kinds].filter(
+      ([d, k]) => inLastDays(d, 28) && isTrainingKind(k),
+    ).length;
     const firstLog = [...foods, ...exercises, ...strengthSets]
       .map((x) => x.date)
       .sort()[0];
@@ -125,10 +126,20 @@ export function buildInsights(input: InsightsInput): Insight[] {
       text: `Llevás ${week.streak} días seguidos entrenando.`,
     });
   } else if (week.days >= 1) {
+    // El desglose, no el total: "5 días" mezclando gimnasio con caminatas era
+    // la cuenta que hacía creer que entrenabas todos los días.
+    const extra = [
+      week.byKind.ligera > 0 && `${week.byKind.ligera} de actividad ligera`,
+      week.byKind.descanso > 0 && `${week.byKind.descanso} de descanso`,
+    ]
+      .filter(Boolean)
+      .join(" y ");
     info.push({
       emoji: "🏋️",
       tone: "info",
-      text: `Entrenaste ${week.days} ${week.days === 1 ? "vez" : "veces"} esta semana.`,
+      text: `${week.byKind.fuerza} ${week.byKind.fuerza === 1 ? "día" : "días"} de fuerza${
+        week.byKind.cardio > 0 ? ` y ${week.byKind.cardio} de cardio` : ""
+      } esta semana${extra ? `, más ${extra}` : ""}.`,
     });
   }
 

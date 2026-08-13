@@ -91,13 +91,15 @@ export function dailyScore(
       points: Math.round(30 * row("entrenamiento").ratio),
       detail: training.rest
         ? "Día de descanso: cuenta como cumplido, es parte del plan."
-        : training.trained
-          ? `${INTENSITY_PHRASE[training.intensity]}${
-              training.volume > 0
-                ? ` · ${training.sets} series · ${Math.round(training.volume).toLocaleString("es-AR")} kg`
-                : ` · ${training.cardioMinutes} min`
-            }.`
-          : "No registraste entrenamiento (ni fuerza ni cardio).",
+        : training.kind === "ligera"
+          ? `Actividad ligera · ${training.cardioMinutes} min: suma movimiento, no entrenamiento.`
+          : training.trained
+            ? `${INTENSITY_PHRASE[training.intensity]}${
+                training.volume > 0
+                  ? ` · ${training.sets} series · ${Math.round(training.volume).toLocaleString("es-AR")} kg`
+                  : ` · ${training.cardioMinutes} min`
+              }.`
+            : "No registraste entrenamiento (ni fuerza ni cardio).",
     },
     {
       label: "Proteína",
@@ -196,8 +198,10 @@ export function dailyScore(
       `Te falta proteína: sumá ~${Math.round(nutrition.remaining.protein)} g.`,
     );
   }
-  if (!training.trained && !training.rest) {
+  if (training.kind === "sin-registro") {
     tips.push("Hoy no registraste entrenamiento.");
+  } else if (training.kind === "ligera") {
+    tips.push("Solo actividad ligera: suma, pero no reemplaza una sesión.");
   }
   // El consejo calórico depende del lado del desvío Y de si el día cerró: a
   // media tarde "te falta" no es un problema, es un día sin terminar.

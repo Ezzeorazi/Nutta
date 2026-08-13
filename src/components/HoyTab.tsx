@@ -162,7 +162,7 @@ export default function HoyTab({
             {streak > 0 && (
               <span
                 className="flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-sm font-semibold text-accent tabular-nums"
-                title={`Racha de entrenamiento: ${streak} ${streak === 1 ? "día" : "días"}`}
+                title={`${streak} ${streak === 1 ? "día entrenado" : "días entrenados"} sin cortar la racha (los días ligeros y de descanso no la cortan)`}
               >
                 🔥 {streak}
               </span>

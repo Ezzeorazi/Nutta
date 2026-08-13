@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { rate, type AthleteState, type StatusRow } from "@/lib/athlete";
+import {
+  rate,
+  weekBreakdown,
+  type AthleteState,
+  type StatusRow,
+} from "@/lib/athlete";
 
 /** Color de un 0-1. Es el mismo semáforo que usa el score, a propósito. */
 function ratioColor(ratio: number, logged = true) {
@@ -40,7 +45,8 @@ const toneClasses = {
  */
 export default function EstadoCard({ state }: { state: AthleteState }) {
   const [open, setOpen] = useState(false);
-  const { recovery, status, headline, coach, meal } = state;
+  const { recovery, status, headline, coach, meal, week } = state;
+  const semana = weekBreakdown(week);
   const recColor = ratioColor((recovery.score ?? 0) / 100, recovery.score != null);
 
   return (
@@ -153,6 +159,14 @@ export default function EstadoCard({ state }: { state: AthleteState }) {
             </li>
           ))}
         </ul>
+        {/* La semana por tipo de día. Antes acá decía "7/7 entrenamientos"
+            contando caminatas, y era la cuenta con la que se decidía si había
+            fatiga acumulada. */}
+        {semana && (
+          <p className="text-xs text-muted">
+            <span className="font-medium">Últimos 7 días:</span> {semana}
+          </p>
+        )}
       </div>
 
       {/* La recomendación principal: una sola, la que más mueve la aguja */}
