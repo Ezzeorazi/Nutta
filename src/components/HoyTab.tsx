@@ -192,6 +192,7 @@ export default function HoyTab({
           consumed={consumed.calories}
           burned={Math.round(state.training.cardioBurned)}
           goal={goals.calories}
+          energy={state.energy}
         />
         <div className="flex w-full flex-col gap-3">
           <MacroBar

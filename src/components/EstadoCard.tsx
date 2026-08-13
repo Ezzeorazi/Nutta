@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { rate, type AthleteState } from "@/lib/athlete";
+import { rate, type AthleteState, type StatusRow } from "@/lib/athlete";
 
 /** Color de un 0-1. Es el mismo semáforo que usa el score, a propósito. */
 function ratioColor(ratio: number, logged = true) {
@@ -12,6 +12,17 @@ function ratioColor(ratio: number, logged = true) {
   if (ratio >= 0.4) return "var(--accent)";
   return "var(--muted)";
 }
+
+/** Color de una fila que trae su propio veredicto (ver `StatusRow.tone`). */
+const TONE_COLOR = {
+  good: "var(--success)",
+  warn: "var(--accent)",
+  bad: "var(--danger)",
+  neutral: "var(--muted)",
+} as const;
+
+const rowColor = (s: StatusRow) =>
+  s.tone ? TONE_COLOR[s.tone] : ratioColor(s.ratio, s.logged);
 
 const toneClasses = {
   good: "border-l-success",
@@ -103,39 +114,46 @@ export default function EstadoCard({ state }: { state: AthleteState }) {
         )}
       </div>
 
-      {/* Las cinco señales del día. El valor real va SIEMPRE visible: antes
-          vivía en un `title` y en un teléfono no hay hover, así que veías
-          "Excelente" y nunca los 158 / 150 g que lo justificaban. */}
-      <ul className="flex flex-col gap-2.5 border-t border-border pt-3">
-        {status.map((s) => (
-          <li key={s.key} className="flex flex-col gap-1">
-            <div className="flex items-baseline gap-2 text-sm">
-              <span className="shrink-0 leading-none" aria-hidden>
-                {s.emoji}
-              </span>
-              <span className="min-w-0 flex-1 truncate">{s.label}</span>
-              <span className="shrink-0 text-xs tabular-nums text-muted">
-                {s.value}
-              </span>
-              <span
-                className="w-16 shrink-0 text-right text-xs font-semibold"
-                style={{ color: ratioColor(s.ratio, s.logged) }}
-              >
-                {s.logged ? rate(s.ratio) : "—"}
-              </span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
-              <div
-                className="h-full rounded-full transition-[width] duration-500"
-                style={{
-                  width: `${(s.logged ? s.ratio : 0) * 100}%`,
-                  backgroundColor: ratioColor(s.ratio, s.logged),
-                }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
+      {/* Objetivo del día. El valor real va SIEMPRE visible: antes vivía en un
+          `title` y en un teléfono no hay hover, así que veías "Excelente" y
+          nunca los 158 / 150 g que lo justificaban. */}
+      <div className="flex flex-col gap-2.5 border-t border-border pt-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">
+          🎯 Objetivo del día
+        </h3>
+        <ul className="flex flex-col gap-2.5">
+          {status.map((s) => (
+            <li key={s.key} className="flex flex-col gap-1">
+              <div className="flex items-baseline gap-2 text-sm">
+                <span className="shrink-0 leading-none" aria-hidden>
+                  {s.emoji}
+                </span>
+                <span className="shrink-0">{s.label}</span>
+                <span className="min-w-0 flex-1 truncate text-right text-xs tabular-nums text-muted">
+                  {s.value}
+                </span>
+                {/* El veredicto propio de la fila gana sobre el genérico: un
+                    déficit buscado no es "Flojo" (ver `StatusRow.rating`). */}
+                <span
+                  className="w-20 shrink-0 text-right text-xs font-semibold"
+                  style={{ color: rowColor(s) }}
+                >
+                  {s.rating ?? (s.logged ? rate(s.ratio) : "—")}
+                </span>
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-sunken">
+                <div
+                  className="h-full rounded-full transition-[width] duration-500"
+                  style={{
+                    width: `${(s.logged ? s.ratio : 0) * 100}%`,
+                    backgroundColor: rowColor(s),
+                  }}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {/* La recomendación principal: una sola, la que más mueve la aguja */}
       <p className="rounded-control bg-sunken px-3.5 py-3 text-sm font-medium">

@@ -17,7 +17,7 @@
 
 import { caloriesFromMet } from "@/lib/exercises";
 import { groupsOf, setVolume } from "@/lib/gym";
-import { waterGoalL } from "@/lib/nutrition";
+import { waterGoalL, type ObjectiveKey } from "@/lib/nutrition";
 import { carbPlan, proteinPlan, type MealPlan } from "@/lib/meals";
 import { dailySupplementProtein } from "@/lib/supplements";
 import {
@@ -490,6 +490,192 @@ function nutritionOfDay(
 }
 
 // ---------------------------------------------------------------------------
+// Balance energético
+// ---------------------------------------------------------------------------
+
+/**
+ * Cómo cerró (o viene cerrando) el día en calorías.
+ *
+ * Reemplaza a "te faltan N kcal, comé algo más". Ese mensaje trataba la meta
+ * como una tarea pendiente, y para alguien en déficit buscado eso es al revés:
+ * el problema no es no llegar, es pasarse de largo para abajo. Acá se juzga el
+ * DESVÍO, con una banda que se estrecha cuando el día tuvo entrenamiento
+ * fuerte —no es lo mismo terminar 800 kcal abajo en el sillón que después de
+ * 90 minutos de pesas—.
+ */
+export type EnergyLevel =
+  | "sin-registro"
+  | "en-curso"
+  | "adecuado"
+  | "deficit-alto"
+  | "deficit-excesivo"
+  | "exceso"
+  | "exceso-alto";
+
+export type EnergyTone = "good" | "warn" | "bad" | "neutral";
+
+export type EnergyBalance = {
+  level: EnergyLevel;
+  tone: EnergyTone;
+  emoji: string;
+  /** Etiqueta corta: "Déficit alto", "En la meta", "En curso". */
+  label: string;
+  /** El número, para el panel: "1.203 / 2.350 kcal". */
+  short: string;
+  /** El número con su desvío: "1.203 de 2.350 kcal netas · 1.147 por debajo". */
+  detail: string;
+  /** kcal netas − meta. Negativo = déficit. */
+  delta: number;
+  /** Desvío como fracción de la meta (siempre positivo). */
+  drift: number;
+  /** 0-1 para la barra del panel de estado. */
+  ratio: number;
+  /**
+   * `false` mientras el día sigue abierto: un día a medias no se juzga. A las
+   * 15 h, 1.100 kcal "faltando" no son un déficit, son un día sin terminar.
+   */
+  closed: boolean;
+};
+
+/**
+ * Desvíos (fracción de la meta) donde el balance deja de ser el buscado:
+ * [empieza a ser mucho, es demasiado]. `under` es comer de menos y `over`
+ * comer de más, y cada objetivo tolera distinto de cada lado.
+ */
+const ENERGY_BANDS: Record<
+  ObjectiveKey,
+  { under: [number, number]; over: [number, number] }
+> = {
+  bajar: { under: [0.15, 0.28], over: [0.08, 0.18] },
+  mantener: { under: [0.12, 0.25], over: [0.12, 0.25] },
+  subir: { under: [0.08, 0.18], over: [0.15, 0.3] },
+};
+
+/** Un día duro estrecha la banda del déficit; uno de descanso la afloja. */
+const DEFICIT_TIGHTEN: Record<Intensity, number> = {
+  descanso: 1.25,
+  suave: 1.1,
+  medio: 0.9,
+  fuerte: 0.75,
+};
+
+/**
+ * Hora a partir de la cual el día se considera cerrado para comer. Después de
+ * esto lo que falta ya no se va a comer, así que recién ahí se opina.
+ */
+const DAY_CLOSE_HOUR = 21;
+
+const kcal = (n: number) => Math.round(n).toLocaleString("es-AR");
+
+export function energyStatus(x: {
+  /** Calorías netas del día (consumidas − quemadas en cardio). */
+  net: number;
+  /** Meta del día, ya ajustada al entrenamiento. */
+  goal: number;
+  intensity: Intensity;
+  objective: ObjectiveKey;
+  isToday: boolean;
+  /** Hora local (0-23). Solo importa si `isToday`. */
+  hour: number;
+  /** Si no se registró NADA de comida, no hay déficit: hay un registro vacío. */
+  hasFood: boolean;
+}): EnergyBalance {
+  const delta = x.net - x.goal;
+  const drift = x.goal > 0 ? Math.abs(delta) / x.goal : 0;
+  const short = `${kcal(x.net)} / ${kcal(x.goal)} kcal`;
+  const detail = `${kcal(x.net)} de ${kcal(x.goal)} kcal netas${
+    Math.abs(delta) >= 25
+      ? ` · ${kcal(Math.abs(delta))} ${delta < 0 ? "por debajo" : "por encima"}`
+      : ""
+  }`;
+
+  if (!x.hasFood || x.goal <= 0) {
+    return {
+      level: "sin-registro",
+      tone: "neutral",
+      emoji: "⚪",
+      label: "Sin registrar",
+      short: "Sin registrar",
+      detail: "Todavía no cargaste comida.",
+      delta,
+      drift,
+      ratio: 0,
+      closed: false,
+    };
+  }
+
+  if (x.isToday && x.hour < DAY_CLOSE_HOUR) {
+    return {
+      level: "en-curso",
+      tone: "neutral",
+      emoji: "⏳",
+      label: "En curso",
+      short,
+      detail,
+      delta,
+      drift,
+      ratio: clamp(x.net / x.goal, 0, 1),
+      closed: false,
+    };
+  }
+
+  const band = ENERGY_BANDS[x.objective] ?? ENERGY_BANDS.mantener;
+  const tighten = DEFICIT_TIGHTEN[x.intensity];
+  const [warnAt, badAt] =
+    delta < 0
+      ? [band.under[0] * tighten, band.under[1] * tighten]
+      : band.over;
+
+  if (drift < warnAt) {
+    const surplus = delta > 0 && x.objective === "subir";
+    return {
+      level: "adecuado",
+      tone: "good",
+      emoji: "🟢",
+      // Menos de un 5% de desvío es ruido de medición, no un déficit buscado.
+      label: delta < -0.05 * x.goal
+        ? "Déficit adecuado"
+        : surplus
+          ? "Superávit adecuado"
+          : "En la meta",
+      short,
+      detail,
+      delta,
+      drift,
+      ratio: 1,
+      closed: true,
+    };
+  }
+
+  const bad = drift >= badAt;
+  return {
+    level: delta < 0
+      ? bad
+        ? "deficit-excesivo"
+        : "deficit-alto"
+      : bad
+        ? "exceso-alto"
+        : "exceso",
+    tone: bad ? "bad" : "warn",
+    emoji: bad ? "🔴" : "🟡",
+    label:
+      delta < 0
+        ? bad
+          ? "Déficit excesivo"
+          : "Déficit alto"
+        : bad
+          ? "Muy por encima"
+          : "Por encima",
+    short,
+    detail,
+    delta,
+    drift,
+    ratio: bad ? 0.25 : 0.55,
+    closed: true,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Recuperación
 // ---------------------------------------------------------------------------
 
@@ -633,6 +819,14 @@ export type StatusRow = {
   /** `false` cuando no hay dato ese día (no se juzga lo que no se registró). */
   logged: boolean;
   value: string;
+  /**
+   * Veredicto propio de la fila. Sin esto, todas se califican con `rate()`
+   * (Excelente/Bien/Regular/Flojo), que para las calorías miente: un déficit
+   * buscado no es "flojo" y un día a medias no es nada todavía.
+   */
+  rating?: string;
+  /** Color del veredicto cuando no sale del ratio (ver `rating`). */
+  tone?: EnergyTone;
 };
 
 export type AthleteInput = {
@@ -649,6 +843,13 @@ export type AthleteInput = {
   /** Día que se está mirando. */
   date: string;
   today: string;
+  /** Objetivo del usuario: define qué desvío calórico es el buscado. */
+  objective?: ObjectiveKey;
+  /**
+   * Hora local actual (0-23). Se pasa desde afuera a propósito: esta capa es
+   * pura y no mira el reloj. Sirve para no juzgar un día que sigue abierto.
+   */
+  hour?: number;
 };
 
 export type AthleteState = {
@@ -657,9 +858,11 @@ export type AthleteState = {
   training: TrainingDay;
   week: WeekLoad;
   nutrition: NutritionState;
+  /** Qué tan bien cerró el día en calorías (ver `energyStatus`). */
+  energy: EnergyBalance;
   recovery: Recovery;
   waterGoal: number;
-  /** Las cinco filas del panel "Estado actual". */
+  /** Las filas del panel "Objetivo del día". */
   status: StatusRow[];
   /** La única cosa que hay que hacer ahora. */
   headline: string;
@@ -700,6 +903,15 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     training.cardioBurned,
     training.rest,
   );
+  const energy = energyStatus({
+    net: nutrition.netCalories,
+    goal: nutrition.goals.calories,
+    intensity: training.intensity,
+    objective: input.objective ?? "mantener",
+    isToday,
+    hour: input.hour ?? DAY_CLOSE_HOUR,
+    hasFood: nutrition.consumed.calories > 0,
+  });
 
   const yesterday = shiftISO(date, -1);
   const yFoods = input.foods.filter((f) => f.date === yesterday);
@@ -726,12 +938,14 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
   const status = buildStatus({
     training,
     nutrition,
+    energy,
     metrics: dayMetrics,
     waterGoal,
   });
   const { headline, coach, meal } = buildCoach({
     training,
     nutrition,
+    energy,
     recovery,
     week,
     metrics: dayMetrics,
@@ -746,6 +960,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     training,
     week,
     nutrition,
+    energy,
     recovery,
     waterGoal,
     status,
@@ -758,10 +973,11 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
 function buildStatus(x: {
   training: TrainingDay;
   nutrition: NutritionState;
+  energy: EnergyBalance;
   metrics?: DailyMetrics;
   waterGoal: number;
 }): StatusRow[] {
-  const { training, nutrition, metrics, waterGoal } = x;
+  const { training, nutrition, energy, metrics, waterGoal } = x;
   const sleep = metrics?.sleepHours;
   const water = metrics?.water;
   const steps = metrics?.steps;
@@ -792,6 +1008,16 @@ function buildStatus(x: {
       ratio: clamp(nutrition.consumed.protein / (nutrition.goals.protein || 1), 0, 1),
       logged: true,
       value: `${nutrition.consumed.protein} / ${nutrition.goals.protein} g`,
+    },
+    {
+      key: "calorias",
+      emoji: energy.emoji,
+      label: "Calorías",
+      ratio: energy.ratio,
+      logged: energy.level !== "sin-registro",
+      value: energy.detail,
+      rating: energy.label,
+      tone: energy.tone,
     },
     {
       key: "sueno",
@@ -827,6 +1053,7 @@ function buildStatus(x: {
 function buildCoach(x: {
   training: TrainingDay;
   nutrition: NutritionState;
+  energy: EnergyBalance;
   recovery: Recovery;
   week: WeekLoad;
   metrics?: DailyMetrics;
@@ -834,7 +1061,7 @@ function buildCoach(x: {
   isToday: boolean;
   foodsOfDay: FoodEntry[];
 }): { headline: string; coach: Signal[]; meal: NextMeal | null } {
-  const { training, nutrition, recovery, week, metrics, isToday } = x;
+  const { training, nutrition, energy, recovery, week, metrics, isToday } = x;
   const coach: Signal[] = [];
   const falta = nutrition.remaining;
 
@@ -876,12 +1103,30 @@ function buildCoach(x: {
   // Cuando el cruce ya habla de carbos, repetir el ajuste de metas abajo sería
   // decir lo mismo dos veces con otras palabras.
   let carbosDichos = false;
-  if (training.intensity === "fuerte" && falta.calories > 400) {
+  // Con el día abierto se habla de lo que TODAVÍA se puede hacer; con el día
+  // cerrado, de cómo quedó. Antes era siempre lo primero, y a las 23 h te
+  // pedía comer 1.100 kcal más.
+  if (
+    training.intensity === "fuerte" &&
+    !energy.closed &&
+    falta.calories > 400
+  ) {
     carbosDichos = true;
     coach.push({
       emoji: "🍚",
       tone: "warn",
-      text: `Entrenaste fuerte y vas ${nutrition.netCalories} de ${nutrition.goals.calories} kcal netas. Subí los carbohidratos ${momento} para recuperar bien.`,
+      text: `Entrenaste fuerte y vas ${energy.short}. Subí los carbohidratos ${momento} para recuperar bien.`,
+    });
+  } else if (
+    training.trained &&
+    energy.closed &&
+    (energy.level === "deficit-alto" || energy.level === "deficit-excesivo")
+  ) {
+    carbosDichos = true;
+    coach.push({
+      emoji: "🍚",
+      tone: energy.level === "deficit-excesivo" ? "warn" : "info",
+      text: `Entrenaste y cerraste ${kcal(Math.abs(energy.delta))} kcal por debajo de la meta. Un día no pasa nada; si se repite, el que paga es el músculo.`,
     });
   } else if (training.trained && falta.protein > 25) {
     coach.push({
@@ -889,11 +1134,14 @@ function buildCoach(x: {
       tone: "warn",
       text: `Después de entrenar te faltan ${Math.round(falta.protein)} g de proteína para cerrar el día.`,
     });
-  } else if (!training.trained && falta.calories < -300) {
+  } else if (
+    !training.trained &&
+    (energy.level === "exceso" || energy.level === "exceso-alto")
+  ) {
     coach.push({
       emoji: "⚖️",
       tone: "warn",
-      text: `Sin entrenar y ${Math.abs(Math.round(falta.calories))} kcal por encima de la meta. Mañana compensalo con movimiento, no con hambre.`,
+      text: `Sin entrenar y ${kcal(energy.delta)} kcal por encima de la meta. Mañana compensalo con movimiento, no con hambre.`,
     });
   }
 
@@ -921,7 +1169,9 @@ function buildCoach(x: {
   } else if (recovery.score != null && recovery.score < 45) {
     headline = recovery.advice;
   } else if (falta.protein >= 30) {
-    headline = `Te faltan ${Math.round(falta.protein)} g de proteína. Cerralo ${momento}.`;
+    headline = energy.closed
+      ? `El día cerró con ${Math.round(falta.protein)} g de proteína por debajo de la meta. Es lo que sostiene el músculo: mañana arrancá temprano con ella.`
+      : `Te faltan ${Math.round(falta.protein)} g de proteína. Cerralo ${momento}.`;
   } else if (training.rest) {
     headline =
       "Día de descanso: sostené la proteína y dormí bien, que es cuando se construye.";
@@ -932,16 +1182,22 @@ function buildCoach(x: {
   } else if (sleep == null) {
     headline = "Registrá cuánto dormiste: es el dato que más me falta para leerte bien.";
   } else if (
-    // "Llegaste con la comida" pide estar CERCA de la meta, no solo no haberse
-    // pasado: antes `falta.calories > -200` daba "día redondo" con 1000 kcal y
-    // 460 g de carbos faltando, justo arriba del cartel que decía lo contrario.
+    // "Llegaste con la comida" pide un balance dentro de la banda buscada, no
+    // solo no haberse pasado: antes `falta.calories > -200` daba "día redondo"
+    // con 1000 kcal y 460 g de carbos faltando.
     training.trained &&
-    Math.abs(falta.protein) <= 15 &&
-    Math.abs(falta.calories) <= 300
+    energy.level === "adecuado" &&
+    Math.abs(falta.protein) <= 15
   ) {
     headline = "Día redondo: entrenaste y llegaste con la comida. Seguí así 💪";
-  } else if (falta.calories > 500) {
-    headline = `Te faltan ${Math.round(falta.calories)} kcal para tu meta del día. Comé algo más.`;
+  } else if (energy.level === "deficit-excesivo") {
+    // El déficit no se corrige comiendo a las 23 h: se corrige mañana. Por eso
+    // el mensaje describe lo que pasó en vez de mandar a comer.
+    headline = `Cerraste ${kcal(Math.abs(energy.delta))} kcal por debajo de tu meta (${energy.short}). Un día no es problema; sostenido te baja fuerza y recuperación.`;
+  } else if (energy.level === "exceso-alto") {
+    headline = `Cerraste ${kcal(energy.delta)} kcal por encima de tu meta (${energy.short}). Ojo con las porciones mañana.`;
+  } else if (!energy.closed && falta.calories > 500) {
+    headline = `Vas ${energy.short}. Te queda margen para ${cenaHecha ? "lo que falte del día" : "la cena"}: apuntá primero a la proteína.`;
   } else {
     headline = recovery.advice;
   }

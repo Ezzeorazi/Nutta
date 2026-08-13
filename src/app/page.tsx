@@ -177,6 +177,12 @@ export default function Home() {
   // De acá salen el score, el panel de estado, las metas dinámicas y la
   // recomendación pre-entreno: antes cada módulo veía su rebanada y por eso el
   // score ignoraba las series de fuerza y la rutina ignoraba el sueño.
+  // Hora local, para que la capa pura (que no mira el reloj) sepa si el día
+  // sigue abierto: a las 15 h "faltan 1.100 kcal" no es un déficit, es un día
+  // sin terminar. Se recalcula en cada render; solo cambia el estado al pasar
+  // de hora.
+  const hour = new Date().getHours();
+  const objective = profile?.objective;
   const athleteBase = useMemo(
     () => ({
       foods,
@@ -189,6 +195,8 @@ export default function Home() {
       goals,
       bodyWeight,
       today,
+      objective,
+      hour,
     }),
     [
       foods,
@@ -201,6 +209,8 @@ export default function Home() {
       goals,
       bodyWeight,
       today,
+      objective,
+      hour,
     ],
   );
   // El estado de HOY manda la rutina del Gym; el del día VISTO, el tab Hoy.

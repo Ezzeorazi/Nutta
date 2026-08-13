@@ -1,9 +1,9 @@
 import {
   INTENSITY_PHRASE,
   clamp,
-  closeness,
   rate,
   type AthleteState,
+  type EnergyLevel,
 } from "@/lib/athlete";
 import { STEPS_GOAL, type FoodEntry } from "@/lib/types";
 
@@ -52,11 +52,27 @@ function label(score: number): string {
  * cargar el sueño no es dormir mal. Cada factor explica por qué sacó lo que
  * sacó, y eso también se le muestra al usuario.
  */
+/**
+ * Puntos de calorías por nivel de balance. Antes era un `closeness()` simétrico
+ * y quedarse 900 kcal abajo costaba lo mismo que pasarse 900: para alguien en
+ * déficit buscado, el desvío hacia abajo dentro de la banda ES el objetivo.
+ * Un día abierto no se juzga: puntúa completo hasta que cierra.
+ */
+const CALORIE_POINTS: Record<EnergyLevel, number> = {
+  "sin-registro": 0,
+  "en-curso": 5,
+  adecuado: 5,
+  "deficit-alto": 4,
+  "deficit-excesivo": 2,
+  exceso: 3,
+  "exceso-alto": 1,
+};
+
 export function dailyScore(
   state: AthleteState,
   foodsOfDay: FoodEntry[],
 ): DailyScore {
-  const { training, nutrition, status } = state;
+  const { training, nutrition, energy, status } = state;
   const goals = nutrition.goals;
   const consumed = nutrition.consumed;
   const hasAlcohol = foodsOfDay.some((f) => ALCOHOL.test(f.name));
@@ -129,14 +145,12 @@ export function dailyScore(
     },
     {
       label: "Calorías",
-      emoji: "🔥",
+      emoji: energy.emoji,
       max: 5,
-      logged: true,
       // Netas (consumidas − quemadas), igual que el anillo de arriba.
-      points: Math.round(
-        5 * closeness(nutrition.netCalories, goals.calories, 0.35),
-      ),
-      detail: `${nutrition.netCalories} de ${goals.calories} kcal netas${
+      logged: energy.level !== "sin-registro",
+      points: CALORIE_POINTS[energy.level],
+      detail: `${energy.label} · ${energy.detail}${
         nutrition.carbDelta !== 0 ? " (meta ajustada a tu entrenamiento)" : ""
       }.`,
     },
@@ -185,13 +199,16 @@ export function dailyScore(
   if (!training.trained && !training.rest) {
     tips.push("Hoy no registraste entrenamiento.");
   }
-  if (nutrition.netCalories > goals.calories * 1.15) {
-    tips.push("Te pasaste de calorías; ojo con las porciones.");
-  } else if (
-    consumed.calories > 0 &&
-    nutrition.netCalories < goals.calories * 0.6
-  ) {
-    tips.push("Vas muy por debajo de tus calorías; comé algo más.");
+  // El consejo calórico depende del lado del desvío Y de si el día cerró: a
+  // media tarde "te falta" no es un problema, es un día sin terminar.
+  if (energy.level === "exceso-alto") {
+    tips.push("Te pasaste bastante de calorías; ojo con las porciones.");
+  } else if (energy.level === "deficit-excesivo") {
+    tips.push(
+      `Cerraste ${Math.abs(Math.round(energy.delta))} kcal por debajo: sostenido, un déficit así te cuesta músculo.`,
+    );
+  } else if (energy.level === "deficit-alto" && training.trained) {
+    tips.push("Déficit alto para un día que entrenaste: mañana comé un poco más.");
   }
   if (sleep.logged && sleep.ratio < 0.7) {
     tips.push(`Dormiste poco (${sleep.value}); apuntá a 7-8.`);

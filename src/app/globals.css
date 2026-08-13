@@ -15,6 +15,10 @@
   --accent: #f97316; /* naranja — energía / ejercicio */
   --accent-foreground: #ffffff;
   --success: #22c55e;
+  /* Rojo para lo que hay que corregir de verdad. El semáforo tenía dos luces
+     (verde y naranja) y la tercera caía en gris, que se lee como "sin dato"
+     justo cuando el dato es el problema. */
+  --danger: #dc2626;
   /* Azul para la TERCERA serie de datos (grasas). `primary` y `success` son
      dos verdes casi idénticos: en el gráfico de macros las líneas de proteína
      y grasas eran indistinguibles. */
@@ -42,6 +46,7 @@
   --accent: #fb923c;
   --accent-foreground: #1a0e04;
   --success: #34d399;
+  --danger: #f87171;
   --info: #60a5fa;
 
   /* En oscuro la sombra no se ve: la profundidad se comunica con luminosidad,
@@ -65,6 +70,7 @@
     --accent: #fb923c;
     --accent-foreground: #1a0e04;
     --success: #34d399;
+    --danger: #f87171;
     --info: #60a5fa;
     --sunken: #0d1310;
     --elev-1: 0 1px 2px rgb(0 0 0 / 0.3);
@@ -85,6 +91,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-success: var(--success);
+  --color-danger: var(--danger);
   --color-info: var(--info);
 
   --shadow-e1: var(--elev-1);
