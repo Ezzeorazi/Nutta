@@ -1,40 +1,79 @@
 "use client";
 
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import Chip from "@/components/ui/Chip";
 import CollapsibleCard from "@/components/ui/CollapsibleCard";
-import { DRINKS, sortByUsage, type DrinkOption } from "@/lib/drinks";
+import {
+  BEERS,
+  BEER_SIZES,
+  COCKTAILS,
+  DEFAULT_BEER_SIZE,
+  caloriesFor,
+  sortByUsage,
+  type DrinkOption,
+} from "@/lib/drinks";
 import type { DrinkEntry } from "@/lib/types";
 
-/** Fila de botones de un catálogo (cervezas o tragos), ya ordenado por consumo. */
+/** Cuántas opciones se ven antes de pedir "ver todas". */
+const PREVIEW = 8;
+
+/**
+ * Fila de botones de un catálogo, ya ordenado por consumo. Muestra las
+ * primeras `PREVIEW` y esconde el resto: con 26 cervezas y 34 tragos, verlos
+ * todos de una es una pared. Como el orden es por lo que más tomás, lo tuyo
+ * queda arriba y casi nunca hace falta abrir.
+ */
 function DrinkRow({
   title,
   options,
+  /** ml de cada opción (fijo en tragos, según presentación en cervezas). */
+  mlOf,
   onAdd,
 }: {
   title: string;
   options: DrinkOption[];
-  onAdd: (opt: DrinkOption) => void;
+  mlOf: (opt: DrinkOption) => number;
+  onAdd: (opt: DrinkOption, ml: number) => void;
 }) {
+  const [all, setAll] = useState(false);
+  const shown = all ? options : options.slice(0, PREVIEW);
+  const hidden = options.length - shown.length;
+
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-xs font-semibold text-muted">{title}</h3>
       <div className="flex flex-wrap gap-2">
-        {options.map((opt) => (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => onAdd(opt)}
-            className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-background px-3 py-1.5 text-left transition-transform duration-(--duration-fast) active:scale-95 hover:border-primary"
-          >
-            <span className="text-lg leading-none">{opt.emoji}</span>
-            <span className="flex flex-col">
-              <span className="text-sm font-medium leading-tight">{opt.name}</span>
-              <span className="text-[11px] leading-tight text-muted tabular-nums">
-                {opt.ml} ml · {opt.calories} kcal
+        {shown.map((opt) => {
+          const ml = mlOf(opt);
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onAdd(opt, ml)}
+              className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-background px-3 py-1.5 text-left transition-transform duration-(--duration-fast) active:scale-95 hover:border-primary"
+            >
+              <span className="text-lg leading-none">{opt.emoji}</span>
+              <span className="flex flex-col">
+                <span className="text-sm font-medium leading-tight">
+                  {opt.name}
+                </span>
+                <span className="text-[11px] leading-tight text-muted tabular-nums">
+                  {ml} ml · {caloriesFor(opt, ml)} kcal
+                </span>
               </span>
-            </span>
+            </button>
+          );
+        })}
+        {hidden > 0 && (
+          <button
+            type="button"
+            onClick={() => setAll(true)}
+            className="min-h-11 rounded-xl border border-dashed border-border px-3.5 text-sm font-medium text-primary transition-transform duration-(--duration-fast) active:scale-95 hover:border-primary"
+          >
+            + {hidden} más
           </button>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -52,17 +91,32 @@ export default function DrinksCard({
   /** Tragos del día que se está viendo. */
   todayDrinks: DrinkEntry[];
   today: string;
-  onAdd: (opt: DrinkOption, date: string) => void;
+  onAdd: (opt: DrinkOption, ml: number, date: string) => void;
   onRemove: (id: string) => void;
 }) {
-  const cervezas = sortByUsage(
-    DRINKS.filter((d) => d.category === "cerveza"),
-    drinks,
+  // La presentación elegida se recuerda: quien toma caguama toma caguama, y
+  // volver a elegirla en cada carga es la clase de fricción que hace que la
+  // gente deje de registrar.
+  const [sizeId, setSizeId] = useState(() =>
+    typeof window === "undefined"
+      ? DEFAULT_BEER_SIZE
+      : localStorage.getItem("nutta.beerSize") ?? DEFAULT_BEER_SIZE,
   );
-  const tragos = sortByUsage(
-    DRINKS.filter((d) => d.category === "trago"),
-    drinks,
-  );
+  const size =
+    BEER_SIZES.find((s) => s.id === sizeId) ??
+    BEER_SIZES.find((s) => s.id === DEFAULT_BEER_SIZE)!;
+
+  const pickSize = (id: string) => {
+    setSizeId(id);
+    try {
+      localStorage.setItem("nutta.beerSize", id);
+    } catch {
+      // sin localStorage: la preferencia no persiste, pero no rompe nada
+    }
+  };
+
+  const cervezas = sortByUsage(BEERS, drinks);
+  const tragos = sortByUsage(COCKTAILS, drinks);
   const kcalHoy = Math.round(todayDrinks.reduce((s, d) => s + d.calories, 0));
   const summary =
     kcalHoy > 0
@@ -71,8 +125,35 @@ export default function DrinksCard({
 
   return (
     <CollapsibleCard icon="🍻" title="Tragos y chelas" summary={summary}>
-      <DrinkRow title="Cervezas" options={cervezas} onAdd={(opt) => onAdd(opt, today)} />
-      <DrinkRow title="Tragos" options={tragos} onAdd={(opt) => onAdd(opt, today)} />
+      {/* Presentación: aplica a la cerveza que toques */}
+      <div className="flex flex-col gap-2">
+        <h3 className="text-xs font-semibold text-muted">Presentación</h3>
+        <div className="flex flex-wrap gap-2">
+          {BEER_SIZES.map((s) => (
+            <Chip
+              key={s.id}
+              selected={s.id === size.id}
+              onClick={() => pickSize(s.id)}
+            >
+              {s.label}
+              <span className="tabular-nums opacity-70">· {s.ml}ml</span>
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      <DrinkRow
+        title="Cervezas"
+        options={cervezas}
+        mlOf={() => size.ml}
+        onAdd={(opt, ml) => onAdd(opt, ml, today)}
+      />
+      <DrinkRow
+        title="Tragos"
+        options={tragos}
+        mlOf={(opt) => opt.ml}
+        onAdd={(opt, ml) => onAdd(opt, ml, today)}
+      />
 
       {todayDrinks.length > 0 && (
         <ul className="flex flex-col gap-1.5 border-t border-border pt-3">
@@ -84,6 +165,9 @@ export default function DrinksCard({
               <span className="flex min-w-0 items-center gap-2">
                 <span className="text-base leading-none">{d.emoji}</span>
                 <span className="truncate">{d.name}</span>
+                <span className="shrink-0 text-xs text-muted tabular-nums">
+                  {d.ml} ml
+                </span>
               </span>
               <span className="flex shrink-0 items-center gap-2 text-xs text-muted">
                 <span className="tabular-nums">{Math.round(d.calories)} kcal</span>
