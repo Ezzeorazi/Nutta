@@ -1,0 +1,6 @@
+{
+  "crons": [
+    { "path": "/api/push/manana", "schedule": "0 14 * * *" },
+    { "path": "/api/push/noche", "schedule": "0 2 * * *" }
+  ]
+}

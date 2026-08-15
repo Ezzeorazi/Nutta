@@ -4,73 +4,90 @@ import { useState } from "react";
 import { Bell, BellOff, ChevronDown } from "lucide-react";
 import Chip from "@/components/ui/Chip";
 import { DIET_TEMPLATES, PLAN_CHECKPOINTS, PLAN_RULES } from "@/lib/plan";
+import type { PushState } from "@/lib/usePlanReminders";
 
-function NotifSection({
-  permission,
-  onRequestPermission,
-  onTestNotif,
-}: {
-  permission: NotificationPermission | "unsupported";
-  onRequestPermission: () => void;
-  onTestNotif: () => void;
-}) {
-  if (permission === "unsupported") {
+function NotifSection({ push }: { push: PushState }) {
+  const { enabled, blocker, busy, error } = push;
+
+  if (blocker === "instalar") {
     return (
-      <p className="flex items-center gap-2 text-xs text-muted">
-        <BellOff size={14} aria-hidden />
-        Tu navegador no soporta avisos.
+      <p className="flex items-start gap-2 text-xs text-muted">
+        <BellOff size={14} className="mt-0.5 shrink-0" aria-hidden />
+        Para recibir avisos en iPhone hay que instalar Nutta: tocá Compartir →
+        «Agregar a inicio» y abrila desde ahí.
       </p>
     );
   }
-  if (permission === "denied") {
+  if (blocker === "no-soportado") {
     return (
       <p className="flex items-center gap-2 text-xs text-muted">
         <BellOff size={14} aria-hidden />
-        Avisos bloqueados: activalos desde los permisos del navegador.
+        Este navegador no soporta avisos.
       </p>
     );
   }
-  if (permission === "granted") {
+  if (blocker === "bloqueado") {
     return (
-      <div className="flex items-center justify-between gap-2">
-        <p className="flex items-center gap-2 text-xs text-primary">
-          <Bell size={14} aria-hidden />
-          Avisos activados
-        </p>
-        <button
-          type="button"
-          onClick={onTestNotif}
-          className="text-xs font-medium text-muted underline-offset-2 hover:underline"
-        >
-          Probar
-        </button>
-      </div>
+      <p className="flex items-start gap-2 text-xs text-muted">
+        <BellOff size={14} className="mt-0.5 shrink-0" aria-hidden />
+        Avisos bloqueados: habilitalos en los permisos del navegador para este
+        sitio.
+      </p>
     );
   }
+
   return (
-    <button
-      type="button"
-      onClick={onRequestPermission}
-      className="flex min-h-9 items-center gap-2 self-start rounded-full border border-primary bg-primary/10 px-3.5 text-sm font-semibold text-primary active:scale-95"
-    >
-      <Bell size={15} aria-hidden />
-      Activar avisos
-    </button>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        {enabled ? (
+          <p className="flex items-center gap-2 text-xs font-medium text-primary">
+            <Bell size={14} aria-hidden />
+            Avisos activados en este dispositivo
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={push.enable}
+            disabled={busy}
+            className="flex min-h-9 items-center gap-2 rounded-full border border-primary bg-primary/10 px-3.5 text-sm font-semibold text-primary active:scale-95 disabled:opacity-50"
+          >
+            <Bell size={15} aria-hidden />
+            {busy ? "Activando…" : "Activar avisos"}
+          </button>
+        )}
+        {enabled && (
+          <div className="flex shrink-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={push.sendTest}
+              className="text-xs font-medium text-muted underline-offset-2 hover:underline"
+            >
+              Probar
+            </button>
+            <button
+              type="button"
+              onClick={push.disable}
+              disabled={busy}
+              className="text-xs font-medium text-muted underline-offset-2 hover:underline disabled:opacity-50"
+            >
+              Desactivar
+            </button>
+          </div>
+        )}
+      </div>
+      {error && <p className="text-xs text-accent">{error}</p>}
+    </div>
   );
 }
 
 export default function PlanCard({
   planActive,
   onTogglePlan,
-  permission,
-  onRequestPermission,
-  onTestNotif,
+  push,
 }: {
   planActive: boolean;
   onTogglePlan: () => void;
-  permission: NotificationPermission | "unsupported";
-  onRequestPermission: () => void;
-  onTestNotif: () => void;
+  push: PushState;
 }) {
   const [openTemplate, setOpenTemplate] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
@@ -172,15 +189,11 @@ export default function PlanCard({
       )}
 
       <div className="mt-4 border-t border-border pt-3">
-        <NotifSection
-          permission={permission}
-          onRequestPermission={onRequestPermission}
-          onTestNotif={onTestNotif}
-        />
+        <NotifSection push={push} />
         <p className="mt-2 text-[11px] text-muted">
-          Te avisa a la tarde/noche si te falta proteína o si todavía no
-          cargaste el entreno de hoy. Funciona con la app abierta o en
-          segundo plano en tu celular.
+          Dos avisos por día: a la mañana, qué toca entrenar y cómo venís de
+          recuperado; a la noche, lo que todavía podés corregir. Llegan aunque
+          tengas la app cerrada.
         </p>
       </div>
     </section>

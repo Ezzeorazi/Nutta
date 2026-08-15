@@ -249,9 +249,41 @@ Variables de entorno:
 | `GROQ_API_KEY` | IA: coach, estimación de macros y lectura de capturas del reloj |
 | `GROQ_MODEL` | Opcional. Modelo del coach (default `openai/gpt-oss-20b`) |
 | `GROQ_VISION_MODEL` | Opcional. Modelo con visión para leer capturas del reloj (default `qwen/qwen3.6-27b`, el único con visión que le queda a Groq) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Avisos push. Es pública: viaja al navegador |
+| `VAPID_PRIVATE_KEY` | Avisos push. **Secreta**: solo en el servidor |
+| `INSTANT_ADMIN_TOKEN` | Avisos push: leer los datos desde el cron (InstantDB → Dashboard → Admin token) |
+| `CRON_SECRET` | Avisos push: Vercel la manda como `Bearer` al invocar el cron |
+| `VAPID_SUBJECT` | Opcional. `mailto:` de contacto para el servicio de push |
 
 - Cada `git push` a `main` dispara un **deploy automático** a producción en Vercel.
 - Todas las claves van también en Vercel → Settings → Environment Variables. Ojo: **agregarlas no alcanza**, hay que hacer un **Redeploy** para que el deploy en curso las tome.
+
+### Avisos push (con la app cerrada)
+
+Antes el recordatorio era un `setInterval` dentro de la página: solo podía sonar
+con la app abierta —justo cuando no hace falta que te avise— porque el navegador
+congela los timers al mandar la PWA a segundo plano. Ahora:
+
+1. El dispositivo se suscribe (`lib/push.ts`) y la suscripción se guarda en
+   `pushSubs`, con el desfase horario del teléfono.
+2. **Vercel Cron** (`vercel.json`) llama a `/api/push/manana` y `/api/push/noche`.
+3. `lib/pushServer.ts` lee los datos con el SDK **admin** de InstantDB, arma el
+   mismo `AthleteState` que ve la pantalla y decide el mensaje (`lib/reminders.ts`).
+4. El `push` del service worker lo muestra, con la app cerrada.
+
+Detalles que hacen falta saber:
+
+- **Vercel Hobby permite 2 crons y una corrida por día cada uno**, y dispara en
+  cualquier minuto dentro de la hora. Por eso el servidor vuelve a chequear la
+  hora LOCAL del usuario (`SLOT_HOURS`) y no manda nada a deshora.
+- Las horas UTC del `vercel.json` están puestas para México (UTC−6): 14:00 UTC
+  = 8:00 y 02:00 UTC = 20:00. Para otra zona, cambiar esos dos `schedule`.
+- **En iPhone el push solo existe con la PWA instalada** (Compartir → Agregar a
+  inicio). En una pestaña de Safari `PushManager` no está, y la tarjeta del plan
+  lo explica en vez de ofrecer un botón que no haría nada.
+- `lib/appId.ts` existe para esto: el servidor necesita el App ID, y tomarlo de
+  `lib/db.ts` arrastraba el SDK de React al bundle del servidor y explotaba en
+  runtime (el build y `tsc` pasaban igual).
 
 ---
 

@@ -1,8 +1,5 @@
 import { i, id, init } from "@instantdb/react";
-
-// App ID de InstantDB. Es una clave pública (viaja al navegador), no un secreto:
-// la seguridad se maneja con las reglas de permisos de InstantDB.
-const APP_ID = "8bcd1994-bd17-4415-a6a4-dc38934d780f";
+import { APP_ID } from "@/lib/appId";
 
 const schema = i.schema({
   entities: {
@@ -157,6 +154,19 @@ const schema = i.schema({
       date: i.string().indexed(),
       qty: i.number().optional(), // cantidad real tomada ese día (si difiere de defaultQty)
       createdAt: i.number().optional(), // epoch ms (para derivar el día local)
+    }),
+    // Suscripciones Web Push (una por dispositivo). Es lo que permite avisar
+    // con la app CERRADA: el cron del servidor las recorre y empuja el aviso.
+    pushSubs: i.entity({
+      owner: i.string().indexed(),
+      // Endpoint único del navegador: hace de identidad del dispositivo.
+      endpoint: i.string().indexed(),
+      p256dh: i.string(), // clave pública del cliente (cifrado del payload)
+      auth: i.string(), // secreto de autenticación del cliente
+      // Minutos de desfase respecto de UTC (getTimezoneOffset invertido), para
+      // que el servidor sepa qué hora es allá antes de mandar nada.
+      tzOffset: i.number(),
+      createdAt: i.number(),
     }),
   },
 });
