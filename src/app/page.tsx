@@ -86,6 +86,9 @@ export default function Home() {
     removeSupplement,
     toggleSupplement,
     setSupplementQty,
+    pushSubs,
+    savePushSub,
+    removePushSub,
     addSet,
     removeSet,
     updateSet,
@@ -227,11 +230,7 @@ export default function Home() {
 
   // Avisos del plan: se calculan siempre sobre HOY (no el día que se está
   // navegando en el tab Hoy), y el hook decide cuándo dispararlos de verdad.
-  const {
-    permission: notifPermission,
-    requestPermission: requestNotifPermission,
-    sendTest: sendTestNotif,
-  } = usePlanReminders(todayState, today);
+  const push = usePlanReminders(pushSubs, savePushSub, removePushSub);
 
   const score = useMemo(
     () => dailyScore(viewState, viewFoods),
@@ -573,9 +572,7 @@ export default function Home() {
           setSupplementQty={setSupplementQty}
           planActive={planActive}
           onTogglePlan={togglePlan}
-          notifPermission={notifPermission}
-          onRequestNotifPermission={requestNotifPermission}
-          onTestNotif={sendTestNotif}
+          push={push}
         />
         )}
       </motion.div>

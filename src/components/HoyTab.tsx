@@ -20,6 +20,7 @@ import Timeline from "@/components/Timeline";
 import WellbeingCard from "@/components/WellbeingCard";
 import type { AthleteState } from "@/lib/athlete";
 import { caloriesFor, type DrinkOption } from "@/lib/drinks";
+import type { PushState } from "@/lib/usePlanReminders";
 import type { Insight } from "@/lib/insights";
 import type { DailyScore } from "@/lib/score";
 import {
@@ -79,9 +80,7 @@ export default function HoyTab({
   setSupplementQty,
   planActive,
   onTogglePlan,
-  notifPermission,
-  onRequestNotifPermission,
-  onTestNotif,
+  push,
 }: {
   weight: number;
   /** Todo lo que se sabe del día visto, ya cruzado (ver `lib/athlete.ts`). */
@@ -137,9 +136,7 @@ export default function HoyTab({
   setSupplementQty: (supId: string, date: string, qty: number) => void;
   planActive: boolean;
   onTogglePlan: () => void;
-  notifPermission: NotificationPermission | "unsupported";
-  onRequestNotifPermission: () => void;
-  onTestNotif: () => void;
+  push: PushState;
 }) {
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
@@ -255,13 +252,7 @@ export default function HoyTab({
           de la carga rápida (que se ganó su lugar arriba y no se lo movemos). */}
       <EstadoCard state={state} />
 
-      <PlanCard
-        planActive={planActive}
-        onTogglePlan={onTogglePlan}
-        permission={notifPermission}
-        onRequestPermission={onRequestNotifPermission}
-        onTestNotif={onTestNotif}
-      />
+      <PlanCard planActive={planActive} onTogglePlan={onTogglePlan} push={push} />
 
       <Timeline
         foods={todayFoods}

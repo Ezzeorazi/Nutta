@@ -31,6 +31,16 @@ import type {
 /** Foto de progreso con la URL ya resuelta desde $files. */
 export type ResolvedPhoto = PhotoEntry & { url?: string };
 
+/** Suscripción Web Push de un dispositivo (ver `lib/push.ts`). */
+export type PushSubRecord = {
+  id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  tzOffset: number;
+  createdAt: number;
+};
+
 /**
  * Capa de datos de Nutta sobre InstantDB.
  *
@@ -55,6 +65,7 @@ export function useNutta() {
           measures: {},
           supplements: {},
           supplementLogs: {},
+          pushSubs: {},
           strengthSets: {},
           customGoals: {},
           favorites: {},
@@ -121,6 +132,9 @@ export function useNutta() {
   )
     .filter((s) => s.owner === owner)
     .map((s) => (s.createdAt ? { ...s, date: localDateFromMs(s.createdAt) } : s));
+  const pushSubs = (
+    (data?.pushSubs ?? []) as unknown as (PushSubRecord & { owner: string })[]
+  ).filter((s) => s.owner === owner);
   const strengthSets = (
     (data?.strengthSets ?? []) as unknown as (StrengthSet & {
       owner: string;
@@ -560,6 +574,34 @@ export function useNutta() {
     db.transact(db.tx.supplements[sid].delete());
 
   /**
+   * Guarda (o actualiza) la suscripción push de ESTE dispositivo. Se identifica
+   * por `endpoint`: el navegador puede renovarlo, y duplicar la fila haría que
+   * el mismo teléfono reciba el aviso dos veces.
+   */
+  const savePushSub = (
+    keys: { endpoint: string; p256dh: string; auth: string },
+    tzOffset: number,
+  ) => {
+    if (!user) return;
+    const existing = pushSubs.find((s) => s.endpoint === keys.endpoint);
+    db.transact(
+      db.tx.pushSubs[existing?.id ?? id()].update({
+        owner: user.id,
+        endpoint: keys.endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+        tzOffset,
+        createdAt: existing?.createdAt ?? Date.now(),
+      }),
+    );
+  };
+
+  const removePushSub = (endpoint: string) => {
+    const existing = pushSubs.find((s) => s.endpoint === endpoint);
+    if (existing) db.transact(db.tx.pushSubs[existing.id].delete());
+  };
+
+  /**
    * Registra una serie de fuerza. Devuelve el id creado (para deshacer).
    * El `date` efectivo y el ORDEN de las series se derivan del `createdAt`:
    * para hoy es Date.now(); para un día pasado, el llamador pasa un timestamp
@@ -732,6 +774,7 @@ export function useNutta() {
     measures,
     supplements,
     supplementLogs,
+    pushSubs,
     strengthSets,
     customGoals,
     favorites,
@@ -763,6 +806,8 @@ export function useNutta() {
     removeMeasure,
     addSupplement,
     removeSupplement,
+    savePushSub,
+    removePushSub,
     toggleSupplement,
     setSupplementQty,
     addSet,
