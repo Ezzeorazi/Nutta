@@ -5,7 +5,7 @@ import { db, id } from "@/lib/db";
 import { downscaleImage } from "@/lib/image";
 import { localDateFromMs, startOfLocalDayMs } from "@/lib/types";
 import type { Profile } from "@/lib/nutrition";
-import type { DrinkOption } from "@/lib/drinks";
+import { caloriesFor, type DrinkOption } from "@/lib/drinks";
 import type {
   BodyPart,
   ChatMessage,
@@ -355,8 +355,17 @@ export function useNutta() {
   };
   const removeFood = (fid: string) => db.transact(db.tx.foods[fid].delete());
 
-  /** Registra un trago/cerveza del catálogo. Devuelve el id creado (para deshacer). */
-  const addDrink = (opt: DrinkOption, date: string, createdAt?: number) => {
+  /**
+   * Registra un trago/cerveza del catálogo en la porción indicada. Las kcal se
+   * derivan de los ml (una caguama no son las kcal de una lata). Devuelve el id
+   * creado (para deshacer).
+   */
+  const addDrink = (
+    opt: DrinkOption,
+    ml: number,
+    date: string,
+    createdAt?: number,
+  ) => {
     if (!user) return null;
     const did = id();
     db.transact(
@@ -367,8 +376,8 @@ export function useNutta() {
         name: opt.name,
         brand: opt.brand,
         category: opt.category,
-        ml: opt.ml,
-        calories: opt.calories,
+        ml,
+        calories: caloriesFor(opt, ml),
         emoji: opt.emoji,
         createdAt: createdAt ?? Date.now(),
       }),

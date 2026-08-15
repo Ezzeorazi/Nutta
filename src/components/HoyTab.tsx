@@ -19,7 +19,7 @@ import SupplementsCard from "@/components/SupplementsCard";
 import Timeline from "@/components/Timeline";
 import WellbeingCard from "@/components/WellbeingCard";
 import type { AthleteState } from "@/lib/athlete";
-import type { DrinkOption } from "@/lib/drinks";
+import { caloriesFor, type DrinkOption } from "@/lib/drinks";
 import type { Insight } from "@/lib/insights";
 import type { DailyScore } from "@/lib/score";
 import {
@@ -107,7 +107,12 @@ export default function HoyTab({
   // Devuelven el id del registro creado: es lo que permite ofrecer "Deshacer".
   addFood: (e: FoodEntry) => string | null;
   removeFood: (id: string) => void;
-  addDrink: (opt: DrinkOption, date: string, createdAt?: number) => string | null;
+  addDrink: (
+    opt: DrinkOption,
+    ml: number,
+    date: string,
+    createdAt?: number,
+  ) => string | null;
   removeDrink: (id: string) => void;
   addFavorite: (fav: Omit<FavoriteFood, "id" | "createdAt">) => void;
   removeFavorite: (id: string) => void;
@@ -288,10 +293,10 @@ export default function HoyTab({
         drinks={drinks}
         todayDrinks={todayDrinks}
         today={viewDate}
-        onAdd={(opt, date) => {
-          const did = addDrink(opt, date, stamp());
+        onAdd={(opt, ml, date) => {
+          const did = addDrink(opt, ml, date, stamp());
           toast(
-            `${opt.emoji} ${opt.name} · ${opt.calories} kcal`,
+            `${opt.emoji} ${opt.name} · ${ml} ml · ${caloriesFor(opt, ml)} kcal`,
             did ? { label: "Deshacer", onAction: () => removeDrink(did) } : undefined,
           );
         }}
