@@ -19,6 +19,8 @@ export async function POST(request: Request) {
     hour?: unknown;
     memories?: unknown;
     frequent?: unknown;
+    brief?: unknown;
+    history?: unknown;
   };
   try {
     body = await request.json();
@@ -48,6 +50,24 @@ export async function POST(request: Request) {
         .slice(0, 40)
     : [];
   const frequent = String(body?.frequent ?? "").slice(0, 500);
+  const brief = String(body?.brief ?? "").slice(0, 2000);
+
+  // Historial reciente: sin él, "sí" o "dame opciones" llegan sin referente y
+  // el coach contesta cualquier cosa. Se acota a 10 turnos para no inflar la
+  // llamada, y cada turno a 600 caracteres.
+  const history = (
+    Array.isArray(body?.history) ? (body.history as unknown[]) : []
+  )
+    .filter(
+      (t): t is { role: string; text: string } =>
+        !!t && typeof t === "object" && "role" in t && "text" in t,
+    )
+    .map((t) => ({
+      role: t.role === "assistant" ? ("assistant" as const) : ("user" as const),
+      text: String(t.text).trim().slice(0, 600),
+    }))
+    .filter((t) => t.text.length > 0)
+    .slice(-10);
 
   try {
     const result = await interpretMessage({
@@ -56,6 +76,8 @@ export async function POST(request: Request) {
       hour,
       memories,
       frequent,
+      brief,
+      history,
     });
 
     // Post-proceso determinístico con el dataset de ejercicios (RepDB):

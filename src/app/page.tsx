@@ -14,13 +14,17 @@ import ProgresoTab from "@/components/ProgresoTab";
 import Login from "@/components/Login";
 import Onboarding from "@/components/Onboarding";
 import { uid } from "@/lib/uid";
-import { formatLog } from "@/lib/chatLog";
+import { formatLog, splitLog } from "@/lib/chatLog";
 import { db } from "@/lib/db";
 import { computeGoals, effectiveWeight, waterGoalL } from "@/lib/nutrition";
 import { buildAthleteState } from "@/lib/athlete";
 import { dailyScore } from "@/lib/score";
 import { buildInsights } from "@/lib/insights";
-import { frequentFoodsSummary, weeklySummary } from "@/lib/coachContext";
+import {
+  athleteBrief,
+  frequentFoodsSummary,
+  weeklySummary,
+} from "@/lib/coachContext";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
 import { PLAN_GOALS, PLAN_TARGET_WEIGHT } from "@/lib/plan";
 import { usePlanReminders } from "@/lib/usePlanReminders";
@@ -272,6 +276,13 @@ export default function Home() {
   // Envía un mensaje al coach, persiste los registros que detecta y responde.
   const sendChat = async (text: string) => {
     if (!profile) return;
+    // Turnos previos (sin el que se está mandando). Del resumen "Registrado" se
+    // manda solo la respuesta: las líneas de lo cargado ya están en la base y
+    // repetírselas al modelo lo tienta a registrarlas de nuevo.
+    const history = messages.slice(-10).map((m) => ({
+      role: m.role,
+      text: m.role === "assistant" ? splitLog(m.text).reply.trim() : m.text,
+    }));
     addMessage("user", text);
     setLastBatch(null); // el lote anterior deja de ser "deshacible"
     setSending(true);
@@ -285,6 +296,17 @@ export default function Home() {
           hour: new Date().getHours(),
           memories: memories.map((m) => ({ kind: m.kind, text: m.text })),
           frequent: frequentFoodsSummary(foods),
+          // El estado de hoy: sin esto el coach no puede sugerir con datos
+          // reales, solo confirmar lo que registró.
+          brief: athleteBrief({
+            state: todayState,
+            foods,
+            metrics,
+            objective: profile.objective,
+            bodyWeight,
+            hour,
+          }),
+          history,
         }),
       });
       const data = (await res.json()) as {

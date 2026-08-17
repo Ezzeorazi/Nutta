@@ -1,8 +1,11 @@
 import {
+  DAY_KIND_LABEL,
+  daySummaryLine,
   muscleStates,
   restDaysOf,
   weekBreakdown,
   weeklyLoad,
+  type AthleteState,
 } from "@/lib/athlete";
 import { readBody } from "@/lib/body";
 import { groupsOf, MUSCLE_GROUPS } from "@/lib/gym";
@@ -16,6 +19,95 @@ import type {
   StrengthSet,
   WeightEntry,
 } from "@/lib/types";
+
+const MEAL_ORDER = ["desayuno", "almuerzo", "merienda", "cena", "snack"];
+const round = (n: number) => Math.round(n);
+const kg = (n: number) => round(n).toLocaleString("es-AR");
+
+/**
+ * El estado de HOY en ~15 líneas de números, para que el chat responda con
+ * datos reales y no con generalidades.
+ *
+ * Todo lo que hay acá ya está calculado por `buildAthleteState`: esto solo lo
+ * aplana a texto. Es puro y client-safe (no importa el AI SDK), igual que
+ * `weeklySummary`, porque se computa en el cliente y viaja al endpoint.
+ *
+ * Sin este contexto la IA solo puede confirmar lo que registró: preguntas como
+ * "¿qué ceno?" o "¿qué pre-entreno tomo?" no tienen respuesta posible si no
+ * sabe cuántas calorías te quedan ni si hoy entrenaste.
+ */
+export function athleteBrief(input: {
+  state: AthleteState;
+  /** Todos los alimentos; se filtran por el día del estado. */
+  foods: FoodEntry[];
+  metrics: DailyMetrics[];
+  objective?: ObjectiveKey;
+  bodyWeight: number;
+  hour: number;
+}): string {
+  const { state, hour, bodyWeight } = input;
+  const { training, nutrition, week, recovery } = state;
+  const objLabel = OBJECTIVES.find((o) => o.key === input.objective)?.label;
+
+  // Lo comido hoy, por comida: es lo que permite no repetirle el mismo plato ni
+  // sugerirle huevos cuando ya desayunó huevos.
+  const dayFoods = input.foods.filter((f) => f.date === state.date);
+  const byMeal = new Map<string, string[]>();
+  for (const f of dayFoods) {
+    const list = byMeal.get(f.meal) ?? [];
+    list.push(f.name.trim().toLowerCase());
+    byMeal.set(f.meal, list);
+  }
+  const eaten = MEAL_ORDER.filter((m) => byMeal.get(m)?.length)
+    .map((m) => `${m}: ${[...new Set(byMeal.get(m))].join(", ")}`)
+    .join(" | ");
+
+  const dayMetrics = input.metrics.find((m) => m.date === state.date);
+  const trainedLine = training.trained
+    ? `${DAY_KIND_LABEL[training.kind]}${
+        training.groups.length ? ` (${training.groups.join(", ")})` : ""
+      }${training.volume > 0 ? ` · ${kg(training.volume)} kg en ${training.sets} series` : ""}${
+        training.cardioMinutes > 0 ? ` · ${training.cardioMinutes} min de cardio` : ""
+      } · ${round(training.burned)} kcal quemadas`
+    : training.rest
+      ? "descanso declarado"
+      : "todavía no entrenó hoy";
+
+  const lines = [
+    `Fecha: ${state.date}, son las ${hour}:00. Peso: ${bodyWeight || "?"} kg. Objetivo: ${objLabel ?? "sin definir"}.`,
+    `Entrenamiento de hoy: ${trainedLine}.`,
+    `Calorías: ${round(nutrition.consumed.calories)} consumidas de ${round(nutrition.goals.calories)} (netas ${round(nutrition.netCalories)}) → ${
+      nutrition.remaining.calories >= 0
+        ? `quedan ${round(nutrition.remaining.calories)}`
+        : `se pasó por ${round(-nutrition.remaining.calories)}`
+    }.`,
+    `Proteína: ${round(nutrition.consumed.protein)} g de ${round(nutrition.goals.protein)} → ${
+      nutrition.remaining.protein > 0
+        ? `faltan ${round(nutrition.remaining.protein)} g`
+        : "cumplida"
+    }. Carbos ${round(nutrition.consumed.carbs)}/${round(nutrition.goals.carbs)} g. Grasa ${round(nutrition.consumed.fat)}/${round(nutrition.goals.fat)} g.`,
+    nutrition.reason ? `Ajuste de metas: ${nutrition.reason}.` : null,
+    `Comido hoy: ${eaten || "nada registrado todavía"}.`,
+    `Agua ${(dayMetrics?.water ?? 0).toFixed(1)}/${state.waterGoal.toFixed(1)} L · sueño ${
+      dayMetrics?.sleepHours ? `${dayMetrics.sleepHours} h` : "sin registrar"
+    } · pasos ${dayMetrics?.steps ? dayMetrics.steps.toLocaleString("es-AR") : "sin registrar"}.`,
+    `Ayer: ${daySummaryLine(state.yesterday)}.`,
+    `Grupos musculares: ${state.muscles
+      .map(
+        (m) =>
+          `${m.group} ${m.daysSince == null ? "nunca" : m.daysSince === 0 ? "hoy" : `hace ${m.daysSince} d`}`,
+      )
+      .join(", ")}.`,
+    `Semana: ${weekBreakdown(week) || "sin registros"} · ${kg(week.volume)} kg de volumen · racha ${week.streak} días seguidos.`,
+    recovery.score != null
+      ? `Recuperación: ${recovery.score}/100 (${recovery.label}). ${recovery.advice}`
+      : null,
+    state.signals.length ? `Señales: ${state.signals.join("; ")}.` : null,
+    `Foco de hoy según la app: ${state.headline}`,
+  ];
+
+  return lines.filter((l): l is string => l !== null).join("\n");
+}
 
 /**
  * Resume los alimentos que el usuario repite por comida (histórico), para dar

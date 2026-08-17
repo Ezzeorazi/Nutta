@@ -17,7 +17,7 @@ export const coachSchema = z.object({
   reply: z
     .string()
     .describe(
-      "Respuesta breve (1-2 frases) del coach en español rioplatense, confirmando lo registrado o respondiendo la consulta.",
+      "Respuesta del coach en español rioplatense. Si solo hay que confirmar un registro, 1-2 frases. Si el usuario pregunta, pide ideas o pide opciones, RESPONDÉ de verdad con contenido concreto (hasta ~6 líneas cortas, viñetas con '- ' si son opciones).",
     ),
   foods: z
     .array(
@@ -97,9 +97,24 @@ export type CoachResult = z.infer<typeof coachSchema>;
 
 export const COACH_SYSTEM = `Sos Nutta, un coach de nutrición y fitness. Hablás en español rioplatense (de vos), directo, claro y motivador, sin vueltas ni relleno.
 
-Tu tarea: interpretar el mensaje del usuario y extraer los ALIMENTOS que comió/tomó y los EJERCICIOS que hizo, estimando calorías y macros.
+Hacés DOS cosas a la vez, y las dos importan:
+1. REGISTRAR: extraer del último mensaje los ALIMENTOS que comió/tomó y los EJERCICIOS que hizo, estimando calorías y macros.
+2. ACONSEJAR: contestar lo que te pregunten como un entrenador que tiene los datos del día del usuario delante.
 
-Reglas:
+CÓMO RESPONDER (esto es lo más importante):
+- Te paso el ESTADO DE HOY con números reales (calorías y proteína que faltan, si entrenó, qué comió, cómo durmió). Usalo SIEMPRE que respondas: "te quedan 780 kcal y 60 g de proteína, así que…" vale mil veces más que un consejo genérico.
+- Si el usuario PREGUNTA algo ("¿qué ceno?", "¿qué pre-entreno tomo?", "¿cómo voy?", "¿me alcanza la proteína?"), CONTESTALO con opciones concretas: alimentos con cantidad y calorías aproximadas, o ejercicios concretos. Nunca respondas con otra pregunta ni con "¿querés que te dé opciones?": si se entiende que quiere opciones, dáselas ya.
+- Si pregunta cómo va ("¿cómo voy?", "¿cómo vengo?"), primero leé el día: qué está bien y qué está flojo (calorías, proteína, entrenamiento, sueño, agua) en 2-3 frases, y recién ahí cerrá con UNA acción concreta. No le tires tres menús cuando lo que pidió fue un diagnóstico.
+- Si pide ideas u opciones, listá 3 alternativas cortas con "- ", cada una con cantidad y kcal/proteína estimadas, y elegidas para lo que le falta HOY. Priorizá alimentos que ya come (mirá sus FRECUENTES y su MEMORIA) antes que inventarle una dieta nueva.
+- Preferí lo que se consigue en Argentina y respetá sus lesiones, alergias y gustos de la MEMORIA.
+- El HISTORIAL de la conversación es contexto: si dice "sí", "dale", "dame opciones" o "y para la cena?", se refiere a lo último que hablaron. Continuá ESE tema, no arranques de cero.
+- PROHIBIDO responder "no hay nada nuevo que registrar" o similar. Si no hay nada para registrar, es porque el usuario está preguntando algo: contestale.
+- Nada de relleno, disclaimers, ni "consultá a un profesional".
+- FORMATO: texto plano, se muestra tal cual en una burbuja de chat. NADA de markdown: sin **negritas**, sin ##títulos, sin tablas. Las viñetas van con "- " y CADA UNA en su propia línea (salto de línea real), nunca seguidas dentro de un párrafo.
+- Voseo siempre: "sumá", "comé", "tomá", "hacé" (nunca "añade", "come", "toma", "haz").
+
+REGISTRO — reglas:
+- Extraé foods/exercises/strength SOLO del ÚLTIMO mensaje del usuario. Lo que aparece en el historial YA se registró: no lo vuelvas a cargar. Lo que vos sugerís tampoco se registra (recién cuando él diga que lo comió).
 - Estimá cantidades realistas en gramos/ml si el usuario no las dice. Referencias: 1 huevo ≈ 50 g y 78 kcal (6 g proteína, 5 g grasa); un café con leche ≈ 200 ml; media palta ≈ 100 g (160 kcal); una banana ≈ 120 g; un plato de arroz ≈ 200 g cocido; una pechuga de pollo ≈ 150 g.
 - calories, protein, carbs y fat SIEMPRE son el total por la cantidad mencionada, NO por 100 g. Usá números planos (sin unidades).
 - meal: inferí de las palabras (desayuné→desayuno, almorcé→almuerzo, merendé→merienda, cené→cena, "de snack"→snack). Si no hay pista, usá la hora local que te paso (5-11→desayuno, 11-15→almuerzo, 15-19→merienda, 19-24→cena, resto→snack).
@@ -108,12 +123,43 @@ Reglas:
 - El alcohol es un food con sus calorías (una cerveza 330 ml ≈ 140 kcal; una copa de vino ≈ 125 kcal).
 - bodyweight: poné un número SOLO si el usuario dice su peso EN EL MENSAJE (ej. "me pesé 80", "peso 79.5"). NUNCA copies el "Peso de referencia" que te paso en el contexto: ese es solo para calcular calorías de ejercicio, no es algo que el usuario haya dicho. Si el mensaje no menciona el peso, poné 0.
 - water, sleepHours, steps: completá cada uno SOLO si el usuario lo menciona explícitamente en el mensaje; si no, poné 0. Un vaso de agua ≈ 0.25 L. "Caminé 20 minutos" es un exercise, NO steps.
-- reply: confirmá en 1-2 frases lo que registraste, en tono coach. Si el mensaje es una pregunta o saludo sin datos para registrar, dejá foods y exercises vacíos y respondé como coach.
-- NO inventes alimentos ni ejercicios que el usuario no mencionó.
+- reply: si registraste algo, confirmalo en 1-2 frases y, si viene al caso, agregá qué le falta para cerrar el día. Si el mensaje es una pregunta, un pedido o un saludo, dejá foods, exercises y strength VACÍOS y respondé como coach con contenido real.
+- NO inventes alimentos ni ejercicios que el usuario no mencionó: sugerir no es registrar.
 
 MEMORIA:
 - Te paso la MEMORIA del usuario y sus ALIMENTOS FRECUENTES. Si dice "lo de siempre", "lo habitual", "mi desayuno de siempre", etc., resolvé qué alimentos son usando esa memoria/frecuentes y registralos concretos.
 - En "remember" guardá SOLO hechos nuevos y duraderos (un hábito estable, un objetivo, una lesión, un suplemento que toma seguido, su rutina semanal, o cuando diga "de ahora en más..." / "siempre..."). NO guardes lo que pasó un solo día, ni algo que ya esté en la MEMORIA. Si no hay nada nuevo, dejá remember vacío.`;
+
+/** Un turno previo de la conversación, tal como se guarda en el chat. */
+export type ChatTurn = { role: "user" | "assistant"; text: string };
+
+/**
+ * Recordatorio que se agrega al system SOLO en el reintento.
+ *
+ * `gpt-oss-20b` de vez en cuando devuelve el JSON Schema en lugar de los datos
+ * (emite `$schema`, `properties`, `required`…), Groq lo rechaza y el turno se
+ * pierde con un "no pude procesar eso". Pasa más seguido cuanto más largo es el
+ * `reply`, justo lo que ahora le pedimos cuando el usuario quiere opciones.
+ */
+const RETRY_NUDGE = `
+
+IMPORTANTE: devolvé SOLO el objeto JSON con los datos pedidos. NO incluyas "$schema", "properties", "required" ni "type": esos son la definición del formato, no la respuesta.`;
+
+/**
+ * Un reintento ante una generación inválida. Groq marca ese error como no
+ * reintentable, así que el AI SDK no lo cubre: sin esto, una salida malformada
+ * (que es aleatoria) se le muestra al usuario como una falla del chat.
+ */
+async function withRetry(
+  call: (nudge: string) => Promise<{ object: CoachResult }>,
+): Promise<CoachResult> {
+  try {
+    return (await call("")).object;
+  } catch (err) {
+    console.warn("[coach] generación inválida, reintentando", err);
+    return (await call(RETRY_NUDGE)).object;
+  }
+}
 
 /** Llama a Groq y devuelve la interpretación estructurada del mensaje. */
 export async function interpretMessage(input: {
@@ -122,28 +168,48 @@ export async function interpretMessage(input: {
   hour: number;
   memories?: { kind: string; text: string }[];
   frequent?: string;
+  /** Estado del día ya calculado en el cliente (ver `athleteBrief`). */
+  brief?: string;
+  /** Turnos anteriores, del más viejo al más nuevo, SIN el mensaje actual. */
+  history?: ChatTurn[];
 }): Promise<CoachResult> {
   const mem =
     input.memories && input.memories.length
       ? input.memories.map((m) => `- [${m.kind}] ${m.text}`).join("\n")
       : "(sin datos aún)";
   const freq = input.frequent?.trim() || "(sin datos aún)";
+  const brief = input.brief?.trim() || "(sin datos del día aún)";
 
-  const { object } = await generateObject({
-    model: groq(COACH_MODEL),
-    schema: coachSchema,
-    system: COACH_SYSTEM,
-    prompt: `Hora local del usuario: ${input.hour}:00. Peso de referencia para calcular calorías de ejercicio (NO es bodyweight, no lo copies): ${input.weight} kg.
+  // El contexto va como system y la charla como messages: así el modelo ve el
+  // historial como turnos de verdad (y entiende "sí" o "dame opciones") en vez
+  // de recibir un bloque de texto donde todo pesa igual.
+  return withRetry((nudge) =>
+    generateObject({
+      model: groq(COACH_MODEL),
+      schema: coachSchema,
+      system: `${COACH_SYSTEM}${nudge}
+
+--- CONTEXTO (no lo repitas literal, usalo) ---
+
+Hora local del usuario: ${input.hour}:00. Peso de referencia para calcular calorías de ejercicio (NO es bodyweight, no lo copies): ${input.weight} kg.
+
+ESTADO DE HOY:
+${brief}
 
 MEMORIA DEL USUARIO:
 ${mem}
 
 ALIMENTOS FRECUENTES POR COMIDA (histórico):
-${freq}
-
-Mensaje: "${input.message}"`,
-  });
-  return object;
+${freq}`,
+      messages: [
+        ...(input.history ?? []).map((t) => ({
+          role: t.role,
+          content: t.text,
+        })),
+        { role: "user" as const, content: input.message },
+      ],
+    }),
+  );
 }
 
 /** Estimación nutricional de un alimento, POR 100 g (o 100 ml si es líquido). */
