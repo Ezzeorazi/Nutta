@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Pause, Play, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Camera, Images, Pause, Play, Trash2 } from "lucide-react";
 import CollapsibleCard from "@/components/ui/CollapsibleCard";
 import type { ResolvedPhoto } from "@/lib/useNutta";
 import { weekIndexFrom, weekStartISO } from "@/lib/week";
@@ -26,7 +26,6 @@ export default function PhotosPanel({
   const [error, setError] = useState<string | null>(null);
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   // Fotos con URL resuelta, en orden cronológico (ya vienen ordenadas por día).
   const withUrl = useMemo(() => photos.filter((p) => p.url), [photos]);
@@ -51,7 +50,8 @@ export default function PhotosPanel({
     return () => clearInterval(t);
   }, [playing, withUrl.length]);
 
-  const handleFile = async (file?: File) => {
+  const handleFile = async (input: HTMLInputElement) => {
+    const file = input.files?.[0];
     if (!file) return;
     setError(null);
     setUploading(true);
@@ -61,7 +61,9 @@ export default function PhotosPanel({
       setError("No se pudo subir la foto. Probá de nuevo.");
     } finally {
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
+      // Se limpia para poder volver a elegir el MISMO archivo: si no, el input
+      // no dispara change y parece que el botón no anda.
+      input.value = "";
     }
   };
 
@@ -75,17 +77,39 @@ export default function PhotosPanel({
 
   return (
     <CollapsibleCard icon="🖼️" title="Fotos de progreso" summary={summary}>
-      <div className="flex items-center justify-end -mt-1">
-        <label className="cursor-pointer rounded-full bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground active:scale-95">
-          {uploading ? "Subiendo…" : "+ Foto"}
+      {/* Dos entradas, no una: `capture` manda al celular directo a la cámara,
+          así que con un solo input no había manera de subir una foto ya sacada.
+          El atributo es fijo por input, por eso van separados. */}
+      <div className="-mt-1 flex items-center justify-end gap-2">
+        <label
+          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground active:scale-95 ${
+            uploading ? "pointer-events-none opacity-50" : ""
+          }`}
+        >
+          <Images size={15} strokeWidth={2} aria-hidden />
+          Galería
           <input
-            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => handleFile(e.target)}
+          />
+        </label>
+        <label
+          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground active:scale-95 ${
+            uploading ? "pointer-events-none opacity-50" : ""
+          }`}
+        >
+          <Camera size={15} strokeWidth={2} aria-hidden />
+          {uploading ? "Subiendo…" : "Cámara"}
+          <input
             type="file"
             accept="image/*"
             capture="environment"
             className="hidden"
             disabled={uploading}
-            onChange={(e) => handleFile(e.target.files?.[0])}
+            onChange={(e) => handleFile(e.target)}
           />
         </label>
       </div>
