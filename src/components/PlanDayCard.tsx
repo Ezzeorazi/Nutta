@@ -1,7 +1,8 @@
 "use client";
 
-import { Check } from "lucide-react";
-import type { PlanDay } from "@/lib/plan";
+import { ArrowLeftRight, Check } from "lucide-react";
+import { muscleWork } from "@/lib/exerciseDb";
+import type { SwappedDay } from "@/lib/planSwaps";
 import { dayLabel, type StrengthSet } from "@/lib/types";
 
 /**
@@ -15,12 +16,15 @@ export default function PlanDayCard({
   isToday = true,
   viewDate,
   onSelectExercise,
+  onSwapExercise,
 }: {
-  planDay: PlanDay;
+  planDay: SwappedDay;
   daySets: StrengthSet[];
   isToday?: boolean;
   viewDate?: string;
   onSelectExercise: (name: string) => void;
+  /** Abre el reemplazo de ese ejercicio. */
+  onSwapExercise?: (name: string) => void;
 }) {
   const doneNames = new Set(
     daySets.map((s) => s.exercise.trim().toLowerCase()),
@@ -51,31 +55,61 @@ export default function PlanDayCard({
             <div className="flex flex-col gap-1.5 pl-1">
               {planDay.exercises.map((ex) => {
                 const done = doneNames.has(ex.name.trim().toLowerCase());
+                // Qué músculos compromete: es lo que convierte la rutina en
+                // algo que se puede razonar (y reemplazar) en vez de una lista
+                // de nombres de máquinas.
+                const musculos = muscleWork(ex.name).primary;
                 return (
-                  <button
-                    key={ex.name}
-                    onClick={() => onSelectExercise(ex.name)}
-                    className={`flex items-center justify-between rounded-xl border px-3 py-2 text-left text-sm active:scale-[0.99] ${
+                  <div
+                    key={ex.swappedFrom ?? ex.name}
+                    className={`flex items-stretch rounded-xl border ${
                       done
                         ? "border-primary bg-primary/10"
                         : "border-border bg-background hover:border-primary"
                     }`}
                   >
-                    <span className="flex min-w-0 items-center gap-2">
-                      {done && (
-                        <Check
-                          size={14}
-                          className="shrink-0 text-primary"
-                          aria-hidden
-                        />
-                      )}
-                      <span className="truncate">{ex.name}</span>
-                    </span>
-                    <span className="shrink-0 pl-2 text-right text-xs text-muted tabular-nums">
-                      {ex.sets}
-                      <span className="block">{ex.weight}</span>
-                    </span>
-                  </button>
+                    <button
+                      onClick={() => onSelectExercise(ex.name)}
+                      className="flex min-w-0 flex-1 items-center justify-between gap-2 px-3 py-2 text-left text-sm active:scale-[0.99]"
+                    >
+                      <span className="flex min-w-0 flex-col gap-0.5">
+                        <span className="flex min-w-0 items-center gap-2">
+                          {done && (
+                            <Check
+                              size={14}
+                              className="shrink-0 text-primary"
+                              aria-hidden
+                            />
+                          )}
+                          <span className="truncate">{ex.name}</span>
+                        </span>
+                        {(musculos.length > 0 || ex.swappedFrom) && (
+                          <span className="truncate text-xs text-muted">
+                            {ex.swappedFrom && (
+                              <span className="text-accent">
+                                en vez de {ex.swappedFrom}
+                                {musculos.length > 0 ? " · " : ""}
+                              </span>
+                            )}
+                            {musculos.join(", ")}
+                          </span>
+                        )}
+                      </span>
+                      <span className="shrink-0 pl-2 text-right text-xs text-muted tabular-nums">
+                        {ex.sets}
+                        {ex.weight && <span className="block">{ex.weight}</span>}
+                      </span>
+                    </button>
+                    {onSwapExercise && (
+                      <button
+                        onClick={() => onSwapExercise(ex.name)}
+                        aria-label={`Cambiar ${ex.name} por otro ejercicio`}
+                        className="grid w-11 shrink-0 place-items-center rounded-r-xl border-l border-border/60 text-muted transition-colors active:scale-95 hover:text-primary"
+                      >
+                        <ArrowLeftRight size={15} strokeWidth={2} aria-hidden />
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>

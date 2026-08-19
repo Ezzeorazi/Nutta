@@ -105,6 +105,17 @@ const schema = i.schema({
       weight: i.number(), // kg
       createdAt: i.number(),
     }),
+    // Ejercicios de la rutina cambiados por otro un día puntual: la máquina
+    // estaba ocupada, la lesión molestaba, lo que sea. Es por DÍA a propósito
+    // —el plan del mes no se toca— y por eso alcanza con guardar el cambio,
+    // no una rutina entera.
+    planSwaps: i.entity({
+      owner: i.string().indexed(),
+      date: i.string().indexed(), // YYYY-MM-DD
+      from: i.string(), // ejercicio del plan que se reemplaza
+      to: i.string(), // el que se hizo en su lugar
+      createdAt: i.number(),
+    }),
     // Recetas: combos de alimentos que se agregan de una.
     recipes: i.entity({
       owner: i.string().indexed(),

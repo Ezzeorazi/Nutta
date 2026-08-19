@@ -20,6 +20,7 @@ import type {
   MemoryFact,
   MemoryKind,
   PhotoEntry,
+  PlanSwap,
   Recipe,
   RecipeItem,
   StrengthSet,
@@ -67,6 +68,7 @@ export function useNutta() {
           supplementLogs: {},
           pushSubs: {},
           strengthSets: {},
+          planSwaps: {},
           customGoals: {},
           favorites: {},
           recipes: {},
@@ -142,6 +144,13 @@ export function useNutta() {
   )
     .filter((s) => s.owner === owner)
     .map((s) => ({ ...s, date: localDateFromMs(s.createdAt) }))
+    .sort((a, b) => a.createdAt - b.createdAt);
+  // Los cambios de ejercicio guardan su `date` de entrada (no hay filas
+  // viejas mal-fechadas que corregir), así que se lee tal cual.
+  const planSwaps = (
+    (data?.planSwaps ?? []) as unknown as (PlanSwap & { owner: string })[]
+  )
+    .filter((s) => s.owner === owner)
     .sort((a, b) => a.createdAt - b.createdAt);
   const customGoals = (
     (data?.customGoals ?? []) as unknown as (CustomGoal & { owner: string })[]
@@ -639,6 +648,30 @@ export function useNutta() {
     );
   };
 
+  /**
+   * Cambia un ejercicio de la rutina por otro, solo para ese día. Repetir el
+   * cambio sobre el mismo ejercicio lo pisa en vez de acumular filas.
+   */
+  const swapExercise = (date: string, from: string, to: string) => {
+    if (!user || !from.trim() || !to.trim()) return;
+    const existing = planSwaps.find((s) => s.date === date && s.from === from);
+    db.transact(
+      db.tx.planSwaps[existing?.id ?? id()].update({
+        owner: user.id,
+        date,
+        from,
+        to: to.trim(),
+        createdAt: startOfLocalDayMs(date),
+      }),
+    );
+  };
+
+  /** Vuelve al ejercicio original del plan. */
+  const undoSwap = (date: string, from: string) => {
+    const existing = planSwaps.find((s) => s.date === date && s.from === from);
+    if (existing) db.transact(db.tx.planSwaps[existing.id].delete());
+  };
+
   const addGoal = (
     kind: GoalKind,
     label: string,
@@ -776,6 +809,7 @@ export function useNutta() {
     supplementLogs,
     pushSubs,
     strengthSets,
+    planSwaps,
     customGoals,
     favorites,
     recipes,
@@ -813,6 +847,8 @@ export function useNutta() {
     addSet,
     removeSet,
     updateSet,
+    swapExercise,
+    undoSwap,
     addGoal,
     removeGoal,
     addPhoto,

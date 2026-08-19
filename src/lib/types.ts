@@ -123,6 +123,15 @@ export type StrengthSet = {
   createdAt: number;
 };
 
+/** Un ejercicio de la rutina reemplazado por otro, un día puntual. */
+export type PlanSwap = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  from: string; // el del plan
+  to: string; // el que se hizo en su lugar
+  createdAt: number;
+};
+
 /** Ejercicios de fuerza comunes para alta rápida. */
 export const COMMON_LIFTS = [
   "Press banca",

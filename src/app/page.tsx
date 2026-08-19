@@ -62,6 +62,7 @@ export default function Home() {
     supplements,
     supplementLogs,
     strengthSets,
+    planSwaps,
     customGoals,
     favorites,
     recipes,
@@ -96,6 +97,8 @@ export default function Home() {
     addSet,
     removeSet,
     updateSet,
+    swapExercise,
+    undoSwap,
     addGoal,
     removeGoal,
     addPhoto,
@@ -521,6 +524,9 @@ export default function Home() {
           onAddExercise={addExercise}
           onRemoveExercise={removeExercise}
           onSetRestDay={(date, rest) => setMetric(date, { restDay: rest })}
+          planSwaps={planSwaps}
+          onSwapExercise={swapExercise}
+          onUndoSwap={undoSwap}
         />
       ) : tab === "progreso" ? (
         <ProgresoTab

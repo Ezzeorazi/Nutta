@@ -13,8 +13,9 @@
 
 import type { AthleteState } from "@/lib/athlete";
 import { groupsOf } from "@/lib/gym";
-import { WEEKLY_PLAN, getPlanDay, type PlanDay, type PlanExercise } from "@/lib/plan";
-import type { StrengthSet } from "@/lib/types";
+import { WEEKLY_PLAN, getPlanDay, type PlanDay } from "@/lib/plan";
+import { applySwaps, type PlanSlot } from "@/lib/planSwaps";
+import type { PlanSwap, StrengthSet } from "@/lib/types";
 
 export type SessionMode = "completa" | "liviana" | "descanso" | "hecha";
 
@@ -25,7 +26,7 @@ export const MODE_LABEL: Record<SessionMode, string> = {
   hecha: "Ya entrenaste",
 };
 
-export type SessionExercise = PlanExercise & {
+export type SessionExercise = PlanSlot & {
   /** Ya lo cargaste hoy. */
   done: boolean;
 };
@@ -90,13 +91,17 @@ export function buildTodaySession(x: {
   today: string;
   /** Series ya cargadas hoy (para tachar lo hecho). */
   daySets: StrengthSet[];
+  /** Ejercicios que cambiaste hoy: la sesión tiene que proponer los tuyos. */
+  swaps?: PlanSwap[];
 }): TodaySession {
   const { state, today, daySets } = x;
   const hechos = new Set(daySets.map((s) => norm(s.exercise)));
   const rec = state.recovery.score;
   const reasons: string[] = [];
 
-  const calendario = getPlanDay(today);
+  // Con los cambios del día ya aplicados: si reemplazaste un ejercicio, la
+  // sesión sugerida tiene que hablar del que vas a hacer, no del que no podés.
+  const calendario = applySwaps(getPlanDay(today), x.swaps ?? [], today);
 
   // --- Ya entrenaste: lo que queda del plan, no una sesión nueva ------------
   if (state.training.kind === "fuerza") {
@@ -162,7 +167,7 @@ export function buildTodaySession(x: {
   }
 
   // --- Qué sesión: la del calendario, salvo que pise músculo fatigado -------
-  let day = calendario;
+  let day: typeof calendario = calendario;
   let swap: TodaySession["swap"];
   const propia = freshness(calendario, state.muscles);
   if (propia != null && propia <= 1) {
@@ -176,7 +181,7 @@ export function buildTodaySession(x: {
     // Se cambia solo si la diferencia es real: mover el plan por un día de más
     // no vale la pena, y romper el orden del split tiene su costo.
     if (mejor && mejor.fresh - propia >= 2) {
-      day = mejor.day;
+      day = applySwaps(mejor.day, x.swaps ?? [], today);
       const gruposEntran = planGroups(mejor.day, state.muscles);
       const salen = listar(planGroups(calendario, state.muscles));
       const entran = listar(gruposEntran);

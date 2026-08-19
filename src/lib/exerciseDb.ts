@@ -191,6 +191,35 @@ function tokenScore(q: string[], cand: string[]): number {
 const MATCH_THRESHOLD = 0.5;
 
 /**
+ * Cómo le decimos acá a lo que el dataset llama de otra forma.
+ *
+ * El catálogo dice "Elevación de Talones" y "Aducción de Cadera"; en cualquier
+ * gimnasio de acá eso es "pantorrillas" y "aductor". Sin esto, ejercicios del
+ * propio plan del usuario no matcheaban con nada y quedaban sin grupo muscular
+ * —ni para el reemplazo, ni para saber qué se entrenó—.
+ *
+ * Se aplican SOLO si el nombre no matcheó por las suyas: los nombres canónicos
+ * que ya contienen estas palabras no se tocan.
+ */
+const ALIASES: [RegExp, string][] = [
+  [/\bpantorrillas?\b/g, "elevacion de talones"],
+  [/\bgemelos?\b/g, "elevacion de talones"],
+  // El "en maquina" se consume a propósito: dejarlo empujaba "aductor en
+  // maquina" hacia "Abducción de Cadera en Máquina" —el músculo opuesto—
+  // porque compartía dos tokens en vez de uno.
+  [/\baductor(?:es)?(?: en maquina)?\b/g, "aduccion de cadera"],
+  [/\babductor(?:es)?(?: en maquina)?\b/g, "abduccion de cadera"],
+  [/\bfemoral(?:es)?\b/g, "curl de piernas"],
+];
+
+/** Reescribe el nombre con los sinónimos de arriba (ya normalizado). */
+function expandAliases(normalized: string): string {
+  let out = normalized;
+  for (const [re, to] of ALIASES) out = out.replace(re, to);
+  return out.trim();
+}
+
+/**
  * Mejor candidato del catálogo, más cuántos empataron con él.
  *
  * Se expone en dos sabores porque no es lo mismo IDENTIFICAR que RENOMBRAR:
@@ -200,6 +229,23 @@ const MATCH_THRESHOLD = 0.5;
  */
 function findMatch(name: string): { ex: DbExercise | null; tied: number } {
   const q = norm(name);
+  const direct = matchNormalized(q);
+  if (direct.ex) return direct;
+
+  // Segunda pasada con sinónimos: "pantorrillas de pie" → "elevacion de
+  // talones de pie", que sí existe en el catálogo.
+  //
+  // Se descarta primero la consulta puramente genérica: si no, un alias podría
+  // rescatar justo lo que el umbral está para frenar —"entrené femorales" es
+  // una sesión de pierna, y snapearla a un ejercicio sería un dato falso—.
+  const qt = q.split(" ").filter((t) => t.length > 1 && !STOPWORDS.has(t));
+  if (qt.length === 0 || qt.every((t) => GENERIC.has(t))) return direct;
+
+  const alias = expandAliases(q);
+  return alias === q ? direct : matchNormalized(alias);
+}
+
+function matchNormalized(q: string): { ex: DbExercise | null; tied: number } {
   if (!q) return { ex: null, tied: 0 };
 
   // 1) match exacto (es/en)
@@ -207,7 +253,7 @@ function findMatch(name: string): { ex: DbExercise | null; tied: number } {
   if (exact) return { ex: exact, tied: 1 };
 
   // 2) mejor puntaje por tokens
-  const qt = tokens(name);
+  const qt = q.split(" ").filter((t) => t.length > 1 && !STOPWORDS.has(t));
   if (qt.length === 0) return { ex: null, tied: 0 };
   // Consulta solo de palabras genéricas (músculo/sesión) → no matchear.
   if (qt.every((t) => GENERIC.has(t))) return { ex: null, tied: 0 };
@@ -356,6 +402,34 @@ const EQUIPMENT_ES: Record<string, string> = {
   foam_roller: "Foam roller",
   bench: "Banco",
   flat_bench: "Banco plano",
+  loop_band: "Banda circular",
+  suspension_trainer: "TRX",
+  rings: "Anillas",
+  leg_curl: "Máquina de femoral",
+  leg_extension: "Máquina de cuádriceps",
+  leg_press: "Prensa",
+  hack_squat: "Hack squat",
+  lat_pulldown_machine: "Máquina de jalón",
+  assisted_pullup_machine: "Máquina de dominadas asistidas",
+  chest_press_machine: "Máquina de press de pecho",
+  shoulder_press_machine: "Máquina de press de hombro",
+  bicep_curl_machine: "Máquina de bíceps",
+  preacher_curl_machine: "Banco Scott",
+  hip_abduction_machine: "Máquina de abductores",
+  hip_adduction_machine: "Máquina de aductores",
+  standing_calf_raise_machine: "Máquina de gemelos de pie",
+  seated_calf_raise_machine: "Máquina de gemelos sentado",
+  glute_ham_developer: "Banco de femoral (GHD)",
+  dip_machine: "Máquina de fondos",
+  pec_deck: "Pec Deck",
+  air_bike: "Bicicleta de aire",
+  battle_rope: "Cuerda de batalla",
+  climbing_rope: "Cuerda de trepar",
+  jump_rope: "Soga",
+  plyo_box: "Cajón pliométrico",
+  slam_ball: "Balón de golpeo",
+  sled: "Trineo",
+  wrist_roller: "Rodillo de muñeca",
   plates: "Discos",
   plate: "Disco",
   box: "Cajón",
@@ -378,4 +452,182 @@ export function mechanicLabel(mechanic: string): string {
   if (mechanic === "compound") return "Compuesto";
   if (mechanic === "isolation") return "Aislado";
   return "";
+}
+
+// ---------------------------------------------------------------------------
+// Qué músculos compromete cada ejercicio
+// ---------------------------------------------------------------------------
+
+/**
+ * Nombre en español de cada músculo del dataset (los 29 que aparecen).
+ *
+ * El grupo ("piernas") sirve para agrupar y para el calendario; el músculo
+ * ("isquiotibiales") es lo que hace falta para reemplazar un ejercicio por otro
+ * sin que se te escape la mitad del estímulo: prensa y curl femoral son los dos
+ * "piernas" y no se sustituyen entre sí.
+ */
+const MUSCLE_ES: Record<string, string> = {
+  pectoralis_major: "pectoral",
+  serratus_anterior: "serrato",
+  latissimus_dorsi: "dorsal ancho",
+  trapezius: "trapecio",
+  rhomboids: "romboides",
+  erector_spinae: "lumbares",
+  quadratus_lumborum: "cuadrado lumbar",
+  quadriceps: "cuádriceps",
+  hamstrings: "isquiotibiales",
+  gluteus_maximus: "glúteo mayor",
+  gluteus_medius: "glúteo medio",
+  abductors: "abductores",
+  adductors: "aductores",
+  hip_flexors: "flexores de cadera",
+  gastrocnemius: "gemelos",
+  soleus: "sóleo",
+  anterior_deltoid: "deltoides anterior",
+  lateral_deltoid: "deltoides lateral",
+  posterior_deltoid: "deltoides posterior",
+  biceps_brachii: "bíceps",
+  triceps_brachii: "tríceps",
+  brachialis: "braquial",
+  brachioradialis: "braquiorradial",
+  forearms: "antebrazos",
+  forearm_flexors: "flexores del antebrazo",
+  forearm_extensors: "extensores del antebrazo",
+  rectus_abdominis: "recto abdominal",
+  transverse_abdominis: "transverso",
+  obliques: "oblicuos",
+};
+
+/** Nombre legible de un músculo (o el código con guiones bajos como fallback). */
+export function muscleLabel(code: string): string {
+  return MUSCLE_ES[code] ?? code.replace(/_/g, " ");
+}
+
+/** TODOS los grupos que tocan esos músculos, sin repetir y en orden de UI. */
+export function groupsOfMuscles(muscles: string[]): MuscleGroup[] {
+  const found = new Set<MuscleGroup>();
+  for (const m of muscles) {
+    const g = MUSCLE_TO_GROUP[m];
+    if (g) found.add(g);
+  }
+  return MUSCLE_GROUPS.map((g) => g.key).filter((k) => found.has(k));
+}
+
+export type MuscleWork = {
+  /** El ejercicio del catálogo que se usó para responder (null si no matcheó). */
+  match: DbExercise | null;
+  /** Grupo dominante: el del primer músculo primario. */
+  group: MuscleGroup | null;
+  /** Grupos que trabaja de lleno. */
+  groups: MuscleGroup[];
+  /** Grupos que asisten (los secundarios que no son ya primarios). */
+  secondaryGroups: MuscleGroup[];
+  /** Músculos primarios en español ("cuádriceps", "glúteo mayor"). */
+  primary: string[];
+  /** Músculos secundarios en español. */
+  secondary: string[];
+};
+
+const EMPTY_WORK: MuscleWork = {
+  match: null,
+  group: null,
+  groups: [],
+  secondaryGroups: [],
+  primary: [],
+  secondary: [],
+};
+
+/**
+ * Qué compromete un ejercicio, a partir de su nombre (libre o canónico).
+ *
+ * Usa `approxExercise` a propósito: para saber qué músculo se trabaja, todas
+ * las variantes de sentadilla dan la misma respuesta, así que un match
+ * aproximado alcanza. Renombrar sí exige `matchExercise`.
+ */
+export function muscleWork(name: string): MuscleWork {
+  const ex = approxExercise(name);
+  if (!ex) return EMPTY_WORK;
+  const groups = groupsOfMuscles(ex.primary_muscles);
+  return {
+    match: ex,
+    group: groupOfMuscles(ex.primary_muscles),
+    groups,
+    secondaryGroups: groupsOfMuscles(ex.secondary_muscles).filter(
+      (g) => !groups.includes(g),
+    ),
+    primary: ex.primary_muscles.map(muscleLabel),
+    secondary: ex.secondary_muscles.map(muscleLabel),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Reemplazos
+// ---------------------------------------------------------------------------
+
+export type Alternative = {
+  exercise: DbExercise;
+  /** Músculos primarios que comparte con el original, en español. */
+  shared: string[];
+  /** Usa otro equipo: es lo que sirve cuando la máquina está ocupada. */
+  otherEquipment: boolean;
+};
+
+/** Cuánto se solapan dos listas de músculos (0-1). */
+function overlap(a: string[], b: string[]): number {
+  if (!a.length || !b.length) return 0;
+  const setB = new Set(b);
+  const common = a.filter((m) => setB.has(m)).length;
+  return common / Math.max(a.length, b.length);
+}
+
+/**
+ * Con qué otro ejercicio reemplazar a este cuando no lo podés hacer.
+ *
+ * El criterio, en orden: que trabaje los MISMOS músculos primarios, que use
+ * OTRO equipo (si la máquina está ocupada, otra variante de la misma máquina
+ * no te sirve) y que sea del mismo tipo —compuesto o aislado—, porque cambiar
+ * un press por una elevación lateral no es el mismo trabajo aunque compartan
+ * el hombro.
+ */
+export function alternativesFor(name: string, limit = 8): Alternative[] {
+  const ref = approxExercise(name);
+  if (!ref) return [];
+  const group = groupOfMuscles(ref.primary_muscles);
+  if (!group) return [];
+
+  return EXERCISES.filter(
+    (ex) =>
+      ex.id !== ref.id &&
+      ex.category === ref.category &&
+      groupOfMuscles(ex.primary_muscles) === group,
+  )
+    .map((ex) => {
+      const sharedCodes = ex.primary_muscles.filter((m) =>
+        ref.primary_muscles.includes(m),
+      );
+      const otherEquipment = ex.equipment !== ref.equipment;
+      const score =
+        overlap(ex.primary_muscles, ref.primary_muscles) * 3 +
+        overlap(ex.secondary_muscles, ref.secondary_muscles) +
+        (ex.mechanic === ref.mechanic ? 1 : 0) +
+        (otherEquipment ? 0.25 : 0);
+      return {
+        alt: {
+          exercise: ex,
+          shared: sharedCodes.map(muscleLabel),
+          otherEquipment,
+        },
+        score,
+      };
+    })
+    // Sin un solo músculo primario en común no es un reemplazo, es otro
+    // ejercicio del mismo grupo: sirve para el catálogo, no para sustituir.
+    .filter((c) => c.alt.shared.length > 0)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.alt.exercise.name_es.localeCompare(b.alt.exercise.name_es, "es"),
+    )
+    .slice(0, limit)
+    .map((c) => c.alt);
 }

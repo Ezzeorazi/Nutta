@@ -20,6 +20,7 @@ import CardioSheet from "@/components/CardioSheet";
 import PlanDayCard from "@/components/PlanDayCard";
 import RestTimer from "@/components/RestTimer";
 import SessionSheet from "@/components/SessionSheet";
+import SwapExerciseSheet from "@/components/SwapExerciseSheet";
 import Button from "@/components/ui/Button";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
@@ -32,6 +33,7 @@ import {
 } from "@/lib/gym";
 import { matchExercise } from "@/lib/exerciseDb";
 import { getPlanDay } from "@/lib/plan";
+import { applySwaps } from "@/lib/planSwaps";
 import { buildTodaySession } from "@/lib/session";
 import type { AthleteState } from "@/lib/athlete";
 import {
@@ -40,6 +42,7 @@ import {
   startOfLocalDayMs,
   type DailyMetrics,
   type ExerciseEntry,
+  type PlanSwap,
   type StrengthSet,
 } from "@/lib/types";
 import exerciseNames from "@/data/exercise-names.json";
@@ -127,6 +130,9 @@ export default function GymTab({
   onAddExercise,
   onRemoveExercise,
   onSetRestDay,
+  planSwaps = [],
+  onSwapExercise,
+  onUndoSwap,
 }: {
   strengthSets: StrengthSet[];
   exercises?: ExerciseEntry[];
@@ -147,12 +153,18 @@ export default function GymTab({
   onAddExercise: (e: ExerciseEntry) => void;
   onRemoveExercise: (id: string) => void;
   onSetRestDay: (date: string, rest: boolean) => void;
+  /** Ejercicios de la rutina cambiados por otro, por día. */
+  planSwaps?: PlanSwap[];
+  onSwapExercise?: (date: string, from: string, to: string) => void;
+  onUndoSwap?: (date: string, from: string) => void;
 }) {
   const [exercise, setExercise] = useState("");
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [cardioOpen, setCardioOpen] = useState(false);
+  // Ejercicio de la rutina que se está por reemplazar (null = sheet cerrado).
+  const [swapping, setSwapping] = useState<string | null>(null);
   const [progExercise, setProgExercise] = useState<string | null>(null);
   // Instante de la última serie cargada, para el cronómetro de descanso.
   const [restSince, setRestSince] = useState<number | null>(null);
@@ -207,9 +219,20 @@ export default function GymTab({
     [strengthSets, today],
   );
   const session = useMemo(
-    () => buildTodaySession({ state, today, daySets: todaySets }),
-    [state, today, todaySets],
+    () => buildTodaySession({ state, today, daySets: todaySets, swaps: planSwaps }),
+    [state, today, todaySets, planSwaps],
   );
+
+  // La rutina del día que se está viendo, con sus cambios ya aplicados.
+  const planDay = useMemo(
+    () => applySwaps(getPlanDay(viewDate), planSwaps, viewDate),
+    [planSwaps, viewDate],
+  );
+  // El slot que se está cambiando: hace falta su original para poder volver
+  // atrás y para sugerir sobre el ejercicio del plan, no sobre el reemplazo.
+  const swapSlot = swapping
+    ? planDay.exercises.find((e) => e.name === swapping)
+    : undefined;
 
   const used = useMemo(() => usedExercises(strengthSets), [strengthSets]);
   // Historial y comunes primero (lo más relevante), luego el catálogo canónico
@@ -363,11 +386,12 @@ export default function GymTab({
 
       {/* Rutina fija del plan del mes, para el día que se está viendo. */}
       <PlanDayCard
-        planDay={getPlanDay(viewDate)}
+        planDay={planDay}
         daySets={daySets}
         isToday={isToday}
         viewDate={viewDate}
         onSelectExercise={setExercise}
+        onSwapExercise={onSwapExercise ? setSwapping : undefined}
       />
 
       {/* Alta de serie (hoy o un día pasado que estés completando) */}
@@ -698,6 +722,20 @@ export default function GymTab({
           session={session}
           onSelectExercise={setExercise}
           onClose={() => setSessionOpen(false)}
+        />
+      )}
+
+      {swapping && (
+        <SwapExerciseSheet
+          exercise={swapping}
+          swappedFrom={swapSlot?.swappedFrom}
+          onSwap={(to) =>
+            onSwapExercise?.(viewDate, swapSlot?.swappedFrom ?? swapping, to)
+          }
+          onUndo={() =>
+            swapSlot?.swappedFrom && onUndoSwap?.(viewDate, swapSlot.swappedFrom)
+          }
+          onClose={() => setSwapping(null)}
         />
       )}
 
