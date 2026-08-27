@@ -16,6 +16,8 @@ import {
   type AthleteState,
 } from "@/lib/athlete";
 import type { PlanDay } from "@/lib/plan";
+import { vacationProgress } from "@/lib/vacation";
+import type { Vacation } from "@/lib/types";
 
 export type Slot = "manana" | "noche";
 
@@ -49,9 +51,25 @@ const noDot = (s: string) => s.replace(/\.\s*$/, "");
  * Aviso de la mañana: qué toca hoy y cómo llegás. No juzga nada todavía —a las
  * 8 de la mañana no hay nada que juzgar—, orienta el día.
  */
-function morning(date: string, state: AthleteState, planDay: PlanDay): Reminder {
+function morning(
+  date: string,
+  state: AthleteState,
+  planDay: PlanDay,
+  vacation: Vacation | null,
+): Reminder {
   const rec = state.recovery.score;
   const partes: string[] = [];
+
+  // De vacaciones el aviso no orienta un plan: recuerda que no hay plan que
+  // cumplir. Y es el único del día (ver `evening`).
+  if (vacation) {
+    const { day, total } = vacationProgress(vacation, date);
+    return {
+      tag: `${date}:manana`,
+      title: "🏖️ Modo vacaciones",
+      body: `Día ${day} de ${total}. Movete un rato —en el Gym tenés la rutina corta, sin equipamiento— y apuntá a ${Math.round(state.nutrition.goals.protein)} g de proteína. Del resto, nada.`,
+    };
+  }
 
   if (planDay.rest) {
     partes.push("Hoy toca descanso 🧘");
@@ -89,7 +107,13 @@ function evening(
   date: string,
   state: AthleteState,
   planDay: PlanDay,
+  vacation: Vacation | null,
 ): Reminder | null {
+  // De vacaciones no hay aviso de noche. El de la noche existe para reclamar lo
+  // que todavía se puede corregir, y en un viaje no hay nada que reclamar: el
+  // modo promete un solo aviso amable por día, no dos.
+  if (vacation) return null;
+
   const { training, nutrition, meal } = state;
   const faltaProteina = Math.round(nutrition.remaining.protein);
   // Un día "ligera" (12.000 pasos) no es no haber hecho nada: solo se reclama
@@ -140,9 +164,12 @@ export function planReminder(params: {
   date: string;
   state: AthleteState;
   planDay: PlanDay;
+  /** Tramo de vacaciones que cubre el día, si hay uno. */
+  vacation?: Vacation | null;
 }): Reminder | null {
   const { slot, date, state, planDay } = params;
+  const vacation = params.vacation ?? null;
   return slot === "manana"
-    ? morning(date, state, planDay)
-    : evening(date, state, planDay);
+    ? morning(date, state, planDay, vacation)
+    : evening(date, state, planDay, vacation);
 }

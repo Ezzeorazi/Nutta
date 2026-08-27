@@ -15,15 +15,22 @@ import type { AthleteState } from "@/lib/athlete";
 import { groupsOf } from "@/lib/gym";
 import { WEEKLY_PLAN, getPlanDay, type PlanDay } from "@/lib/plan";
 import { applySwaps, type PlanSlot } from "@/lib/planSwaps";
+import { VACATION_DAY } from "@/lib/vacation";
 import type { PlanSwap, StrengthSet } from "@/lib/types";
 
-export type SessionMode = "completa" | "liviana" | "descanso" | "hecha";
+export type SessionMode =
+  | "completa"
+  | "liviana"
+  | "descanso"
+  | "hecha"
+  | "flexible";
 
 export const MODE_LABEL: Record<SessionMode, string> = {
   completa: "Sesión completa",
   liviana: "Sesión liviana",
   descanso: "Descanso",
   hecha: "Ya entrenaste",
+  flexible: "Rutina de vacaciones",
 };
 
 export type SessionExercise = PlanSlot & {
@@ -99,9 +106,16 @@ export function buildTodaySession(x: {
   const rec = state.recovery.score;
   const reasons: string[] = [];
 
+  // De vacaciones el calendario no es el split del mes: es la rutina corta sin
+  // equipamiento, la misma todos los días (ver `lib/vacation.ts`).
+  const deViaje = state.vacation;
   // Con los cambios del día ya aplicados: si reemplazaste un ejercicio, la
   // sesión sugerida tiene que hablar del que vas a hacer, no del que no podés.
-  const calendario = applySwaps(getPlanDay(today), x.swaps ?? [], today);
+  const calendario = applySwaps(
+    deViaje ? VACATION_DAY : getPlanDay(today),
+    x.swaps ?? [],
+    today,
+  );
 
   // --- Ya entrenaste: lo que queda del plan, no una sesión nueva ------------
   if (state.training.kind === "fuerza") {
@@ -125,14 +139,16 @@ export function buildTodaySession(x: {
   }
 
   // --- Descanso: declarado por vos o por el plan ----------------------------
-  if (state.training.rest || calendario.rest) {
+  // Ojo con `restDeclared` y no `rest`: de vacaciones TODOS los días sin
+  // registro son descanso, y ahí sí hay algo que proponer (la rutina corta).
+  if (state.training.restDeclared || calendario.rest) {
     return {
       mode: "descanso",
       emoji: "🧘",
-      title: state.training.rest ? "Hoy descansás" : calendario.label,
+      title: state.training.restDeclared ? "Hoy descansás" : calendario.label,
       exercises: [],
       cardio: calendario.cardio,
-      reasons: state.training.rest
+      reasons: state.training.restDeclared
         ? ["Lo marcaste como día de descanso"]
         : ["Es el día de descanso de tu plan"],
     };
@@ -170,7 +186,9 @@ export function buildTodaySession(x: {
   let day: typeof calendario = calendario;
   let swap: TodaySession["swap"];
   const propia = freshness(calendario, state.muscles);
-  if (propia != null && propia <= 1) {
+  // De viaje no se rota nada: la rutina flexible es de cuerpo entero y elegir
+  // "qué toca hoy" es justo la decisión que el modo saca del medio.
+  if (!deViaje && propia != null && propia <= 1) {
     // Se busca el día del plan cuyo grupo más reciente esté MÁS descansado.
     const alternativas = WEEKLY_PLAN.filter(
       (d) => !d.rest && d.dow !== calendario.dow,
@@ -199,6 +217,23 @@ export function buildTodaySession(x: {
 
   const liviana = justo;
   if (liviana) reasons.push(...state.signals.slice(0, 3));
+
+  if (deViaje) {
+    return {
+      mode: "flexible",
+      emoji: day.emoji,
+      title: day.label,
+      exercises: day.exercises.map((e) => ({
+        ...e,
+        done: hechos.has(norm(e.name)),
+      })),
+      cardio: day.cardio,
+      reasons: [
+        "estás de vacaciones: cuerpo entero, sin equipamiento, 20 minutos",
+        "alcanza con estimular el músculo: el volumen se recupera al volver",
+      ],
+    };
+  }
 
   return {
     mode: liviana ? "liviana" : "completa",

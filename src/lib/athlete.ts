@@ -141,6 +141,27 @@ const sum = <T,>(arr: T[], f: (t: T) => number) =>
 export const restDaysOf = (metrics: Pick<DailyMetrics, "date" | "restDay">[]) =>
   new Set(metrics.filter((m) => m.restDay).map((m) => m.date));
 
+/**
+ * De los días de vacaciones, los que además se leen como descanso: los que no
+ * tienen NADA registrado.
+ *
+ * Un día de viaje sin gimnasio no es un olvido, es el modo: no debería cortar
+ * la racha ni aparecer como "no entrenaste". Los que sí tienen algo cargado se
+ * leen por lo que se hizo —si saliste a correr por la playa fue cardio, no
+ * descanso—, así que quedan afuera de este set.
+ */
+export function vacationRestDays(
+  vacationDays: Set<string>,
+  strengthSets: Pick<StrengthSet, "date">[],
+  exercises: Pick<ExerciseEntry, "date">[],
+): Set<string> {
+  const conRegistro = new Set([
+    ...strengthSets.map((s) => s.date),
+    ...exercises.map((e) => e.date),
+  ]);
+  return new Set([...vacationDays].filter((d) => !conRegistro.has(d)));
+}
+
 // ---------------------------------------------------------------------------
 // Qué clase de día fue
 // ---------------------------------------------------------------------------
@@ -260,8 +281,16 @@ export type TrainingDay = {
   kind: DayKind;
   /** Fuerza o cardio estructurado. Una caminata NO cuenta como entrenar. */
   trained: boolean;
-  /** El usuario marcó el día como descanso (y no cargó series). */
+  /** El día se lee como descanso: lo declaró el usuario o lo puso el modo vacaciones. */
   rest: boolean;
+  /**
+   * El descanso lo declaró el USUARIO. Se distingue del anterior porque en
+   * vacaciones todos los días sin registro son "descanso" y, sin embargo, la
+   * app sí tiene algo que proponer: la rutina corta de viaje. Confundirlos
+   * hacía que "¿Qué hago hoy?" contestara "lo marcaste como descanso" un día
+   * que el usuario nunca marcó.
+   */
+  restDeclared: boolean;
   intensity: Intensity;
   /** Volumen de fuerza (reps × peso) del día, en kg. */
   volume: number;
@@ -293,6 +322,8 @@ export type TrainingDay = {
  *
  * `isRest` es el día marcado como descanso por el usuario. Se ignora si igual
  * cargó series: lo que se hizo manda sobre lo que se declaró.
+ * `restFromVacation` dice que ese descanso NO lo declaró el usuario sino el
+ * modo vacaciones (ver `TrainingDay.restDeclared`).
  */
 export function trainingOfDay(
   strengthSets: StrengthSet[],
@@ -301,6 +332,7 @@ export function trainingOfDay(
   bodyWeight: number,
   refVolume = 0,
   isRest = false,
+  restFromVacation = false,
 ): TrainingDay {
   const daySets = strengthSets.filter((s) => s.date === date);
   const dayCardio = exercises.filter((e) => e.date === date);
@@ -342,6 +374,7 @@ export function trainingOfDay(
   // un cardio suave no lo invalidan —eso ES un día de descanso activo—, pero
   // ponerse a levantar sí.
   const rest = isRest && sets === 0;
+  const restDeclared = rest && !restFromVacation;
   const kind = dayKindOf({ sets, cardio: dayCardio, rest: isRest });
   // Un día de caminata no es un día entrenado: cuenta como movimiento, y por
   // eso cae en "descanso" para la intensidad (y para el ajuste de carbos).
@@ -359,6 +392,7 @@ export function trainingOfDay(
     kind,
     trained,
     rest,
+    restDeclared,
     intensity,
     volume,
     sets,
@@ -1076,6 +1110,12 @@ export type AthleteInput = {
   /** Objetivo del usuario: define qué desvío calórico es el buscado. */
   objective?: ObjectiveKey;
   /**
+   * Días marcados como vacaciones (ver `lib/vacation.ts`). Cambian dos cosas:
+   * los días sin registro se leen como descanso (no como olvido) y el objetivo
+   * pasa a mantenimiento, porque en un viaje el desvío buscado no es el déficit.
+   */
+  vacationDays?: Set<string>;
+  /**
    * Hora local actual (0-23). Se pasa desde afuera a propósito: esta capa es
    * pura y no mira el reloj. Sirve para no juzgar un día que sigue abierto.
    */
@@ -1085,6 +1125,8 @@ export type AthleteInput = {
 export type AthleteState = {
   date: string;
   isToday: boolean;
+  /** El día cae dentro de un tramo de vacaciones: la app no exige el plan. */
+  vacation: boolean;
   training: TrainingDay;
   week: WeekLoad;
   nutrition: NutritionState;
@@ -1120,9 +1162,24 @@ export type NextMeal = { macro: "proteína" | "carbohidratos"; plan: MealPlan };
 export function buildAthleteState(input: AthleteInput): AthleteState {
   const { date, today } = input;
   const isToday = date === today;
+  const vacation = input.vacationDays?.has(date) ?? false;
   const waterGoal = input.bodyWeight > 0 ? waterGoalL(input.bodyWeight) : WATER_GOAL_L;
 
-  const restDays = restDaysOf(input.metrics);
+  // Los días de viaje sin registro entran como descanso: es lo que evita que
+  // una semana de vacaciones se lea como una semana de abandono. Se guarda
+  // aparte cuáles declaró el usuario: de eso depende si "¿Qué hago hoy?" dice
+  // "lo marcaste como descanso" o propone la rutina de viaje.
+  const declaredRest = restDaysOf(input.metrics);
+  const restDays = new Set(declaredRest);
+  if (input.vacationDays) {
+    for (const d of vacationRestDays(
+      input.vacationDays,
+      input.strengthSets,
+      input.exercises,
+    )) {
+      restDays.add(d);
+    }
+  }
   const week = weeklyLoad(input.strengthSets, input.exercises, date, restDays);
   const training = trainingOfDay(
     input.strengthSets,
@@ -1131,6 +1188,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     input.bodyWeight,
     week.avgSessionVolume,
     restDays.has(date),
+    !declaredRest.has(date),
   );
   const nutrition = nutritionOfDay(
     input.foods,
@@ -1148,7 +1206,9 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     net: nutrition.netCalories,
     goal: nutrition.goals.calories,
     intensity: training.intensity,
-    objective: input.objective ?? "mantener",
+    // De vacaciones se juzga contra el mantenimiento: el déficit no es el
+    // objetivo de la semana, y no lo es a propósito.
+    objective: vacation ? "mantener" : (input.objective ?? "mantener"),
     isToday,
     hour: input.hour ?? DAY_CLOSE_HOUR,
     hasFood: nutrition.consumed.calories > 0,
@@ -1162,6 +1222,7 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     input.bodyWeight,
     week.avgSessionVolume,
     restDays.has(yDate),
+    !declaredRest.has(yDate),
   );
   const yFoods = input.foods.filter((f) => f.date === yDate);
   const yDrinks = input.drinks.filter((d) => d.date === yDate);
@@ -1219,11 +1280,13 @@ export function buildAthleteState(input: AthleteInput): AthleteState {
     isToday,
     hour: input.hour ?? DAY_CLOSE_HOUR,
     foodsOfDay: input.foods.filter((f) => f.date === date),
+    vacation,
   });
 
   return {
     date,
     isToday,
+    vacation,
     training,
     week,
     nutrition,
@@ -1408,11 +1471,23 @@ function buildCoach(x: {
   /** Hora local, para no dar como consejo lo que a esa hora es obvio. */
   hour: number;
   foodsOfDay: FoodEntry[];
+  /** Día de vacaciones: se lee el día, no se reclama el plan. */
+  vacation: boolean;
 }): { headline: string; coach: Signal[]; meal: NextMeal | null } {
   const { training, nutrition, energy, muscles, recovery, week, metrics, isToday } =
     x;
   const coach: Signal[] = [];
   const falta = nutrition.remaining;
+
+  // 0) El modo, antes que nada: sin esto, el resto de la tarjeta parece la de
+  //    siempre y el usuario no entiende por qué las metas cambiaron solas.
+  if (x.vacation) {
+    coach.push({
+      emoji: "🏖️",
+      tone: "info",
+      text: "Modo vacaciones: metas al mantenimiento y rutina corta sin gimnasio. Lo único que conviene sostener es la proteína.",
+    });
+  }
 
   // 1) Lectura del entrenamiento.
   if (training.rest) {
@@ -1544,7 +1619,14 @@ function buildCoach(x: {
   const señales = x.signals;
   const sobrecargado = señales.length >= 2 && !training.trained && isToday;
   let headline: string;
-  if (sobrecargado) {
+  if (x.vacation) {
+    // La promesa del modo es que la pantalla deje de pedir cosas. Un solo
+    // renglón: qué hacer con el cuerpo y lo único que vale la pena mirar.
+    headline =
+      falta.protein > 25
+        ? `De vacaciones: movete un rato y comé sin cuentas. Si podés, sumá ${Math.round(falta.protein)} g de proteína — es lo único que se pierde en una semana floja.`
+        : "De vacaciones: la proteína ya está. Movete un rato y disfrutá, que el plan te espera.";
+  } else if (sobrecargado) {
     // Con el día terminado, "hoy bajá la intensidad" ya no se puede cumplir:
     // el consejo se corre a mañana.
     const accion = energy.closed

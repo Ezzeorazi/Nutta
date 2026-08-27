@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, BellOff, ChevronDown } from "lucide-react";
+import { Bell, BellOff, ChevronDown, Palmtree } from "lucide-react";
 import Chip from "@/components/ui/Chip";
 import { DIET_TEMPLATES, PLAN_CHECKPOINTS, PLAN_RULES } from "@/lib/plan";
 import type { PushState } from "@/lib/usePlanReminders";
@@ -83,10 +83,15 @@ function NotifSection({ push }: { push: PushState }) {
 export default function PlanCard({
   planActive,
   onTogglePlan,
+  vacationActive,
+  onOpenVacation,
   push,
 }: {
   planActive: boolean;
   onTogglePlan: () => void;
+  /** Hay un tramo de vacaciones cubriendo hoy: el plan está en pausa. */
+  vacationActive: boolean;
+  onOpenVacation: () => void;
   push: PushState;
 }) {
   const [openTemplate, setOpenTemplate] = useState<string | null>(null);
@@ -108,9 +113,11 @@ export default function PlanCard({
       </div>
 
       <p className="mb-3 text-xs text-muted">
-        {planActive
-          ? "Tus metas de calorías y macros de arriba son las del plan (2.350 kcal · 190 P). Meta de peso: 92 kg."
-          : "Metas automáticas activas. Tocá arriba para volver a las del plan."}
+        {vacationActive
+          ? "En pausa: estás de vacaciones, así que arriba mandan las metas flexibles. El plan vuelve solo el día que termina el viaje."
+          : planActive
+            ? "Tus metas de calorías y macros de arriba son las del plan (2.350 kcal · 190 P). Meta de peso: 92 kg."
+            : "Metas automáticas activas. Tocá arriba para volver a las del plan."}
       </p>
 
       <div className="mb-4 flex flex-col gap-2">
@@ -188,12 +195,26 @@ export default function PlanCard({
         </div>
       )}
 
+      {!vacationActive && (
+        <button
+          type="button"
+          onClick={onOpenVacation}
+          className="mt-4 flex w-full items-center gap-2 rounded-control border border-dashed border-border px-3.5 py-2.5 text-left text-xs text-muted transition-colors active:scale-[0.99] hover:border-info hover:text-info"
+        >
+          <Palmtree size={15} strokeWidth={2} className="shrink-0" aria-hidden />
+          <span>
+            <strong className="font-semibold">¿Te vas de viaje?</strong> Activá
+            el modo vacaciones y la app deja de exigirte el plan.
+          </span>
+        </button>
+      )}
+
       <div className="mt-4 border-t border-border pt-3">
         <NotifSection push={push} />
         <p className="mt-2 text-[11px] text-muted">
-          Dos avisos por día: a la mañana, qué toca entrenar y cómo venís de
-          recuperado; a la noche, lo que todavía podés corregir. Llegan aunque
-          tengas la app cerrada.
+          {vacationActive
+            ? "De vacaciones llega uno solo, a la mañana: el de la noche —el que reclama— no se manda."
+            : "Dos avisos por día: a la mañana, qué toca entrenar y cómo venís de recuperado; a la noche, lo que todavía podés corregir. Llegan aunque tengas la app cerrada."}
         </p>
       </div>
     </section>

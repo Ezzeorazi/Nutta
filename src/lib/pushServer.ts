@@ -18,6 +18,12 @@ import { APP_ID } from "@/lib/appId";
 import { effectiveWeight } from "@/lib/nutrition";
 import { PLAN_GOALS, getPlanDay } from "@/lib/plan";
 import { inSlot, planReminder, type Slot } from "@/lib/reminders";
+import {
+  VACATION_DAY,
+  vacationDays,
+  vacationGoals,
+  vacationOn,
+} from "@/lib/vacation";
 import type {
   DailyMetrics,
   DrinkEntry,
@@ -26,6 +32,7 @@ import type {
   StrengthSet,
   Supplement,
   SupplementLog,
+  Vacation,
   WeightEntry,
 } from "@/lib/types";
 
@@ -111,6 +118,7 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
     supplements: {},
     supplementLogs: {},
     weights: {},
+    vacations: {},
   })) as unknown as Record<string, unknown[]>;
 
   const subs = (data.pushSubs ?? []) as unknown as PushSub[];
@@ -161,6 +169,11 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
       data.profiles ?? [],
       owner,
     )[0];
+    // Vacaciones: el cron tiene que saberlo tanto como la pantalla. Sin esto el
+    // teléfono te reclama el día de pierna desde la playa, que es exactamente
+    // lo que el modo viene a evitar.
+    const vacations = mine<Vacation & { owner: string }>(data.vacations ?? [], owner);
+    const vacation = vacationOn(vacations, today);
 
     const bodyWeight = effectiveWeight(profile?.weight ?? 0, weights, today);
     const state = buildAthleteState({
@@ -171,12 +184,14 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
       metrics,
       supplements,
       supplementLogs,
-      // Las metas del plan son las que la app usa por defecto (ver page.tsx).
-      goals: PLAN_GOALS,
+      // Las metas del plan son las que la app usa por defecto (ver page.tsx);
+      // de vacaciones, las flexibles derivadas de ellas.
+      goals: vacation ? vacationGoals(PLAN_GOALS) : PLAN_GOALS,
       bodyWeight,
       date: today,
       today,
       objective: profile?.objective as never,
+      vacationDays: vacationDays(vacations),
       hour,
     });
 
@@ -184,7 +199,8 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
       slot,
       date: today,
       state,
-      planDay: getPlanDay(today),
+      planDay: vacation ? VACATION_DAY : getPlanDay(today),
+      vacation,
     });
     if (!reminder) {
       result.skippedEmpty++;

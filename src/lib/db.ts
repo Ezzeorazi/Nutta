@@ -116,6 +116,17 @@ const schema = i.schema({
       to: i.string(), // el que se hizo en su lugar
       createdAt: i.number(),
     }),
+    // Tramos de vacaciones: los días en que la app pasa a modo flexible.
+    // Van en la base (y no en localStorage, como la preferencia del plan)
+    // porque el cron de los avisos también los tiene que leer: si no, el
+    // teléfono te sigue reclamando el día de pierna desde la playa.
+    vacations: i.entity({
+      owner: i.string().indexed(),
+      start: i.string().indexed(), // YYYY-MM-DD (incluido)
+      end: i.string().indexed(), // YYYY-MM-DD (incluido)
+      label: i.string().optional(), // "Brasil", "Casamiento de mi hermano"…
+      createdAt: i.number(),
+    }),
     // Recetas: combos de alimentos que se agregan de una.
     recipes: i.entity({
       owner: i.string().indexed(),

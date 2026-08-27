@@ -9,6 +9,7 @@ const MODE_TONE: Record<TodaySession["mode"], string> = {
   liviana: "bg-accent/10 text-accent",
   descanso: "bg-sunken text-muted",
   hecha: "bg-success/10 text-success",
+  flexible: "bg-info/10 text-info",
 };
 
 /**

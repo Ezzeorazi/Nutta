@@ -26,6 +26,7 @@ import type {
   StrengthSet,
   Supplement,
   SupplementLog,
+  Vacation,
   WeightEntry,
 } from "@/lib/types";
 
@@ -69,6 +70,7 @@ export function useNutta() {
           pushSubs: {},
           strengthSets: {},
           planSwaps: {},
+          vacations: {},
           customGoals: {},
           favorites: {},
           recipes: {},
@@ -152,6 +154,13 @@ export function useNutta() {
   )
     .filter((s) => s.owner === owner)
     .sort((a, b) => a.createdAt - b.createdAt);
+  // Tramos de vacaciones, del más reciente al más viejo: el activo, si hay
+  // uno, es el primero que cubra el día que se esté mirando.
+  const vacations = (
+    (data?.vacations ?? []) as unknown as (Vacation & { owner: string })[]
+  )
+    .filter((v) => v.owner === owner)
+    .sort((a, b) => b.start.localeCompare(a.start));
   const customGoals = (
     (data?.customGoals ?? []) as unknown as (CustomGoal & { owner: string })[]
   )
@@ -766,6 +775,63 @@ export function useNutta() {
     }
   };
 
+  /**
+   * Abre un tramo de vacaciones. Si ya hay uno que cubre el arranque, se
+   * extiende en vez de crear otro solapado: dos tramos encimados no cambian
+   * nada de lo que hace la app, pero ensucian el historial y la tarjeta.
+   */
+  const startVacation = (start: string, end: string, label?: string) => {
+    if (!user || end < start) return null;
+    const overlap = vacations.find((v) => start <= v.end && end >= v.start);
+    if (overlap) {
+      const merged = {
+        start: start < overlap.start ? start : overlap.start,
+        end: end > overlap.end ? end : overlap.end,
+        ...(label?.trim() ? { label: label.trim() } : {}),
+      };
+      db.transact(db.tx.vacations[overlap.id].update(merged));
+      return overlap.id;
+    }
+    const vid = id();
+    db.transact(
+      db.tx.vacations[vid].update({
+        owner: user.id,
+        start,
+        end,
+        ...(label?.trim() ? { label: label.trim() } : {}),
+        createdAt: Date.now(),
+      }),
+    );
+    return vid;
+  };
+
+  /**
+   * Corta el tramo en una fecha: es "volví antes". No lo borra —esos días
+   * fueron vacaciones y el historial tiene que poder decirlo—, salvo que se
+   * corte antes de que empezara.
+   */
+  const endVacation = (vid: string, lastDay: string) => {
+    const v = vacations.find((x) => x.id === vid);
+    if (!v) return;
+    if (lastDay < v.start) {
+      db.transact(db.tx.vacations[vid].delete());
+      return;
+    }
+    // Solo acorta. Se llama con la fecha de HOY, y si se está mirando un viaje
+    // que ya terminó, "volví antes" no puede estirarlo hasta hoy.
+    if (lastDay < v.end) db.transact(db.tx.vacations[vid].update({ end: lastDay }));
+  };
+
+  /** Estira (o recorta) la vuelta de un tramo. */
+  const extendVacation = (vid: string, end: string) => {
+    const v = vacations.find((x) => x.id === vid);
+    if (!v || end < v.start) return;
+    db.transact(db.tx.vacations[vid].update({ end }));
+  };
+
+  const removeVacation = (vid: string) =>
+    db.transact(db.tx.vacations[vid].delete());
+
   /** Actualiza (o crea) las métricas de bienestar de un día. */
   const setMetric = (
     date: string,
@@ -810,6 +876,7 @@ export function useNutta() {
     pushSubs,
     strengthSets,
     planSwaps,
+    vacations,
     customGoals,
     favorites,
     recipes,
@@ -849,6 +916,10 @@ export function useNutta() {
     updateSet,
     swapExercise,
     undoSwap,
+    startVacation,
+    endVacation,
+    extendVacation,
+    removeVacation,
     addGoal,
     removeGoal,
     addPhoto,

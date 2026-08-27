@@ -123,6 +123,20 @@ export type StrengthSet = {
   createdAt: number;
 };
 
+/**
+ * Un tramo de vacaciones: los días en que la app pasa a modo flexible (ver
+ * `lib/vacation.ts`). Vive en la base y no en el dispositivo porque el cron de
+ * los avisos también lo tiene que saber: nada arruina más un viaje que el
+ * teléfono reclamándote el día de pierna.
+ */
+export type Vacation = {
+  id: string;
+  start: string; // YYYY-MM-DD (incluido)
+  end: string; // YYYY-MM-DD (incluido)
+  label?: string; // "Brasil", "Casamiento de mi hermano"…
+  createdAt: number;
+};
+
 /** Un ejercicio de la rutina reemplazado por otro, un día puntual. */
 export type PlanSwap = {
   id: string;

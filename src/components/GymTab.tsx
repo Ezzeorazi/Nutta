@@ -33,6 +33,7 @@ import {
 } from "@/lib/gym";
 import { matchExercise } from "@/lib/exerciseDb";
 import { getPlanDay } from "@/lib/plan";
+import { planDayFor } from "@/lib/vacation";
 import { applySwaps } from "@/lib/planSwaps";
 import { buildTodaySession } from "@/lib/session";
 import type { AthleteState } from "@/lib/athlete";
@@ -44,6 +45,7 @@ import {
   type ExerciseEntry,
   type PlanSwap,
   type StrengthSet,
+  type Vacation,
 } from "@/lib/types";
 import exerciseNames from "@/data/exercise-names.json";
 
@@ -131,6 +133,7 @@ export default function GymTab({
   onRemoveExercise,
   onSetRestDay,
   planSwaps = [],
+  vacations = [],
   onSwapExercise,
   onUndoSwap,
 }: {
@@ -155,6 +158,8 @@ export default function GymTab({
   onSetRestDay: (date: string, rest: boolean) => void;
   /** Ejercicios de la rutina cambiados por otro, por día. */
   planSwaps?: PlanSwap[];
+  /** Tramos de vacaciones: los días que cubren muestran la rutina de viaje. */
+  vacations?: Vacation[];
   onSwapExercise?: (date: string, from: string, to: string) => void;
   onUndoSwap?: (date: string, from: string) => void;
 }) {
@@ -223,10 +228,11 @@ export default function GymTab({
     [state, today, todaySets, planSwaps],
   );
 
-  // La rutina del día que se está viendo, con sus cambios ya aplicados.
+  // La rutina del día que se está viendo, con sus cambios ya aplicados. Si ese
+  // día cae en vacaciones, la del split del mes deja lugar a la corta de viaje.
   const planDay = useMemo(
-    () => applySwaps(getPlanDay(viewDate), planSwaps, viewDate),
-    [planSwaps, viewDate],
+    () => applySwaps(planDayFor(viewDate, vacations, getPlanDay), planSwaps, viewDate),
+    [planSwaps, vacations, viewDate],
   );
   // El slot que se está cambiando: hace falta su original para poder volver
   // atrás y para sugerir sobre el ejercicio del plan, no sobre el reemplazo.

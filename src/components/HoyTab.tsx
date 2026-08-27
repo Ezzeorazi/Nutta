@@ -17,6 +17,8 @@ import MacroBar from "@/components/MacroBar";
 import ScoreCard from "@/components/ScoreCard";
 import SupplementsCard from "@/components/SupplementsCard";
 import Timeline from "@/components/Timeline";
+import VacationCard from "@/components/VacationCard";
+import VacationSheet from "@/components/VacationSheet";
 import WellbeingCard from "@/components/WellbeingCard";
 import type { AthleteState } from "@/lib/athlete";
 import { caloriesFor, type DrinkOption } from "@/lib/drinks";
@@ -32,11 +34,13 @@ import {
   type ExerciseEntry,
   type FavoriteFood,
   type FoodEntry,
+  type Goals,
   type MealType,
   type Recipe,
   type RecipeItem,
   type Supplement,
   type SupplementLog,
+  type Vacation,
 } from "@/lib/types";
 import { waterGoalL } from "@/lib/nutrition";
 import { uid } from "@/lib/uid";
@@ -80,6 +84,13 @@ export default function HoyTab({
   setSupplementQty,
   planActive,
   onTogglePlan,
+  vacation,
+  vacationToday,
+  baseGoals,
+  onStartVacation,
+  onSaveVacation,
+  onEndVacation,
+  onRemoveVacation,
   push,
 }: {
   weight: number;
@@ -136,11 +147,22 @@ export default function HoyTab({
   setSupplementQty: (supId: string, date: string, qty: number) => void;
   planActive: boolean;
   onTogglePlan: () => void;
+  /** Tramo de vacaciones que cubre el día visto, si hay uno. */
+  vacation: Vacation | null;
+  /** HOY cae de vacaciones. Distinto de `vacation`: se puede estar mirando un viaje pasado. */
+  vacationToday: boolean;
+  /** Metas de siempre (sin el ajuste de vacaciones): el sheet compara contra ellas. */
+  baseGoals: Goals;
+  onStartVacation: (start: string, end: string, label?: string) => void;
+  onSaveVacation: (id: string, end: string) => void;
+  onEndVacation: (id: string, lastDay: string) => void;
+  onRemoveVacation: (id: string) => void;
   push: PushState;
 }) {
   const [foodOpen, setFoodOpen] = useState<MealType | null>(null);
   const [exOpen, setExOpen] = useState(false);
   const [recipesOpen, setRecipesOpen] = useState(false);
+  const [vacationOpen, setVacationOpen] = useState(false);
   const toast = useToast();
   const isToday = viewDate === today;
   const waterGoal = waterGoalL(weight);
@@ -247,12 +269,30 @@ export default function HoyTab({
         </div>
       </section>
 
+      {/* El modo, antes que el estado: es lo que explica por qué las metas de
+          arriba y la rutina del Gym cambiaron. */}
+      {vacation && (
+        <VacationCard
+          vacation={vacation}
+          viewDate={viewDate}
+          today={today}
+          goals={goals}
+          onEdit={() => setVacationOpen(true)}
+        />
+      )}
+
       {/* Estado actual: recuperación, señales del día y qué hacer ahora. Es lo
           primero que diría un entrenador, así que va apenas debajo del anillo y
           de la carga rápida (que se ganó su lugar arriba y no se lo movemos). */}
       <EstadoCard state={state} />
 
-      <PlanCard planActive={planActive} onTogglePlan={onTogglePlan} push={push} />
+      <PlanCard
+        planActive={planActive}
+        onTogglePlan={onTogglePlan}
+        vacationActive={vacationToday}
+        onOpenVacation={() => setVacationOpen(true)}
+        push={push}
+      />
 
       <Timeline
         foods={todayFoods}
@@ -349,6 +389,18 @@ export default function HoyTab({
                 : undefined,
             );
           }}
+        />
+      )}
+      {vacationOpen && (
+        <VacationSheet
+          today={today}
+          goals={baseGoals}
+          current={vacation ?? undefined}
+          onStart={onStartVacation}
+          onSave={(end) => vacation && onSaveVacation(vacation.id, end)}
+          onEndNow={() => vacation && onEndVacation(vacation.id, today)}
+          onRemove={() => vacation && onRemoveVacation(vacation.id)}
+          onClose={() => setVacationOpen(false)}
         />
       )}
       {recipesOpen && (

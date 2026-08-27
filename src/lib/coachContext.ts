@@ -69,12 +69,19 @@ export function athleteBrief(input: {
       }${training.volume > 0 ? ` · ${kg(training.volume)} kg en ${training.sets} series` : ""}${
         training.cardioMinutes > 0 ? ` · ${training.cardioMinutes} min de cardio` : ""
       } · ${round(training.burned)} kcal quemadas`
-    : training.rest
+    : training.restDeclared
       ? "descanso declarado"
-      : "todavía no entrenó hoy";
+      : training.rest
+        ? "día de viaje sin gimnasio (no es un olvido)"
+        : "todavía no entrenó hoy";
 
   const lines = [
     `Fecha: ${state.date}, son las ${hour}:00. Peso: ${bodyWeight || "?"} kg. Objetivo: ${objLabel ?? "sin definir"}.`,
+    // Sin esta línea el coach sigue empujando el plan del mes desde la playa:
+    // ve las metas más altas y las lee como un error de registro.
+    state.vacation
+      ? "MODO VACACIONES ACTIVO: está de viaje. Las metas de abajo ya son las flexibles (mantenimiento, proteína como piso). No le reclames el gimnasio ni el déficit; si pregunta qué comer afuera, resolvelo con lo que haya en un restaurante."
+      : null,
     `Entrenamiento de hoy: ${trainedLine}.`,
     `Calorías: ${round(nutrition.consumed.calories)} consumidas de ${round(nutrition.goals.calories)} (netas ${round(nutrition.netCalories)}) → ${
       nutrition.remaining.calories >= 0

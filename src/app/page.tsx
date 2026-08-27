@@ -27,6 +27,7 @@ import {
 } from "@/lib/coachContext";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
 import { PLAN_GOALS, PLAN_TARGET_WEIGHT } from "@/lib/plan";
+import { vacationDays, vacationGoals, vacationOn } from "@/lib/vacation";
 import { usePlanReminders } from "@/lib/usePlanReminders";
 import { useNutta } from "@/lib/useNutta";
 import {
@@ -63,6 +64,7 @@ export default function Home() {
     supplementLogs,
     strengthSets,
     planSwaps,
+    vacations,
     customGoals,
     favorites,
     recipes,
@@ -99,6 +101,10 @@ export default function Home() {
     updateSet,
     swapExercise,
     undoSwap,
+    startVacation,
+    endVacation,
+    extendVacation,
+    removeVacation,
     addGoal,
     removeGoal,
     addPhoto,
@@ -167,11 +173,20 @@ export default function Home() {
   // (que se completa una vez y queda viejo). De él dependen las metas, el agua
   // y las calorías de todo el ejercicio.
   const bodyWeight = effectiveWeight(profile?.weight ?? 0, weights, today);
-  const goals = !profile
+  // Las de siempre: las del plan del mes o las calculadas del perfil.
+  const baseGoals = !profile
     ? DEFAULT_GOALS
     : planActive
       ? PLAN_GOALS
       : computeGoals({ ...profile, weight: bodyWeight });
+
+  // Vacaciones. El tramo que importa para las metas es el de HOY: el día visto
+  // puede ser uno pasado, y el estado de cada día ya resuelve el suyo por su
+  // cuenta a partir del set de días (ver `buildAthleteState`).
+  const vacationDaySet = useMemo(() => vacationDays(vacations), [vacations]);
+  const todayVacation = vacationOn(vacations, today);
+  const viewVacation = vacationOn(vacations, viewDate);
+  const goals = todayVacation ? vacationGoals(baseGoals) : baseGoals;
 
   const waterGoal = bodyWeight > 0 ? waterGoalL(bodyWeight) : undefined;
 
@@ -205,6 +220,7 @@ export default function Home() {
       bodyWeight,
       today,
       objective,
+      vacationDays: vacationDaySet,
       hour,
     }),
     [
@@ -219,6 +235,7 @@ export default function Home() {
       bodyWeight,
       today,
       objective,
+      vacationDaySet,
       hour,
     ],
   );
@@ -231,8 +248,17 @@ export default function Home() {
     () =>
       viewDate === today
         ? todayState
-        : buildAthleteState({ ...athleteBase, date: viewDate }),
-    [athleteBase, todayState, viewDate, today],
+        : buildAthleteState({
+            ...athleteBase,
+            // Un día pasado de vacaciones se juzga con las metas que regían ESE
+            // día: mirarlo contra las del plan sería reprocharle en retrospectiva
+            // un déficit que el modo justamente había suspendido.
+            goals: vacationOn(vacations, viewDate)
+              ? vacationGoals(baseGoals)
+              : baseGoals,
+            date: viewDate,
+          }),
+    [athleteBase, todayState, viewDate, today, vacations, baseGoals],
   );
 
   // Avisos del plan: se calculan siempre sobre HOY (no el día que se está
@@ -243,21 +269,8 @@ export default function Home() {
     () => dailyScore(viewState, viewFoods),
     [viewState, viewFoods],
   );
-  const insights = useMemo(
-    () =>
-      buildInsights({
-        foods,
-        exercises,
-        strengthSets,
-        metrics,
-        supplements,
-        supplementLogs,
-        goals,
-        today,
-        waterGoal,
-        profile,
-      }),
-    [
+  const insights = useMemo(() => {
+    const all = buildInsights({
       foods,
       exercises,
       strengthSets,
@@ -268,8 +281,25 @@ export default function Home() {
       today,
       waterGoal,
       profile,
-    ],
-  );
+    });
+    // De vacaciones el panel se queda solo con lo bueno. Audita una semana que
+    // el modo suspendió a propósito, así que reprocharle el volumen o los días
+    // sin gimnasio es justo lo que el modo viene a evitar. Un PR, en cambio,
+    // sigue siendo un PR.
+    return todayVacation ? all.filter((i) => i.tone === "good") : all;
+  }, [
+    foods,
+    exercises,
+    strengthSets,
+    metrics,
+    supplements,
+    supplementLogs,
+    goals,
+    today,
+    waterGoal,
+    profile,
+    todayVacation,
+  ]);
   // Racha de constancia para la chip 🔥 (ver `WeekLoad.habitStreak`): cuenta
   // días entrenados, y los días ligeros o de descanso ni suman ni la cortan.
   const trainStreak = todayState.week.habitStreak;
@@ -525,6 +555,7 @@ export default function Home() {
           onRemoveExercise={removeExercise}
           onSetRestDay={(date, rest) => setMetric(date, { restDay: rest })}
           planSwaps={planSwaps}
+          vacations={vacations}
           onSwapExercise={swapExercise}
           onUndoSwap={undoSwap}
         />
@@ -600,6 +631,13 @@ export default function Home() {
           setSupplementQty={setSupplementQty}
           planActive={planActive}
           onTogglePlan={togglePlan}
+          vacation={viewVacation}
+          vacationToday={!!todayVacation}
+          baseGoals={baseGoals}
+          onStartVacation={startVacation}
+          onSaveVacation={extendVacation}
+          onEndVacation={endVacation}
+          onRemoveVacation={removeVacation}
           push={push}
         />
         )}

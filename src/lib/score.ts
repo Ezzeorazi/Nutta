@@ -90,7 +90,9 @@ export function dailyScore(
       logged: true,
       points: Math.round(30 * row("entrenamiento").ratio),
       detail: training.rest
-        ? "Día de descanso: cuenta como cumplido, es parte del plan."
+        ? state.vacation
+          ? "Día de vacaciones sin gimnasio: cuenta como cumplido, es el modo."
+          : "Día de descanso: cuenta como cumplido, es parte del plan."
         : training.kind === "ligera"
           ? `Actividad ligera · ${training.cardioMinutes} min: suma movimiento, no entrenamiento.`
           : training.trained

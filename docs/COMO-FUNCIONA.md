@@ -129,6 +129,20 @@ Los **5 tabs**:
 - El resumen incluye entrenamiento **y** volumen de fuerza con su tendencia, nutrición, sueño/agua/pasos y composición corporal. Si no le pasás sueño ni medidas, la IA no puede hacer otra cosa que hablar de calorías — que es justo lo que no queremos.
 - El prompt le exige **cruzar** los datos (entrenó mucho y comió poco → el problema es la comida), poner el sueño antes que cualquier ajuste de macros y **no** llamar retroceso a subir de peso si la cintura baja.
 
+### Modo vacaciones (flexible)
+
+- **El problema**: durante un viaje el plan no se cumple, y la app lo lee como abandono. Reclama el día de pierna a la noche, corta la racha, hunde el score y muestra un déficit que nadie estaba buscando. La reacción normal a eso no es cumplir el plan: es **dejar de registrar** una semana y volver con un agujero en los datos.
+- Un **tramo con fechas** (`vacations` en la base) en el que la app deja de exigir y sostiene solo lo que importa afuera:
+  - **Metas al mantenimiento**: +15% de calorías (se sale del déficit) y la proteína baja al **75% como piso** —es lo único que se pierde en una semana floja—. El resto se reparte manteniendo la relación carbos:grasas del plan. Con el plan de agosto: 2.700 kcal · 145 P · 315 C · 95 G.
+  - **Rutina corta de viaje**: cuerpo entero, sin equipamiento, ~20 min, **la misma todos los días**. El split de seis días existe para acumular volumen; en una semana de viaje no hay volumen que acumular, hay músculo que mantener. Aparece en el Gym y en "¿Qué hago hoy?" (modo `flexible`).
+  - **La racha no se corta**: los días de viaje sin registro entran como **descanso**, no como olvidos. Si ese día sí entrenaste o saliste a correr, manda lo que hiciste.
+  - **Un solo aviso por día**, a la mañana ("Día 3 de 7…"). El de la noche —el que reclama— no se manda.
+  - **Insights**: solo los positivos. El panel audita una semana que el modo suspendió a propósito; un PR sigue siendo un PR.
+  - El chat lo sabe (va en el brief del coach), así que no te empuja el gimnasio ni el déficit desde la playa.
+- La **fecha de vuelta es obligatoria**: un modo flexible sin corte deja de ser un modo. Si volvés antes se corta ("Volví antes"), si te quedás más se estira, y el día que termina el plan vuelve solo.
+- Se activa desde **Hoy → tarjeta del plan → "¿Te vas de viaje?"**. Con el modo activo, una tarjeta arriba de Hoy explica por qué cambiaron las metas.
+- Lógica pura en [`src/lib/vacation.ts`](../src/lib/vacation.ts); vive en la base (y no en el dispositivo) porque el **cron de los avisos** también la tiene que leer. UI en [`VacationCard.tsx`](../src/components/VacationCard.tsx) y [`VacationSheet.tsx`](../src/components/VacationSheet.tsx).
+
 ### Completar días pasados (backfill)
 - El chat siempre registra en **hoy**, pero si te olvidaste de cargar algo podés completar días anteriores desde el alta manual:
   - **Tab Hoy** → flechas **‹ ›** hasta el día → sección "Agregar a \<fecha\>" (comida / ejercicio / recetas), la tarjeta de **Bienestar** (agua/sueño/pasos) y el checklist de **Suplementos**.
@@ -203,7 +217,7 @@ Los **5 tabs**:
 
 - La base de datos es **InstantDB** (en la nube), asociada a tu cuenta por **email**.
 - Entidades, cada una con un campo `owner` (= tu id de usuario):
-  `profiles`, `foods`, `exercises`, `messages` (chat), `memories`, `weights`, `metrics` (agua/sueño/pasos), `measures`, `supplements`, `supplementLogs`, `strengthSets` (fuerza), `customGoals` (metas), `favorites`, `recipes` y `photos` (+ `$files` de storage).
+  `profiles`, `foods`, `exercises`, `messages` (chat), `memories`, `weights`, `metrics` (agua/sueño/pasos), `measures`, `supplements`, `supplementLogs`, `strengthSets` (fuerza), `planSwaps`, `vacations` (modo vacaciones), `customGoals` (metas), `favorites`, `recipes` y `photos` (+ `$files` de storage).
 - Las escrituras son **optimistas**: se ven al instante y se sincronizan en segundo plano (funciona offline y reconcilia al reconectar).
 - **Seguridad**: reglas de permisos que solo permiten a cada usuario ver/editar sus propios registros (`auth.id == data.owner`).
 - Cliente y esquema en [`src/lib/db.ts`](../src/lib/db.ts); acceso centralizado en el hook [`src/lib/useNutta.ts`](../src/lib/useNutta.ts); login en [`Login.tsx`](../src/components/Login.tsx).
