@@ -10,7 +10,7 @@ App **mobile-first** para registrar alimentación y ejercicio: calorías, prote�
 - **Comidas**: tus favoritos y lo que ya registraste (búsqueda local, instantánea y offline); para algo nuevo, la IA estima los macros por 100 g.
 - **Ejercicio**: actividades con valores MET, calorías quemadas según tu peso, y catálogo de +400 ejercicios ([RepDB](https://repdb.co)) para el chat y el registro de fuerza.
 - **Reloj / smartband**: le sacás una captura a la pantalla del reloj (Xiaomi y cía.) y la IA carga el entrenamiento, los pasos o el sueño. Ver [Vincular el reloj](#vincular-el-reloj-xiaomi-amazfit).
-- **Modo vacaciones**: un tramo con fechas en el que la app deja de exigir el plan — metas al mantenimiento, proteína como piso, rutina corta sin equipamiento, la racha intacta y un solo aviso por día. Volvés y el plan sigue donde estaba.
+- **Modo vacaciones**: un tramo con fechas en el que la app deja de exigir el plan — metas al mantenimiento, proteína como piso, la racha intacta y un solo aviso por día. Cada día elegís qué entrenar: la rutina corta sin equipamiento o el día del plan que quieras. Volvés y el plan sigue donde estaba.
 - **Dashboard**: anillo de calorías (in/out) y barras de macros.
 - **Historial** de 7 días con gráficos (calorías netas y macros).
 - **PWA** instalable con soporte offline y dark mode.

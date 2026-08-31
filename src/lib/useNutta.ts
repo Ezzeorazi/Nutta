@@ -20,6 +20,7 @@ import type {
   MemoryFact,
   MemoryKind,
   PhotoEntry,
+  PlanPick,
   PlanSwap,
   Recipe,
   RecipeItem,
@@ -70,6 +71,7 @@ export function useNutta() {
           pushSubs: {},
           strengthSets: {},
           planSwaps: {},
+          planPicks: {},
           vacations: {},
           customGoals: {},
           favorites: {},
@@ -154,6 +156,10 @@ export function useNutta() {
   )
     .filter((s) => s.owner === owner)
     .sort((a, b) => a.createdAt - b.createdAt);
+  // Días del plan elegidos a mano, por fecha (modo vacaciones).
+  const planPicks = (
+    (data?.planPicks ?? []) as unknown as (PlanPick & { owner: string })[]
+  ).filter((p) => p.owner === owner);
   // Tramos de vacaciones, del más reciente al más viejo: el activo, si hay
   // uno, es el primero que cubra el día que se esté mirando.
   const vacations = (
@@ -776,6 +782,30 @@ export function useNutta() {
   };
 
   /**
+   * Elige (o cambia) el día del plan que se hace en una fecha. Un solo registro
+   * por día: volver a elegir pisa lo anterior, no acumula.
+   */
+  const pickPlanDay = (date: string, dow: number) => {
+    if (!user) return;
+    const existing = planPicks.find((p) => p.date === date);
+    const pid = existing?.id ?? id();
+    db.transact(
+      db.tx.planPicks[pid].update({
+        owner: user.id,
+        date,
+        dow,
+        ...(existing ? {} : { createdAt: Date.now() }),
+      }),
+    );
+  };
+
+  /** Vuelve al default del día (la rutina corta de viaje). */
+  const clearPlanPick = (date: string) => {
+    const existing = planPicks.find((p) => p.date === date);
+    if (existing) db.transact(db.tx.planPicks[existing.id].delete());
+  };
+
+  /**
    * Abre un tramo de vacaciones. Si ya hay uno que cubre el arranque, se
    * extiende en vez de crear otro solapado: dos tramos encimados no cambian
    * nada de lo que hace la app, pero ensucian el historial y la tarjeta.
@@ -876,6 +906,7 @@ export function useNutta() {
     pushSubs,
     strengthSets,
     planSwaps,
+    planPicks,
     vacations,
     customGoals,
     favorites,
@@ -916,6 +947,8 @@ export function useNutta() {
     updateSet,
     swapExercise,
     undoSwap,
+    pickPlanDay,
+    clearPlanPick,
     startVacation,
     endVacation,
     extendVacation,

@@ -22,6 +22,7 @@ import RestTimer from "@/components/RestTimer";
 import SessionSheet from "@/components/SessionSheet";
 import SwapExerciseSheet from "@/components/SwapExerciseSheet";
 import Button from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
 import {
@@ -32,8 +33,14 @@ import {
   usedExercises,
 } from "@/lib/gym";
 import { matchExercise } from "@/lib/exerciseDb";
-import { getPlanDay } from "@/lib/plan";
-import { planDayFor } from "@/lib/vacation";
+import { DOW_SHORT, getPlanDay, shortPlanLabel } from "@/lib/plan";
+import {
+  VACATION_DOW,
+  VACATION_OPTIONS,
+  pickedDow,
+  planDayFor,
+  vacationOn,
+} from "@/lib/vacation";
 import { applySwaps } from "@/lib/planSwaps";
 import { buildTodaySession } from "@/lib/session";
 import type { AthleteState } from "@/lib/athlete";
@@ -44,6 +51,7 @@ import {
   type DailyMetrics,
   type ExerciseEntry,
   type PlanSwap,
+  type PlanPick,
   type StrengthSet,
   type Vacation,
 } from "@/lib/types";
@@ -134,6 +142,8 @@ export default function GymTab({
   onSetRestDay,
   planSwaps = [],
   vacations = [],
+  planPicks = [],
+  onPickPlanDay,
   onSwapExercise,
   onUndoSwap,
 }: {
@@ -160,6 +170,10 @@ export default function GymTab({
   planSwaps?: PlanSwap[];
   /** Tramos de vacaciones: los días que cubren muestran la rutina de viaje. */
   vacations?: Vacation[];
+  /** Días del plan elegidos a mano, por fecha (solo en vacaciones). */
+  planPicks?: PlanPick[];
+  /** Elegir qué día del plan hacer en esa fecha (`VACATION_DOW` = rutina de viaje). */
+  onPickPlanDay?: (date: string, dow: number) => void;
   onSwapExercise?: (date: string, from: string, to: string) => void;
   onUndoSwap?: (date: string, from: string) => void;
 }) {
@@ -224,16 +238,35 @@ export default function GymTab({
     [strengthSets, today],
   );
   const session = useMemo(
-    () => buildTodaySession({ state, today, daySets: todaySets, swaps: planSwaps }),
-    [state, today, todaySets, planSwaps],
+    () =>
+      buildTodaySession({
+        state,
+        today,
+        daySets: todaySets,
+        swaps: planSwaps,
+        picks: planPicks,
+      }),
+    [state, today, todaySets, planSwaps, planPicks],
   );
 
   // La rutina del día que se está viendo, con sus cambios ya aplicados. Si ese
-  // día cae en vacaciones, la del split del mes deja lugar a la corta de viaje.
+  // día cae en vacaciones manda lo que hayas elegido, y si no elegiste nada, la
+  // rutina corta de viaje.
   const planDay = useMemo(
-    () => applySwaps(planDayFor(viewDate, vacations, getPlanDay), planSwaps, viewDate),
-    [planSwaps, vacations, viewDate],
+    () =>
+      applySwaps(
+        planDayFor(viewDate, vacations, getPlanDay, planPicks),
+        planSwaps,
+        viewDate,
+      ),
+    [planPicks, planSwaps, vacations, viewDate],
   );
+  // De viaje el calendario no manda: el día lo elegís vos, y solo para ese día.
+  const deViaje = useMemo(
+    () => !!vacationOn(vacations, viewDate),
+    [vacations, viewDate],
+  );
+  const elegido = pickedDow(planPicks, viewDate) ?? VACATION_DOW;
   // El slot que se está cambiando: hace falta su original para poder volver
   // atrás y para sugerir sobre el ejercicio del plan, no sobre el reemplazo.
   const swapSlot = swapping
@@ -388,6 +421,35 @@ export default function GymTab({
             Marcar {isToday ? "hoy" : dayLabel(viewDate)} como día de descanso
           </button>
         )
+      )}
+
+      {/* De vacaciones, el día lo elegís. Es la contracara del modo: si no hay
+          calendario que cumplir, tampoco hay uno que te diga qué toca — y si
+          apareció un gimnasio en el viaje, la rutina corta no alcanza. */}
+      {deViaje && onPickPlanDay && (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-sm font-semibold text-muted">
+            ¿Qué entrenás {isToday ? "hoy" : `el ${dayLabel(viewDate)}`}?
+          </h2>
+          <p className="text-xs text-muted">
+            Estás de vacaciones: elegí el día del plan que quieras. Vale solo
+            para este día, así que mañana volvés a elegir.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {VACATION_OPTIONS.map((d) => (
+              <Chip
+                key={d.dow}
+                selected={elegido === d.dow}
+                onClick={() => onPickPlanDay(viewDate, d.dow)}
+              >
+                <span aria-hidden>{d.emoji}</span>
+                {d.dow === VACATION_DOW
+                  ? "Rutina de viaje"
+                  : `${DOW_SHORT[d.dow]} · ${shortPlanLabel(d)}`}
+              </Chip>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Rutina fija del plan del mes, para el día que se está viendo. */}

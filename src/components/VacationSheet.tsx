@@ -168,9 +168,10 @@ export default function VacationSheet({
               pierde en una semana floja.
             </li>
             <li>
-              🏖️ <strong className="text-foreground">Rutina corta</strong>: cuerpo
-              entero, sin equipamiento, 20 minutos. La misma todos los días — el
-              split del mes se retoma al volver.
+              🏖️ <strong className="text-foreground">Elegís qué entrenar</strong>
+              : por defecto una rutina corta de cuerpo entero, sin equipamiento,
+              de 20 minutos. Si aparece un gimnasio, elegís en el Gym el día del
+              plan que quieras — y vale solo para ese día.
             </li>
             <li>
               🔥 <strong className="text-foreground">La racha no se corta</strong>:

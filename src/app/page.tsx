@@ -27,7 +27,12 @@ import {
 } from "@/lib/coachContext";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
 import { PLAN_GOALS, PLAN_TARGET_WEIGHT } from "@/lib/plan";
-import { vacationDays, vacationGoals, vacationOn } from "@/lib/vacation";
+import {
+  VACATION_DOW,
+  vacationDays,
+  vacationGoals,
+  vacationOn,
+} from "@/lib/vacation";
 import { usePlanReminders } from "@/lib/usePlanReminders";
 import { useNutta } from "@/lib/useNutta";
 import {
@@ -64,6 +69,7 @@ export default function Home() {
     supplementLogs,
     strengthSets,
     planSwaps,
+    planPicks,
     vacations,
     customGoals,
     favorites,
@@ -101,6 +107,8 @@ export default function Home() {
     updateSet,
     swapExercise,
     undoSwap,
+    pickPlanDay,
+    clearPlanPick,
     startVacation,
     endVacation,
     extendVacation,
@@ -556,6 +564,12 @@ export default function Home() {
           onSetRestDay={(date, rest) => setMetric(date, { restDay: rest })}
           planSwaps={planSwaps}
           vacations={vacations}
+          planPicks={planPicks}
+          onPickPlanDay={(date, dow) =>
+            // La rutina de viaje es el default del día: elegirla es borrar la
+            // elección, no guardar una fila que diga "lo de siempre".
+            dow === VACATION_DOW ? clearPlanPick(date) : pickPlanDay(date, dow)
+          }
           onSwapExercise={swapExercise}
           onUndoSwap={undoSwap}
         />

@@ -15,8 +15,8 @@ import type { AthleteState } from "@/lib/athlete";
 import { groupsOf } from "@/lib/gym";
 import { WEEKLY_PLAN, getPlanDay, type PlanDay } from "@/lib/plan";
 import { applySwaps, type PlanSlot } from "@/lib/planSwaps";
-import { VACATION_DAY } from "@/lib/vacation";
-import type { PlanSwap, StrengthSet } from "@/lib/types";
+import { VACATION_DAY, VACATION_DOW, pickedDow } from "@/lib/vacation";
+import type { PlanPick, PlanSwap, StrengthSet } from "@/lib/types";
 
 export type SessionMode =
   | "completa"
@@ -100,6 +100,8 @@ export function buildTodaySession(x: {
   daySets: StrengthSet[];
   /** Ejercicios que cambiaste hoy: la sesión tiene que proponer los tuyos. */
   swaps?: PlanSwap[];
+  /** Días del plan elegidos a mano (modo vacaciones). */
+  picks?: PlanPick[];
 }): TodaySession {
   const { state, today, daySets } = x;
   const hechos = new Set(daySets.map((s) => norm(s.exercise)));
@@ -107,15 +109,19 @@ export function buildTodaySession(x: {
   const reasons: string[] = [];
 
   // De vacaciones el calendario no es el split del mes: es la rutina corta sin
-  // equipamiento, la misma todos los días (ver `lib/vacation.ts`).
+  // equipamiento… salvo que hayas elegido un día del plan a mano, que es lo
+  // que se hace cuando aparece un gimnasio en el viaje (ver `lib/vacation.ts`).
   const deViaje = state.vacation;
+  const elegido = deViaje ? pickedDow(x.picks ?? [], today) : null;
+  const elegidoDelPlan = elegido != null && elegido !== VACATION_DOW;
+  const base = deViaje
+    ? elegidoDelPlan
+      ? (WEEKLY_PLAN.find((d) => d.dow === elegido) ?? VACATION_DAY)
+      : VACATION_DAY
+    : getPlanDay(today);
   // Con los cambios del día ya aplicados: si reemplazaste un ejercicio, la
   // sesión sugerida tiene que hablar del que vas a hacer, no del que no podés.
-  const calendario = applySwaps(
-    deViaje ? VACATION_DAY : getPlanDay(today),
-    x.swaps ?? [],
-    today,
-  );
+  const calendario = applySwaps(base, x.swaps ?? [], today);
 
   // --- Ya entrenaste: lo que queda del plan, no una sesión nueva ------------
   if (state.training.kind === "fuerza") {
@@ -218,7 +224,10 @@ export function buildTodaySession(x: {
   const liviana = justo;
   if (liviana) reasons.push(...state.signals.slice(0, 3));
 
-  if (deViaje) {
+  // La rutina corta de viaje. Si elegiste un día del plan, en cambio, se sigue
+  // de largo: esa sesión se lee como cualquier otra (y se aliviana si venís
+  // justo), porque es una sesión de gimnasio de verdad.
+  if (deViaje && !elegidoDelPlan) {
     return {
       mode: "flexible",
       emoji: day.emoji,
@@ -250,9 +259,11 @@ export function buildTodaySession(x: {
     reasons: liviana
       ? reasons
       : [
-          rec != null && rec >= 80
-            ? `recuperación ${rec}%: día para ir por un PR`
-            : "venís bien: sesión completa",
+          elegidoDelPlan
+            ? "elegiste este día del plan para hoy"
+            : rec != null && rec >= 80
+              ? `recuperación ${rec}%: día para ir por un PR`
+              : "venís bien: sesión completa",
           ...reasons,
         ],
   };

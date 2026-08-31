@@ -15,8 +15,14 @@
  * Todo acá es puro: se usa igual en el cliente y en el cron de los avisos.
  */
 
-import type { PlanDay } from "@/lib/plan";
-import { dayLabel, shiftISO, type Goals, type Vacation } from "@/lib/types";
+import { WEEKLY_PLAN, type PlanDay } from "@/lib/plan";
+import {
+  dayLabel,
+  shiftISO,
+  type Goals,
+  type PlanPick,
+  type Vacation,
+} from "@/lib/types";
 
 /** Duración por defecto al abrir el modo (días, incluyendo hoy). */
 export const DEFAULT_VACATION_DAYS = 7;
@@ -137,13 +143,44 @@ export const VACATION_DAY: PlanDay = {
   cardio: "Caminá todo lo que puedas: turistear cuenta. Con 8-10 mil pasos ya está.",
 };
 
-/** El día que toca: el del plan, o la rutina flexible si estás de viaje. */
+/** `dow` de la rutina de vacaciones: no es ningún día de la semana. */
+export const VACATION_DOW = -1;
+
+/**
+ * Los días entre los que se puede elegir estando de viaje: la rutina corta
+ * primero (es el default) y después los días de gimnasio del plan.
+ *
+ * El día de descanso del plan queda afuera: de vacaciones, un día sin elegir
+ * nada YA es descanso, así que ofrecerlo sería ofrecer lo que ya está puesto.
+ */
+export const VACATION_OPTIONS: PlanDay[] = [
+  VACATION_DAY,
+  ...WEEKLY_PLAN.filter((d) => !d.rest).sort((a, b) => a.dow - b.dow),
+];
+
+/** El `dow` elegido a mano para esa fecha, o `null` si no elegiste nada. */
+export function pickedDow(picks: PlanPick[], date: string): number | null {
+  const pick = picks.find((p) => p.date === date);
+  return pick ? pick.dow : null;
+}
+
+/**
+ * El día que toca.
+ *
+ * Fuera de vacaciones manda el calendario del plan, sin más. De viaje, la
+ * rutina corta es el default y tu elección la pisa: no estás siguiendo el
+ * split, así que qué entrenar hoy es una decisión tuya y no del almanaque.
+ */
 export function planDayFor(
   date: string,
   vacations: Vacation[],
   fallback: (iso: string) => PlanDay,
+  picks: PlanPick[] = [],
 ): PlanDay {
-  return vacationOn(vacations, date) ? VACATION_DAY : fallback(date);
+  if (!vacationOn(vacations, date)) return fallback(date);
+  const dow = pickedDow(picks, date);
+  if (dow == null || dow === VACATION_DOW) return VACATION_DAY;
+  return WEEKLY_PLAN.find((d) => d.dow === dow) ?? VACATION_DAY;
 }
 
 /** Lo que dice la app cuando el día cae en vacaciones. */

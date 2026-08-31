@@ -19,7 +19,7 @@ import { effectiveWeight } from "@/lib/nutrition";
 import { PLAN_GOALS, getPlanDay } from "@/lib/plan";
 import { inSlot, planReminder, type Slot } from "@/lib/reminders";
 import {
-  VACATION_DAY,
+  planDayFor,
   vacationDays,
   vacationGoals,
   vacationOn,
@@ -29,6 +29,7 @@ import type {
   DrinkEntry,
   ExerciseEntry,
   FoodEntry,
+  PlanPick,
   StrengthSet,
   Supplement,
   SupplementLog,
@@ -119,6 +120,7 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
     supplementLogs: {},
     weights: {},
     vacations: {},
+    planPicks: {},
   })) as unknown as Record<string, unknown[]>;
 
   const subs = (data.pushSubs ?? []) as unknown as PushSub[];
@@ -174,6 +176,10 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
     // lo que el modo viene a evitar.
     const vacations = mine<Vacation & { owner: string }>(data.vacations ?? [], owner);
     const vacation = vacationOn(vacations, today);
+    // De viaje el día lo elige el usuario: el aviso tiene que nombrar el que
+    // eligió, no el que le tocaría por almanaque.
+    const planPicks = mine<PlanPick & { owner: string }>(data.planPicks ?? [], owner);
+    const planDay = planDayFor(today, vacations, getPlanDay, planPicks);
 
     const bodyWeight = effectiveWeight(profile?.weight ?? 0, weights, today);
     const state = buildAthleteState({
@@ -199,7 +205,7 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
       slot,
       date: today,
       state,
-      planDay: vacation ? VACATION_DAY : getPlanDay(today),
+      planDay,
       vacation,
     });
     if (!reminder) {

@@ -15,8 +15,8 @@ import {
   isTrainingKind,
   type AthleteState,
 } from "@/lib/athlete";
-import type { PlanDay } from "@/lib/plan";
-import { vacationProgress } from "@/lib/vacation";
+import { shortPlanLabel, type PlanDay } from "@/lib/plan";
+import { VACATION_DOW, vacationProgress } from "@/lib/vacation";
 import type { Vacation } from "@/lib/types";
 
 export type Slot = "manana" | "noche";
@@ -41,9 +41,6 @@ export function inSlot(slot: Slot, localHour: number): boolean {
   return localHour >= from && localHour <= to;
 }
 
-/** El nombre del entrenamiento del día, sin la coletilla entre paréntesis. */
-const shortLabel = (planDay: PlanDay) => planDay.label.replace(/\s*\(.*\)$/, "");
-
 /** Las partes se unen con ". ", así que ninguna puede traer su propio punto. */
 const noDot = (s: string) => s.replace(/\.\s*$/, "");
 
@@ -64,10 +61,17 @@ function morning(
   // cumplir. Y es el único del día (ver `evening`).
   if (vacation) {
     const { day, total } = vacationProgress(vacation, date);
+    const proteina = `apuntá a ${Math.round(state.nutrition.goals.protein)} g de proteína`;
+    // Si ya elegiste un día del plan para hoy, el aviso habla de ESE día: la
+    // rutina corta es el default, no una imposición del modo.
+    const que =
+      planDay.dow === VACATION_DOW
+        ? `Movete un rato —en el Gym tenés la rutina corta, sin equipamiento— y ${proteina}`
+        : `Elegiste ${shortPlanLabel(planDay)} ${planDay.emoji}. ${capFirst(proteina)}`;
     return {
       tag: `${date}:manana`,
       title: "🏖️ Modo vacaciones",
-      body: `Día ${day} de ${total}. Movete un rato —en el Gym tenés la rutina corta, sin equipamiento— y apuntá a ${Math.round(state.nutrition.goals.protein)} g de proteína. Del resto, nada.`,
+      body: `Día ${day} de ${total}. ${que}. Del resto, nada.`,
     };
   }
 
@@ -75,7 +79,7 @@ function morning(
     partes.push("Hoy toca descanso 🧘");
     if (planDay.cardio) partes.push(noDot(planDay.cardio));
   } else {
-    partes.push(`Hoy toca ${shortLabel(planDay)} ${planDay.emoji}`);
+    partes.push(`Hoy toca ${shortPlanLabel(planDay)} ${planDay.emoji}`);
     if (planDay.warning) partes.push(noDot(planDay.warning));
   }
 
@@ -122,7 +126,7 @@ function evening(
 
   const partes: string[] = [];
   if (sinEntrenar) {
-    partes.push(`Hoy tocaba ${shortLabel(planDay)} y todavía no lo cargaste`);
+    partes.push(`Hoy tocaba ${shortPlanLabel(planDay)} y todavía no lo cargaste`);
   }
   if (faltaProteina > 20) {
     partes.push(`te faltan ${faltaProteina} g de proteína`);

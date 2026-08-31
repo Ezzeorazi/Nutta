@@ -132,6 +132,12 @@ export const WEEKLY_PLAN: PlanDay[] = [
   },
 ];
 
+/** El nombre del entrenamiento sin la coletilla entre paréntesis: "Tirón A". */
+export const shortPlanLabel = (d: PlanDay) => d.label.replace(/\s*\(.*\)$/, "");
+
+/** Abreviatura del día de la semana de un `dow` (0 = domingo). */
+export const DOW_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
 /** El día del plan que corresponde a una fecha YYYY-MM-DD. */
 export function getPlanDay(iso: string): PlanDay {
   const dow = new Date(`${iso}T00:00:00`).getDay();

@@ -137,6 +137,21 @@ export type Vacation = {
   createdAt: number;
 };
 
+/**
+ * El día del plan que elegiste hacer en una fecha concreta.
+ *
+ * Existe para el modo vacaciones: ahí no hay calendario que respetar —no
+ * estás siguiendo el split— pero sí puede haber gimnasio, y entonces la
+ * pregunta "¿qué hago hoy?" pasa a ser tuya. `dow` es el día del plan
+ * (0 = domingo … 6 = sábado); `VACATION_PICK` (-1) es la rutina corta de viaje.
+ */
+export type PlanPick = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  dow: number; // 0-6 = día del plan · -1 = rutina de vacaciones
+  createdAt: number;
+};
+
 /** Un ejercicio de la rutina reemplazado por otro, un día puntual. */
 export type PlanSwap = {
   id: string;

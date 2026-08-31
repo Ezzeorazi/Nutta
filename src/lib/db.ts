@@ -116,6 +116,15 @@ const schema = i.schema({
       to: i.string(), // el que se hizo en su lugar
       createdAt: i.number(),
     }),
+    // El día del plan elegido a mano para una fecha (modo vacaciones). Es por
+    // DÍA, como los cambios de ejercicio: elegir hoy "Tirón A" no reescribe el
+    // plan del mes ni compromete al día de mañana.
+    planPicks: i.entity({
+      owner: i.string().indexed(),
+      date: i.string().indexed(), // YYYY-MM-DD
+      dow: i.number(), // 0-6 = día del plan · -1 = rutina de vacaciones
+      createdAt: i.number(),
+    }),
     // Tramos de vacaciones: los días en que la app pasa a modo flexible.
     // Van en la base (y no en localStorage, como la preferencia del plan)
     // porque el cron de los avisos también los tiene que leer: si no, el

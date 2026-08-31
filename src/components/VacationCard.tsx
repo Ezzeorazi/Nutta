@@ -57,8 +57,13 @@ export default function VacationCard({
       <p className="text-sm text-muted">
         Metas flexibles: {goals.calories.toLocaleString("es-AR")} kcal y{" "}
         <strong className="text-foreground">{goals.protein} g de proteína</strong>
-        , que es lo único que conviene sostener. La rutina corta de viaje está en
-        el Gym y la racha no se corta.
+        , que es lo único que conviene sostener. La racha no se corta.
+      </p>
+
+      <p className="text-xs text-muted">
+        En el <strong className="text-foreground">Gym</strong> elegís qué
+        entrenar cada día: la rutina corta de viaje o el día del plan que
+        quieras. Vale solo para ese día.
       </p>
 
       {isToday && !terminado && (
