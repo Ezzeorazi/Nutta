@@ -6,6 +6,7 @@ import BottomNav, { type Tab } from "@/components/BottomNav";
 import AppProviders from "@/components/ui/AppProviders";
 import { ScreenSkeleton } from "@/components/ui/Skeleton";
 import Chat from "@/components/Chat";
+import DataErrorScreen from "@/components/DataErrorScreen";
 import GymTab from "@/components/GymTab";
 import History from "@/components/History";
 import HoyTab from "@/components/HoyTab";
@@ -56,6 +57,7 @@ export default function Home() {
   const {
     authLoading,
     dataLoading,
+    dataError,
     user,
     foods,
     drinks,
@@ -510,6 +512,19 @@ export default function Home() {
   // Ya sabemos que hay sesión: en vez de texto pulsando, se dibuja la forma de
   // lo que viene, así la pantalla no salta cuando llegan los datos.
   if (dataLoading) return <ScreenSkeleton />;
+
+  // La query falló. Va ANTES del onboarding a propósito: sin perfil legible los
+  // dos casos son indistinguibles, y mandar al onboarding a alguien que ya
+  // tiene cuenta le duplica el perfil sobre datos que no se pudieron leer.
+  if (dataError) {
+    return (
+      <DataErrorScreen
+        message={dataError}
+        onRetry={() => window.location.reload()}
+        onSignOut={() => db.auth.signOut()}
+      />
+    );
+  }
 
   // Primera vez: sin perfil → onboarding a pantalla completa.
   if (!profile) return <Onboarding onDone={saveProfile} />;

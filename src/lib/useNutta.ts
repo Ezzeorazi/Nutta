@@ -54,7 +54,11 @@ export type PushSubRecord = {
  */
 export function useNutta() {
   const { isLoading: authLoading, user } = db.useAuth();
-  const { isLoading: dataLoading, data } = db.useQuery(
+  const {
+    isLoading: dataLoading,
+    data,
+    error: queryError,
+  } = db.useQuery(
     user
       ? {
           profiles: {},
@@ -82,6 +86,17 @@ export function useNutta() {
   );
 
   const owner = user?.id;
+
+  /**
+   * La query falló (permisos, red, un namespace que el backend no conoce).
+   *
+   * Se expone en vez de tragarse: sin esto, un error se veía EXACTAMENTE igual
+   * que una cuenta vacía —`data` llega `undefined`, todas las listas quedan en
+   * cero— y la app te mandaba al onboarding como si fueras nuevo. El que lo
+   * completara terminaba con un perfil duplicado y un pesaje inventado encima
+   * de sus datos reales, que siguen ahí y no se pueden leer.
+   */
+  const dataError = queryError ? (queryError.message ?? "Error de conexión") : null;
 
   // El `date` efectivo se deriva del createdAt LOCAL (con fallback al date
   // guardado): así los registros quedan en el día correcto aunque se hayan
@@ -258,7 +273,9 @@ export function useNutta() {
 
   // Migración única de los datos locales (localStorage) a la cuenta.
   useEffect(() => {
-    if (!user || dataLoading) return;
+    // Con la query caída no se migra NADA: lo que hay en la base es ilegible,
+    // así que copiar encima solo puede duplicar.
+    if (!user || dataLoading || dataError) return;
     if (localStorage.getItem("nutta.migrated")) return;
     try {
       const lsFoods = JSON.parse(localStorage.getItem("nutta.foods") || "[]");
@@ -311,12 +328,12 @@ export function useNutta() {
     } catch {
       // si algo falla, no bloquea la app
     }
-  }, [user, dataLoading, profileId]);
+  }, [user, dataLoading, dataError, profileId]);
 
   // Migración única: corrige el `date` de registros mal-fechados por el bug de
   // UTC, reescribiéndolo con el día LOCAL de su createdAt.
   useEffect(() => {
-    if (!user || dataLoading) return;
+    if (!user || dataLoading || dataError) return;
     if (localStorage.getItem("nutta.datefix.v1")) return;
     try {
       const txns = [];
@@ -346,7 +363,7 @@ export function useNutta() {
       // no bloquea la app
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, dataLoading]);
+  }, [user, dataLoading, dataError]);
 
   const saveProfile = (p: Profile) => {
     if (!user) return;
@@ -892,6 +909,7 @@ export function useNutta() {
   return {
     authLoading,
     dataLoading,
+    dataError,
     user,
     foods,
     drinks,
