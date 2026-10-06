@@ -659,6 +659,7 @@ export default function Home() {
           toggleSupplement={toggleSupplement}
           setSupplementQty={setSupplementQty}
           planActive={planActive}
+          memories={memories}
           onTogglePlan={togglePlan}
           vacation={viewVacation}
           vacationToday={!!todayVacation}

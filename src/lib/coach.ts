@@ -150,9 +150,9 @@ IMPORTANTE: devolvé SOLO el objeto JSON con los datos pedidos. NO incluyas "$sc
  * reintentable, así que el AI SDK no lo cubre: sin esto, una salida malformada
  * (que es aleatoria) se le muestra al usuario como una falla del chat.
  */
-async function withRetry(
-  call: (nudge: string) => Promise<{ object: CoachResult }>,
-): Promise<CoachResult> {
+async function withRetry<T>(
+  call: (nudge: string) => Promise<{ object: T }>,
+): Promise<T> {
   try {
     return (await call("")).object;
   } catch (err) {
@@ -275,4 +275,107 @@ export async function analyzeWeek(input: {
     prompt: `Datos de la última semana:\n${input.summary}\n\nMEMORIA DEL USUARIO:\n${mem}\n\nDale tu análisis de coach y las recomendaciones.`,
   });
   return text.trim();
+}
+
+/**
+ * Ideas de comida para cerrar los macros que faltan, con lo que el usuario come.
+ *
+ * Los macros se piden POR INGREDIENTE y se suman acá: si se le piden los
+ * totales, el modelo copia el objetivo ("2 huevos + palta = 48 g de proteína")
+ * en vez de calcular. Ingrediente por ingrediente sí da valores de tabla.
+ */
+export const mealIdeasSchema = z.object({
+  ideas: z
+    .array(
+      z.object({
+        title: z.string().describe("Nombre corto del plato (ej. 'Entraña con papas al horno')"),
+        ingredients: z
+          .array(
+            z.object({
+              food: z.string().describe("Alimento (ej. 'entraña', 'huevo')"),
+              amount: z.string().describe("Cantidad: '200 g' o '3 unidades'"),
+              calories: z.number(),
+              protein: z.number(),
+              carbs: z.number(),
+              fat: z.number(),
+            }),
+          )
+          .describe("Macros REALES de esa cantidad de ese ingrediente"),
+      }),
+    )
+    .describe("Exactamente 3 opciones distintas entre sí"),
+});
+
+export type MealIdea = {
+  title: string;
+  items: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+};
+
+export const MEAL_IDEAS_SYSTEM = `Sos Nutta, entrenador y nutricionista. Armás 3 opciones concretas para la PRÓXIMA comida del usuario.
+
+Reglas:
+- Usá sobre todo los alimentos que el usuario come de verdad (ALIMENTOS FRECUENTES) y respetá su MEMORIA (gustos, cosas que no come). Comida argentina de casa, que se consiga en cualquier súper.
+- Cantidades en gramos o unidades, sin aclaraciones entre paréntesis. Para CADA ingrediente das sus macros REALES para esa cantidad, de tabla nutricional.
+- NUNCA ajustes los números para que coincidan con el objetivo. Para acercarte al objetivo cambiá las CANTIDADES o sumá ingredientes.
+- La proteína tiene que quedar cerca del objetivo (±8 g): si no llega, sumá huevo, claras, yogur griego, queso magro, carne, pollo, atún o un scoop de proteína.
+- Platos simples de 3 a 5 ingredientes, que tengan sentido juntos en un plato de casa. Nada de rellenos para cerrar números (yogur con entraña, jamón con morcilla): mejor subí la porción de la proteína principal.
+- Las 3 opciones con distinta proteína principal. Títulos cortos, en español rioplatense.`;
+
+/**
+ * El 20b arma platos raros (morcilla con claras y "0 g de whey"). Es un botón a
+ * pedido, no el chat: esperar ~4 s por ideas comibles vale la pena.
+ */
+const MEAL_IDEAS_MODEL = process.env.GROQ_IDEAS_MODEL || "openai/gpt-oss-120b";
+
+/** Tres ideas de comida para la próxima comida, con macros. */
+export async function suggestMeals(input: {
+  meal: string;
+  target: { calories: number; protein: number; carbs: number; fat: number };
+  remaining: { calories: number; protein: number; carbs: number; fat: number };
+  frequent?: string;
+  memories?: { kind: string; text: string }[];
+}): Promise<MealIdea[]> {
+  const mem =
+    input.memories && input.memories.length
+      ? input.memories.map((m) => `- [${m.kind}] ${m.text}`).join("\n")
+      : "(sin datos)";
+  const t = input.target;
+  const r = input.remaining;
+  const object = await withRetry((nudge) =>
+    generateObject({
+      model: groq(MEAL_IDEAS_MODEL),
+      schema: mealIdeasSchema,
+      // Con el razonamiento por defecto, 3 platos con macros lo agotan y Groq
+      // devuelve una generación vacía (json_validate_failed). En low sale.
+      providerOptions: { groq: { reasoningEffort: "low" } },
+      system: `${MEAL_IDEAS_SYSTEM}${nudge}`,
+      prompt: `PRÓXIMA COMIDA: ${input.meal}
+OBJETIVO DE ESTA COMIDA: ~${t.calories} kcal · ${t.protein} g proteína · ${t.carbs} g carbos · ${t.fat} g grasa
+LO QUE FALTA EN TODO EL DÍA: ${r.calories} kcal · ${r.protein} g P · ${r.carbs} g C · ${r.fat} g G
+
+ALIMENTOS FRECUENTES POR COMIDA:
+${input.frequent?.trim() || "(sin datos)"}
+
+MEMORIA DEL USUARIO:
+${mem}`,
+    }),
+  );
+  const r1 = (v: number) => Math.round(v);
+  return object.ideas.slice(0, 3).map((idea) => {
+    idea = { ...idea, ingredients: idea.ingredients.filter((x) => !/^0/.test(x.amount.trim())) };
+    const sum = (k: "calories" | "protein" | "carbs" | "fat") =>
+      r1(idea.ingredients.reduce((acc, x) => acc + (Number(x[k]) || 0), 0));
+    return {
+      title: idea.title,
+      items: idea.ingredients.map((x) => `${x.amount} de ${x.food}`).join(" + "),
+      calories: sum("calories"),
+      protein: sum("protein"),
+      carbs: sum("carbs"),
+      fat: sum("fat"),
+    };
+  });
 }

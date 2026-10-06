@@ -28,11 +28,14 @@ import { Field, inputCls } from "@/components/ui/Field";
 import {
   exerciseProgress,
   groupByExercise,
+  lastPerformance,
+  nextWeight,
   personalRecords,
   totalVolume,
   usedExercises,
+  type LastPerformance,
 } from "@/lib/gym";
-import { matchExercise } from "@/lib/exerciseDb";
+import { canonicalName, matchExercise } from "@/lib/exerciseDb";
 import { DOW_SHORT, getPlanDay, shortPlanLabel } from "@/lib/plan";
 import {
   VACATION_DOW,
@@ -267,6 +270,37 @@ export default function GymTab({
     [vacations, viewDate],
   );
   const elegido = pickedDow(planPicks, viewDate) ?? VACATION_DOW;
+
+  // Lo último que hiciste en cada ejercicio de la rutina, antes del día que se
+  // ve: de ahí sale el peso sugerido. Se compara por nombre canónico para que
+  // "Abductor" y "Abducción de Cadera en Máquina" sean el mismo historial.
+  const lastByExercise = useMemo(() => {
+    const canon = new Map<string, string>();
+    const key = (n: string) => {
+      let k = canon.get(n);
+      if (k === undefined) canon.set(n, (k = canonicalName(n).trim().toLowerCase()));
+      return k;
+    };
+    const same = (a: string, b: string) => key(a) === key(b);
+    const out = new Map<string, LastPerformance>();
+    for (const ex of planDay.exercises) {
+      const last = lastPerformance(strengthSets, ex.name, viewDate, ex.sets, same);
+      if (last) out.set(ex.name, last);
+    }
+    return out;
+  }, [planDay, strengthSets, viewDate]);
+
+  // Tocar un ejercicio de la rutina lo carga con tu último peso y reps (o el
+  // siguiente escalón si la última vez topeaste el rango en todas las series).
+  const selectExercise = (name: string) => {
+    setExercise(name);
+    const last = lastByExercise.get(name);
+    if (last) {
+      setWeight(String(last.topped ? nextWeight(last.weight) : last.weight));
+      setReps(String(last.reps));
+    }
+  };
+
   // El slot que se está cambiando: hace falta su original para poder volver
   // atrás y para sugerir sobre el ejercicio del plan, no sobre el reemplazo.
   const swapSlot = swapping
@@ -458,7 +492,8 @@ export default function GymTab({
         daySets={daySets}
         isToday={isToday}
         viewDate={viewDate}
-        onSelectExercise={setExercise}
+        lastByExercise={lastByExercise}
+        onSelectExercise={selectExercise}
         onSwapExercise={onSwapExercise ? setSwapping : undefined}
       />
 
@@ -788,7 +823,7 @@ export default function GymTab({
       {sessionOpen && (
         <SessionSheet
           session={session}
-          onSelectExercise={setExercise}
+          onSelectExercise={selectExercise}
           onClose={() => setSessionOpen(false)}
         />
       )}

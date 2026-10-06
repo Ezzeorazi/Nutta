@@ -10,6 +10,7 @@ import {
 import { readBody } from "@/lib/body";
 import { groupsOf, MUSCLE_GROUPS } from "@/lib/gym";
 import { OBJECTIVES, type ObjectiveKey } from "@/lib/nutrition";
+import { getPlanDay, PLAN_WAIST } from "@/lib/plan";
 import type {
   DailyMetrics,
   ExerciseEntry,
@@ -47,6 +48,7 @@ export function athleteBrief(input: {
 }): string {
   const { state, hour, bodyWeight } = input;
   const { training, nutrition, week, recovery } = state;
+  const plan = getPlanDay(state.date);
   const objLabel = OBJECTIVES.find((o) => o.key === input.objective)?.label;
 
   // Lo comido hoy, por comida: es lo que permite no repetirle el mismo plato ni
@@ -83,6 +85,13 @@ export function athleteBrief(input: {
       ? "MODO VACACIONES ACTIVO: está de viaje. Las metas de abajo ya son las flexibles (mantenimiento, proteína como piso). No le reclames el gimnasio ni el déficit; si pregunta qué comer afuera, resolvelo con lo que haya en un restaurante."
       : null,
     `Entrenamiento de hoy: ${trainedLine}.`,
+    // El plan que él eligió: sin esto la IA sugiere rutinas inventadas en vez
+    // de la suya.
+    `Plan (recomposición, 6 días PPL, meta cintura ${PLAN_WAIST.start}→${PLAN_WAIST.target} cm): hoy toca ${
+      plan.rest
+        ? `descanso (${plan.cardio})`
+        : `${plan.label}: ${plan.exercises.map((e) => `${e.name} ${e.sets}`).join(", ")}`
+    }.`,
     `Calorías: ${round(nutrition.consumed.calories)} consumidas de ${round(nutrition.goals.calories)} (netas ${round(nutrition.netCalories)}) → ${
       nutrition.remaining.calories >= 0
         ? `quedan ${round(nutrition.remaining.calories)}`

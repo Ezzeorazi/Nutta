@@ -36,6 +36,7 @@ import {
   type FoodEntry,
   type Goals,
   type MealType,
+  type MemoryFact,
   type Recipe,
   type RecipeItem,
   type Supplement,
@@ -83,6 +84,7 @@ export default function HoyTab({
   toggleSupplement,
   setSupplementQty,
   planActive,
+  memories,
   onTogglePlan,
   vacation,
   vacationToday,
@@ -146,6 +148,7 @@ export default function HoyTab({
   toggleSupplement: (supId: string, date: string) => void;
   setSupplementQty: (supId: string, date: string, qty: number) => void;
   planActive: boolean;
+  memories: MemoryFact[];
   onTogglePlan: () => void;
   /** Tramo de vacaciones que cubre el día visto, si hay uno. */
   vacation: Vacation | null;
@@ -292,6 +295,11 @@ export default function HoyTab({
         vacationActive={vacationToday}
         onOpenVacation={() => setVacationOpen(true)}
         push={push}
+        ideas={
+          isToday
+            ? { today, remaining: state.nutrition.remaining, foods, memories }
+            : undefined
+        }
       />
 
       <Timeline

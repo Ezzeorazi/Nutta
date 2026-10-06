@@ -2,12 +2,14 @@
 
 import { ArrowLeftRight, Check } from "lucide-react";
 import { muscleWork } from "@/lib/exerciseDb";
+import { nextWeight, type LastPerformance } from "@/lib/gym";
 import type { SwappedDay } from "@/lib/planSwaps";
 import { dayLabel, type StrengthSet } from "@/lib/types";
 
 /**
  * Sesión fija del plan del mes, con tap-to-fill: tocar un ejercicio lo carga en
- * el formulario de abajo. Es la única rutina que se muestra —antes convivía con
+ * el formulario de abajo, con el peso de tu última vez. El plan no trae pesos:
+ * salen de tu historial. Es la única rutina que se muestra —antes convivía con
  * una sugerencia generada por la app y no se sabía cuál seguir—.
  */
 export default function PlanDayCard({
@@ -15,6 +17,7 @@ export default function PlanDayCard({
   daySets,
   isToday = true,
   viewDate,
+  lastByExercise,
   onSelectExercise,
   onSwapExercise,
 }: {
@@ -22,6 +25,8 @@ export default function PlanDayCard({
   daySets: StrengthSet[];
   isToday?: boolean;
   viewDate?: string;
+  /** Última sesión de cada ejercicio, por nombre del plan. */
+  lastByExercise?: Map<string, LastPerformance>;
   onSelectExercise: (name: string) => void;
   /** Abre el reemplazo de ese ejercicio. */
   onSwapExercise?: (name: string) => void;
@@ -59,6 +64,7 @@ export default function PlanDayCard({
                 // algo que se puede razonar (y reemplazar) en vez de una lista
                 // de nombres de máquinas.
                 const musculos = muscleWork(ex.name).primary;
+                const last = lastByExercise?.get(ex.name);
                 return (
                   <div
                     key={ex.swappedFrom ?? ex.name}
@@ -97,7 +103,21 @@ export default function PlanDayCard({
                       </span>
                       <span className="shrink-0 pl-2 text-right text-xs text-muted tabular-nums">
                         {ex.sets}
-                        {ex.weight && <span className="block">{ex.weight}</span>}
+                        {last ? (
+                          last.topped ? (
+                            <span className="block font-semibold text-primary">
+                              ↑ {nextWeight(last.weight)} kg
+                            </span>
+                          ) : (
+                            <span className="block">
+                              {last.weight} kg × {last.reps}
+                            </span>
+                          )
+                        ) : (
+                          <span className="block">
+                            {ex.weight ?? "buscá tu peso"}
+                          </span>
+                        )}
                       </span>
                     </button>
                     {onSwapExercise && (

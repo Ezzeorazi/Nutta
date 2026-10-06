@@ -144,3 +144,83 @@ export function exerciseProgress(
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
+
+export type LastPerformance = {
+  date: string;
+  /** Mejor peso de esa sesión y las reps más altas que hiciste con él. */
+  weight: number;
+  reps: number;
+  /** Cuántas series hiciste con ese peso. */
+  setsAtWeight: number;
+  /** Todas las series con ese peso llegaron al tope del rango: toca subir. */
+  topped: boolean;
+};
+
+/**
+ * Tope del rango de reps de un esquema del plan: "4 × 8-10" → 10. Los que van
+ * por tiempo ("3 × 45-60 s") no tienen reps que topear.
+ */
+const rangeTop = (scheme: string): number | null => {
+  if (/\d\s*s\b/.test(scheme)) return null;
+  const m = scheme.match(/×\s*(?:\d+\s*-\s*)?(\d+)/);
+  return m ? Number(m[1]) : null;
+};
+
+/** Series del plan: "4 × 8-10" → 4. */
+const plannedSets = (scheme: string): number | null => {
+  const m = scheme.match(/^\s*(\d+)/);
+  return m ? Number(m[1]) : null;
+};
+
+/**
+ * La última sesión ANTERIOR a `before` en que hiciste ese ejercicio: de ahí
+ * sale el peso sugerido de la rutina, en vez de un número fijo en el plan que
+ * queda viejo a la segunda semana.
+ *
+ * `same` decide si dos nombres son el mismo ejercicio (ej. por nombre
+ * canónico): sin eso, "Abductor" y "Abducción de Cadera en Máquina" serían
+ * dos historiales distintos.
+ */
+export function lastPerformance(
+  sets: StrengthSet[],
+  exercise: string,
+  before: string,
+  scheme?: string,
+  same: (a: string, b: string) => boolean = (a, b) =>
+    normName(a) === normName(b),
+): LastPerformance | null {
+  let lastDate = "";
+  const byName = new Map<string, boolean>();
+  const matches = (name: string) => {
+    let ok = byName.get(name);
+    if (ok === undefined) byName.set(name, (ok = same(name, exercise)));
+    return ok;
+  };
+  for (const s of sets) {
+    if (s.date < before && s.date > lastDate && s.weight > 0 && matches(s.exercise))
+      lastDate = s.date;
+  }
+  if (!lastDate) return null;
+
+  const session = sets.filter((s) => s.date === lastDate && matches(s.exercise));
+  const weight = Math.max(...session.map((s) => s.weight));
+  const atWeight = session.filter((s) => s.weight === weight);
+  const reps = Math.max(...atWeight.map((s) => s.reps));
+
+  const top = scheme ? rangeTop(scheme) : null;
+  const planned = scheme ? plannedSets(scheme) : null;
+  const topped =
+    top != null &&
+    planned != null &&
+    atWeight.length >= planned &&
+    atWeight.every((s) => s.reps >= top);
+
+  return { date: lastDate, weight, reps, setsAtWeight: atWeight.length, topped };
+}
+
+/**
+ * El siguiente escalón de peso: 2,5 kg en barra y máquina; con pesos chicos
+ * (mancuerna liviana, polea de laterales) 2,5 kg es un salto del 30 %, así que
+ * se sube de a 1.
+ */
+export const nextWeight = (w: number) => (w < 15 ? w + 1 : w + 2.5);

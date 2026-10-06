@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 import { Bell, BellOff, ChevronDown, Palmtree } from "lucide-react";
-import Chip from "@/components/ui/Chip";
-import { DIET_TEMPLATES, PLAN_CHECKPOINTS, PLAN_RULES } from "@/lib/plan";
+import MealIdeas from "@/components/MealIdeas";
+import {
+  PLAN_CHECKPOINTS,
+  PLAN_GOALS,
+  PLAN_MEALS,
+  PLAN_RULES,
+  PLAN_WAIST,
+} from "@/lib/plan";
+import type { FoodEntry, Goals, MemoryFact } from "@/lib/types";
 import type { PushState } from "@/lib/usePlanReminders";
 
 function NotifSection({ push }: { push: PushState }) {
@@ -86,6 +93,7 @@ export default function PlanCard({
   vacationActive,
   onOpenVacation,
   push,
+  ideas,
 }: {
   planActive: boolean;
   onTogglePlan: () => void;
@@ -93,14 +101,22 @@ export default function PlanCard({
   vacationActive: boolean;
   onOpenVacation: () => void;
   push: PushState;
+  /** Para "Dame ideas"; solo viaja cuando se está viendo hoy. */
+  ideas?: {
+    today: string;
+    remaining: Goals;
+    foods: FoodEntry[];
+    memories: MemoryFact[];
+  };
 }) {
-  const [openTemplate, setOpenTemplate] = useState<string | null>(null);
+  const [showDay, setShowDay] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const g = PLAN_GOALS;
 
   return (
     <section className="rounded-card bg-card p-4 shadow-e1">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-semibold">📋 Tu plan de agosto</h2>
+        <h2 className="font-semibold">📋 Tu plan de octubre</h2>
         <button
           type="button"
           onClick={onTogglePlan}
@@ -116,51 +132,38 @@ export default function PlanCard({
         {vacationActive
           ? "En pausa: estás de vacaciones, así que arriba mandan las metas flexibles. El plan vuelve solo el día que termina el viaje."
           : planActive
-            ? "Tus metas de calorías y macros de arriba son las del plan (2.350 kcal · 190 P). Meta de peso: 92 kg."
+            ? `Recomposición: ${g.calories.toLocaleString("es-AR")} kcal · ${g.protein} P · ${g.carbs} C · ${g.fat} G. La meta que manda es la cintura: de ${PLAN_WAIST.start} a ${PLAN_WAIST.target} cm.`
             : "Metas automáticas activas. Tocá arriba para volver a las del plan."}
       </p>
 
-      <div className="mb-4 flex flex-col gap-2">
-        <h3 className="text-xs font-semibold text-muted">Plantillas de comida</h3>
-        <div className="flex flex-wrap gap-2">
-          {DIET_TEMPLATES.map((t) => (
-            <Chip
-              key={t.id}
-              selected={openTemplate === t.id}
-              onClick={() => setOpenTemplate((o) => (o === t.id ? null : t.id))}
-            >
-              {t.id}
-            </Chip>
-          ))}
+      {ideas && (
+        <div className="mb-4">
+          <MealIdeas {...ideas} />
         </div>
-        {openTemplate && (
-          <div className="mt-1 flex flex-col gap-2 rounded-xl bg-sunken p-3">
-            {(() => {
-              const t = DIET_TEMPLATES.find((x) => x.id === openTemplate)!;
-              return (
-                <>
-                  <p className="text-xs font-semibold">{t.label}</p>
-                  <p className="text-[11px] text-muted">{t.summary}</p>
-                  <ul className="flex flex-col gap-1.5">
-                    {t.meals.map((m) => (
-                      <li key={m.time} className="text-xs">
-                        <span className="font-medium">{m.time}</span>
-                        <span className="text-muted"> — {m.desc}</span>
-                        {m.kcal > 0 && (
-                          <span className="text-muted tabular-nums">
-                            {" "}
-                            ({m.kcal} kcal, {m.protein} g P)
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              );
-            })()}
-          </div>
-        )}
-      </div>
+      )}
+
+      <button
+        type="button"
+        onClick={() => setShowDay((s) => !s)}
+        className="mb-2 flex w-full items-center justify-between text-xs font-semibold text-muted"
+      >
+        Cómo repartir el día
+        <ChevronDown
+          size={15}
+          className={`transition-transform ${showDay ? "rotate-180" : ""}`}
+          aria-hidden
+        />
+      </button>
+      {showDay && (
+        <ul className="mb-3 flex flex-col gap-1.5">
+          {PLAN_MEALS.map((m) => (
+            <li key={m.time} className="text-xs">
+              <span className="font-medium">{m.time}</span>
+              <span className="text-muted"> — {m.text}</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <button
         type="button"

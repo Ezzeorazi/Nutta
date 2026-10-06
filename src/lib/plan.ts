@@ -1,26 +1,47 @@
 /**
- * El plan de Ezequiel de agosto 2026: metas, rutina semanal fija y plantillas
- * de comida, tal como salió del análisis de sus registros (20/7-8/8).
+ * El plan de Ezequiel de octubre 2026 (vuelta de vacaciones, más fuerte):
+ * recomposición —bajar cintura sin perder la fuerza ganada—, 6 días de 60-75
+ * min en Smartfit.
  *
  * Es data estática a propósito: no es una rutina que la app inventa según el
- * historial (esa ya existe en `lib/gym.ts`), es la que él decidió seguir este
- * mes. Vive acá, separada, para poder cambiarla mes a mes sin tocar lógica.
+ * historial (esa ya existe en `lib/gym.ts`), es la que él decidió seguir. Vive
+ * acá, separada, para poder cambiarla sin tocar lógica.
+ *
+ * Por qué así (PPL ondulado): cada músculo 2 veces por semana, una pesada (A,
+ * 5-8 reps, para sostener la fuerza) y una de volumen (B, 8-15, la que hace
+ * crecer). 16-19 series por sesión: con más no entra en 70 min con el cardio.
+ *
+ * Los pesos NO están escritos acá: salen de la última serie real de cada
+ * ejercicio (`lastPerformance` en `lib/gym.ts`). Un número fijo queda viejo a
+ * la segunda semana; el historial no.
  */
 
 import type { Goals } from "@/lib/types";
 
-/** Metas nutricionales del plan (reemplazan a las calculadas del perfil). */
+/**
+ * Metas nutricionales del plan (reemplazan a las calculadas del perfil).
+ * 94 kg, mantenimiento estimado ~2.800 kcal entrenando 6 días: déficit de
+ * ~350, chico a propósito para no comerse la fuerza. Proteína ~2 g/kg, grasa
+ * ~0,8 g/kg y el resto carbos, concentrados alrededor del entreno.
+ */
 export const PLAN_GOALS: Goals = {
-  calories: 2350,
+  calories: 2450,
   protein: 190,
-  carbs: 240,
-  fat: 72,
+  carbs: 250,
+  fat: 75,
 };
 
-/** Meta de peso del plan (10-12 semanas desde el 8/8). */
-export const PLAN_TARGET_WEIGHT = 92;
+/**
+ * Meta de peso del plan: solo siembra si no hay una propia. En recomposición
+ * la balanza se mueve poco; la meta que manda es la cintura.
+ */
+export const PLAN_TARGET_WEIGHT = 90;
 
-export type PlanExercise = { name: string; sets: string; weight: string };
+/** Cintura (cm) al arrancar y meta a 12 semanas (~0,5 cm por semana). */
+export const PLAN_WAIST = { start: 104, target: 98 };
+
+/** `weight`: solo una aclaración que el historial no dice ("o en Smith"). */
+export type PlanExercise = { name: string; sets: string; weight?: string };
 
 export type PlanDay = {
   dow: number; // 0 = domingo … 6 = sábado (Date.getDay())
@@ -35,92 +56,85 @@ export type PlanDay = {
 export const WEEKLY_PLAN: PlanDay[] = [
   {
     dow: 1,
-    label: "Empuje A (pecho enfocado)",
+    label: "Empuje A (fuerza)",
     emoji: "💪",
     exercises: [
-      { name: "Press en banco inclinado con barra", sets: "4 × 6-8", weight: "45 kg" },
-      { name: "Press con mancuernas plano", sets: "3 × 8-10", weight: "20 kg c/u" },
-      { name: "Press de pecho con cable (medio)", sets: "3 × 10-12", weight: "8 kg" },
-      { name: "Pec Deck", sets: "3 × 12-15", weight: "45 kg" },
-      { name: "Elevación lateral en polea", sets: "3 × 12-15", weight: "12-17 kg" },
-      { name: "Fondos en máquina asistida", sets: "3 × 8-10", weight: "40 kg asistencia" },
-      { name: "Extensión de tríceps con cable a una mano", sets: "3 × 12", weight: "4,5 kg" },
+      { name: "Press de Banca con Barra", sets: "4 × 5-7" },
+      { name: "Press de Hombros con Mancuernas", sets: "3 × 6-8" },
+      { name: "Press con mancuernas en banco inclinado", sets: "3 × 8-10" },
+      { name: "Elevación lateral en polea", sets: "3 × 12-15" },
+      { name: "Fondos en Máquina Asistida", sets: "3 × 8-10" },
     ],
-    cardio: "15 min cinta trote suave",
+    cardio: "10-15 min cinta suave",
   },
   {
     dow: 2,
-    label: "Tirón A (espalda gruesa)",
+    label: "Tirón A (fuerza)",
     emoji: "🔙",
     exercises: [
-      { name: "Remo con barra inclinado", sets: "4 × 6-8", weight: "35 kg" },
-      { name: "Jalón al pecho", sets: "4 × 8-10", weight: "50 kg" },
-      { name: "Remo en polea sentado agarre ancho", sets: "3 × 10-12", weight: "39-45 kg" },
-      { name: "Remo con mancuernas con apoyo en el pecho", sets: "3 × 10-12", weight: "10 kg c/u" },
-      { name: "Face pull con TRX", sets: "3 × 12-15", weight: "peso corporal" },
-      { name: "Curl con barra", sets: "3 × 8-10", weight: "20 kg" },
-      { name: "Curl con mancuernas en banco inclinado", sets: "3 × 10-12", weight: "12-14 kg" },
+      { name: "Dominadas Asistidas", sets: "4 × 5-8" },
+      { name: "Remo con Barra Inclinado", sets: "4 × 6-8" },
+      { name: "Remo en Polea Sentado en Agarre Ancho", sets: "3 × 8-10" },
+      { name: "Face Pull en Polea", sets: "3 × 12-15" },
+      { name: "Curl con barra", sets: "3 × 6-8" },
     ],
-    cardio: "12 min escaladora",
+    cardio: "10-15 min escaladora",
   },
   {
     dow: 3,
-    label: "Pierna A (cuádriceps enfocado)",
+    label: "Pierna A (cuádriceps, fuerza)",
     emoji: "🦵",
-    warning: "Tu día más flojo — no lo saltees.",
     exercises: [
-      { name: "Sentadilla en máquina Smith", sets: "4 × 8-10", weight: "60 kg" },
-      { name: "Sentadilla búlgara en Smith", sets: "3 × 8 por pierna", weight: "40 kg" },
-      { name: "Curl de piernas sentado", sets: "4 × 10-12", weight: "45 kg" },
-      { name: "Abducción de cadera en máquina", sets: "3 × 12-15", weight: "57 kg" },
-      { name: "Aductor en máquina", sets: "3 × 12-15", weight: "50 kg" },
-      { name: "Pantorrillas de pie", sets: "4 × 12-15", weight: "desde 20 kg" },
-      { name: "Crunch con cable", sets: "3 × 12-15", weight: "36-50 kg" },
+      { name: "Sentadilla Trasera con Barra", sets: "4 × 5-7", weight: "o en Smith" },
+      { name: "Peso muerto rumano en Smith", sets: "3 × 6-8" },
+      { name: "Prensa de Piernas", sets: "3 × 8-10" },
+      { name: "Curl de Piernas Sentado", sets: "3 × 8-10" },
+      { name: "Elevación de Talones de Pie", sets: "3 × 8-12" },
+      { name: "Crunch con Cable", sets: "3 × 10-12" },
     ],
-    cardio: "20 min caminata inclinada",
+    cardio: "10 min caminata inclinada",
   },
   {
     dow: 4,
-    label: "Empuje B (hombro enfocado)",
+    label: "Empuje B (volumen)",
     emoji: "🎽",
     exercises: [
-      { name: "Press Arnold", sets: "4 × 8-10", weight: "12 kg c/u" },
-      { name: "Press de banca con barra", sets: "4 × 6-8", weight: "45 kg" },
-      { name: "Press con mancuernas en banco inclinado", sets: "3 × 8-10", weight: "18 kg c/u" },
-      { name: "Elevación lateral con mancuerna sentado", sets: "4 × 12-15", weight: "9 kg" },
-      { name: "Elevación de deltoides posterior en banco inclinado", sets: "3 × 15", weight: "8-9 kg" },
-      { name: "Jalón de tríceps con cable tras nuca", sets: "3 × 10-12", weight: "12 kg" },
+      { name: "Press Inclinado en Máquina Smith", sets: "3 × 8-10" },
+      { name: "Press de Banca con Mancuernas", sets: "3 × 10-12" },
+      { name: "Pec Deck", sets: "3 × 12-15" },
+      { name: "Elevación lateral con mancuerna sentado", sets: "4 × 12-20" },
+      { name: "Extensión de Tríceps por Encima de la Cabeza", sets: "3 × 10-15", weight: "en polea" },
+      { name: "Extensión de Tríceps en Polea con Barra en V", sets: "2 × 12-15" },
     ],
-    cardio: "15 min cinta",
+    cardio: "10-15 min cinta",
   },
   {
     dow: 5,
-    label: "Tirón B (espalda ancha)",
+    label: "Tirón B (volumen)",
     emoji: "🔙",
     exercises: [
-      { name: "Dominadas asistidas", sets: "4 × 6-8", weight: "30 kg asistencia" },
-      { name: "Jalón al pecho con agarre ancho", sets: "3 × 10-12", weight: "45-52 kg" },
-      { name: "Remo sentado en máquina a un brazo", sets: "3 × 10 por lado", weight: "20 kg" },
-      { name: "Jalón con brazos rectos", sets: "3 × 12-15", weight: "19 kg" },
-      { name: "Extensión de espalda", sets: "3 × 12-15", weight: "10 kg" },
-      { name: "Curl predicador con mancuerna", sets: "3 × 8-10", weight: "8-10 kg" },
-      { name: "Curl en banco Scott", sets: "3 × 10-12", weight: "20 kg" },
+      { name: "Jalón al Pecho", sets: "3 × 8-12" },
+      { name: "Remo con Mancuerna a Un Brazo", sets: "3 × 10-12" },
+      { name: "Jalón con Brazos Rectos", sets: "3 × 12-15" },
+      { name: "Apertura de Deltoides Posterior", sets: "3 × 15-20", weight: "pec deck invertido" },
+      { name: "Curl con mancuernas en banco inclinado", sets: "3 × 10-12" },
+      { name: "Curl de Martillo con Mancuernas", sets: "2 × 12-15" },
     ],
-    cardio: "12 min escaladora",
+    cardio: "10-15 min escaladora",
   },
   {
     dow: 6,
-    label: "Pierna B (posterior) + cardio largo",
+    label: "Pierna B (posterior y glúteo)",
     emoji: "🦵",
     exercises: [
-      { name: "Peso muerto rumano en Smith", sets: "4 × 8-10", weight: "50 kg" },
-      { name: "Hip thrust con barra", sets: "4 × 10-12", weight: "40 kg" },
-      { name: "Sentadilla trasera con barra", sets: "3 × 8", weight: "50 kg" },
-      { name: "Puente de glúteos / abducción en máquina", sets: "3 × 15", weight: "50-57 kg" },
-      { name: "Pantorrillas sentado", sets: "4 × 15", weight: "20 kg" },
-      { name: "Oblicuos con cable + plancha", sets: "3 × 12 / 3 × 45 s", weight: "12 kg" },
+      { name: "Hip thrust con barra", sets: "4 × 8-12" },
+      { name: "Sentadilla Búlgara en Máquina Smith", sets: "3 × 8-10 por pierna" },
+      { name: "Curl de Piernas Tumbado", sets: "3 × 10-12" },
+      { name: "Extensión de Piernas", sets: "3 × 12-15" },
+      { name: "Elevación de Talones Sentado", sets: "3 × 12-20" },
+      { name: "Plancha", sets: "3 × 45-60 s" },
     ],
-    cardio: "35-40 min: natación o trote suave",
+    cardio: "15-20 min caminata inclinada o bici",
   },
   {
     dow: 0,
@@ -128,7 +142,7 @@ export const WEEKLY_PLAN: PlanDay[] = [
     emoji: "🧘",
     rest: true,
     exercises: [],
-    cardio: "Caminata 40 min + estiramiento. Nada de gimnasio.",
+    cardio: "Caminata 40 min + movilidad. Nada de gimnasio ni calistenia: el músculo crece cuando descansa.",
   },
 ];
 
@@ -144,62 +158,30 @@ export function getPlanDay(iso: string): PlanDay {
   return WEEKLY_PLAN.find((d) => d.dow === dow) ?? WEEKLY_PLAN[6];
 }
 
-export type DietMeal = { time: string; desc: string; kcal: number; protein: number };
-export type DietTemplate = {
-  id: string;
-  label: string;
-  summary: string;
-  meals: DietMeal[];
-};
-
-export const DIET_TEMPLATES: DietTemplate[] = [
-  {
-    id: "A",
-    label: "Plantilla A — día de entrenamiento fuerte",
-    summary: "~2.350 kcal · 195 P / 240 C / 70 G",
-    meals: [
-      { time: "09:00 · Desayuno", desc: "3 huevos (150 g) + 2 tostadas integrales (60 g) + 60 g de palta + café solo", kcal: 500, protein: 27 },
-      { time: "12:30 · Almuerzo", desc: "200 g de pechuga de pollo + 200 g de arroz cocido + 150 g de verduras salteadas + 1 cda de aceite de oliva", kcal: 640, protein: 55 },
-      { time: "16:00 · Pre-entreno", desc: "1 banana + 30 g de granola + 200 g de yogur griego natural", kcal: 400, protein: 20 },
-      { time: "18:30 · Post-entreno", desc: "Batido: 40 g de proteína en polvo + 250 ml de leche descremada", kcal: 250, protein: 42 },
-      { time: "21:00 · Cena", desc: "200 g de carne magra o pescado + 250 g de papa/batata + ensalada grande", kcal: 560, protein: 50 },
-    ],
-  },
-  {
-    id: "B",
-    label: "Plantilla B — día liviano o de descanso",
-    summary: "~2.050 kcal · 185 P / 180 C / 65 G",
-    meals: [
-      { time: "09:00", desc: "3 huevos + 1 tostada + 30 g de queso + café solo", kcal: 440, protein: 30 },
-      { time: "13:00", desc: "220 g de pollo + 150 g de arroz o legumbres + brócoli/zapallito abundante", kcal: 570, protein: 60 },
-      { time: "17:00", desc: "200 g de yogur griego + 20 g de granola + puñado de nueces (15 g)", kcal: 340, protein: 22 },
-      { time: "21:00", desc: "220 g de pescado o carne magra + 200 g de papa + ensalada con aceite", kcal: 600, protein: 55 },
-      { time: "Extra si falta proteína", desc: "1 batido de 30 g de proteína", kcal: 140, protein: 25 },
-    ],
-  },
-  {
-    id: "C",
-    label: "Plantilla C — día apurado / afuera",
-    summary: "~2.300 kcal · 180 P / 230 C / 80 G",
-    meals: [
-      { time: "Mañana", desc: "Batido de proteína con banana y leche + 2 tostadas con palta", kcal: 600, protein: 40 },
-      { time: "Mediodía", desc: "Lo que haya afuera: proteína del tamaño de tu palma y media + verduras sí o sí. Si son empanadas, máximo 3 + ensalada.", kcal: 0, protein: 0 },
-      { time: "Tarde", desc: "200 g de yogur + fruta", kcal: 250, protein: 18 },
-      { time: "Noche", desc: "250 g de pollo/carne + guarnición de vegetales + 150 g de arroz o papa", kcal: 650, protein: 60 },
-    ],
-  },
+/**
+ * Cómo se reparte el día. Sin gramos fijos a propósito: las comidas concretas
+ * las arma la IA con lo que él come de verdad ("Ideas de comida" en Hoy).
+ * Entrena entre el desayuno y el almuerzo; se levanta 8:30-9 y se acuesta a 00.
+ */
+export const PLAN_MEALS: { time: string; text: string }[] = [
+  { time: "9:00 · Desayuno", text: "Proteína + carbos, lo que te sostiene el entreno (~40 g P)." },
+  { time: "10:30-12 · Entreno", text: "Si desayunaste hace más de 2 h, una banana antes." },
+  { time: "13:00 · Almuerzo", text: "La comida más grande y la de más carbos: es la post-entreno (~50 g P)." },
+  { time: "17:00 · Merienda", text: "Liviana y con proteína: yogur, batido o huevos (~35 g P)." },
+  { time: "21:00 · Cena", text: "Proteína + verduras, carbos moderados (~50 g P). Cortá a las 22." },
 ];
 
 export const PLAN_RULES: string[] = [
-  "Proteína primero: si llegás a 190 g, el resto se acomoda casi solo (~4 tomas de 45-50 g).",
-  "Cargá la comida cuando la comés, no a la noche. Sin datos reales no se puede ajustar nada.",
-  "Cortá de comer 2 h antes de dormir.",
-  "La granola es el alimento con peor relación calorías/saciedad: pesala o bajala a 25-30 g.",
-  "Agua 3,5 L — ya lo venís cumpliendo, sostenelo.",
+  "Semana 1 de calibración: buscá tu peso en cada ejercicio nuevo, que la última serie quede a 1-2 reps del fallo. Desde ahí la app te sugiere el peso con tu historial.",
+  "Doble progresión: cuando hacés el tope del rango en TODAS las series, la próxima subí el peso (2,5 kg en barra, 1-2 kg en mancuerna) y volvé al piso del rango.",
+  "Proteína primero: 190 g en 4 tomas de 40-50 g. Si llegás, el resto se acomoda.",
+  "La cintura manda, no la balanza: en recomposición el peso puede quedarse quieto mientras la panza baja.",
+  "El domingo es descanso de verdad. La calistenia de golpe te dejó roto: si la querés sumar, liviana y entre semana.",
+  "Dormí 7,5-8 h: entrenando 6 días, el sueño es lo que más pesa en la recuperación.",
 ];
 
 export const PLAN_CHECKPOINTS: { freq: string; text: string }[] = [
-  { freq: "Cada semana", text: "Peso en ayunas 3 mañanas y promediá. Si no bajó en 2 semanas seguidas, restá 150 kcal." },
-  { freq: "Cada 2 semanas", text: "Cintura: de 101 a 92 cm es la meta más ambiciosa, se mueve más lento que el peso." },
-  { freq: "Cada 4 semanas", text: "Brazo, muslo, pantorrilla, pecho + foto de progreso." },
+  { freq: "Cada semana", text: "Peso en ayunas 3 mañanas y promediá + cintura a la altura del ombligo. Si la cintura no bajó en 2 semanas, restá 150 kcal." },
+  { freq: "Si la fuerza cae", text: "2 sesiones seguidas peor en los básicos = mucho déficit o poco sueño. Sumá 150 kcal de carbos antes de tocar otra cosa." },
+  { freq: "2 de noviembre", text: "Revisión del mes: brazo, muslo, pecho, cintura + foto. Ahí elegimos qué músculos priorizar." },
 ];
