@@ -37,8 +37,19 @@ export async function POST(request: Request) {
     return NextResponse.json(await scanWatchScreen(base64, mediaType));
   } catch (err) {
     console.error("[/api/watch/scan]", err);
+    // Que el proveedor de IA falle (modelo dado de baja, clave vencida, cuota)
+    // no es culpa de la captura. Cuando Groq apagó el modelo de visión, este
+    // endpoint respondía "probá con una más nítida" a TODO el mundo: el usuario
+    // sacaba capturas nuevas una y otra vez persiguiendo un problema que no
+    // existía. Si el error viene con status HTTP, es de ellos, y se dice.
+    const status = (err as { statusCode?: number })?.statusCode;
+    const delProveedor = typeof status === "number" && status >= 400;
     return NextResponse.json(
-      { error: "No pude leer la captura. Probá con una más nítida." },
+      {
+        error: delProveedor
+          ? "El lector de capturas no está disponible (falla del servicio de IA, no de tu foto). Cargá los datos a mano por ahora."
+          : "No pude leer la captura. Probá con una más nítida.",
+      },
       { status: 502 },
     );
   }

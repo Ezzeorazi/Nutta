@@ -9,17 +9,24 @@ import { generateText } from "ai";
  * pasos ni sueño), y Health Connect es nativa de Android. Sacarle una foto a
  * la pantalla del reloj sí cubre todo, gratis.
  *
- * OJO con el modelo: Groq dejó de ofrecer los Llama 4 y hoy el único de su
- * catálogo que acepta imágenes es `qwen/qwen3.6-27b` (verificado contra
- * /v1/models y probando el resto, que rechaza el formato multimodal). Si algún
- * día lo saca también, esto deja de funcionar y hay que revisar la lista.
+ * OJO con el modelo: es la pieza que se cae sola cada tanto. Groq dejó de
+ * ofrecer los Llama 4, y el 14/9/2026 dio de baja también `qwen/qwen3.6-27b`,
+ * que lo había reemplazado: desde esa fecha el escaneo devolvía 502 a todo el
+ * mundo. Hoy el único de su catálogo que acepta imágenes es su sucesor directo,
+ * `qwen/qwen3.8-27b` (mismo contexto, mismos modos de razonamiento).
+ *
+ * Cuando esto vuelva a pasar —va a pasar— el síntoma es un 502 en
+ * /api/watch/scan para CUALQUIER imagen: se chequea en
+ * console.groq.com/docs/vision cuál quedó vivo y se cambia acá. Un
+ * `GROQ_VISION_MODEL` en el entorno pisa este valor, así que también hay que
+ * mirar ahí.
  *
  * Como además es un modelo de razonamiento, se le pide que esconda su cadena de
  * pensamiento y no razone: sin eso antepone un bloque `<think>` y el JSON queda
  * enterrado. Por las dudas igual se parsea tolerante (ver `parseLoose`), y por
  * eso tampoco se usa `generateObject`.
  */
-export const VISION_MODEL = process.env.GROQ_VISION_MODEL || "qwen/qwen3.6-27b";
+export const VISION_MODEL = process.env.GROQ_VISION_MODEL || "qwen/qwen3.8-27b";
 
 export type WatchReading = {
   /** Qué pantalla era: el detalle de una actividad o el resumen del día. */
