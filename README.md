@@ -54,7 +54,8 @@
 
 - **La IA interpreta y el código decide.** Después de la respuesta del modelo, un post-proceso determinístico ([`coachEnrich.ts`](src/lib/coachEnrich.ts)) ajusta cada ejercicio al catálogo: normaliza el nombre para no duplicar PRs y recalcula las calorías con el MET real. El dataset nunca entra al prompt.
 - **Un solo modelo del estado del usuario.** El score, los insights, la rutina y el coach leen de la misma función pura ([`athlete.ts`](src/lib/athlete.ts)). Al principio cada módulo miraba solo su parte y se contradecían entre sí.
-- **Las rutas de API no confían en el cliente.** Toda entrada se recorta y se valida: tamaño máximo de mensajes e imágenes, tipos y números no negativos. Los errores del modelo vuelven como un 502 controlado.
+- **Las rutas de API no confían en el cliente.** Las de IA exigen una sesión válida, que se verifica en el servidor con el SDK de admin de InstantDB. Toda entrada se recorta y se valida: tamaño máximo de mensajes e imágenes, tipos y números no negativos. Los errores del modelo vuelven como un 502 controlado.
+- **Metas para cualquiera, plan para una persona.** Cada usuario recibe metas calculadas desde su perfil. El plan de entrenamiento armado a mano ([`plan.ts`](src/lib/plan.ts)) solo se activa para su dueño, que se reconoce por un hash del email para que la dirección no quede en el código.
 - **Seguridad por reglas, no por ocultamiento.** El `APP_ID` de InstantDB es público por diseño. Lo que protege los datos son las reglas de [`instant.perms.ts`](instant.perms.ts): cada usuario solo puede leer y escribir sus propias filas y sus propias fotos.
 - **Las decisiones descartadas están documentadas.** Este README explica por qué no hay sincronización automática con el reloj y por qué se quitó Open Food Facts.
 

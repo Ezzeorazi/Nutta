@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { downscaleImage } from "@/lib/image";
 import type { WatchReading } from "@/lib/watchScan";
+import { aiFetch } from "@/lib/aiFetch";
 
 const toDataUrl = (blob: Blob) =>
   new Promise<string>((resolve, reject) => {
@@ -38,7 +39,7 @@ export default function WatchScanButton({
     setBusy(true);
     try {
       const image = await toDataUrl(await downscaleImage(file));
-      const res = await fetch("/api/watch/scan", {
+      const res = await aiFetch("/api/watch/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image }),

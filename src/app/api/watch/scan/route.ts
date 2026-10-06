@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireUser } from "@/lib/apiAuth";
 import { scanWatchScreen } from "@/lib/watchScan";
 
 export const maxDuration = 30;
@@ -8,6 +9,9 @@ const MAX_CHARS = 4_000_000;
 
 /** Lee una captura de pantalla del reloj y devuelve los números que encontró. */
 export async function POST(request: Request) {
+  const denied = await requireUser(request);
+  if (denied) return denied;
+
   if (!process.env.GROQ_API_KEY) {
     return NextResponse.json(
       { error: "La IA no está configurada (falta GROQ_API_KEY)." },

@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { requireUser } from "@/lib/apiAuth";
 import { analyzeWeek } from "@/lib/coach";
 
 export const maxDuration = 30;
 
 /** Análisis semanal del coach a partir de un resumen de datos. */
 export async function POST(request: Request) {
+  const denied = await requireUser(request);
+  if (denied) return denied;
+
   if (!process.env.GROQ_API_KEY) {
     return NextResponse.json(
       { error: "La IA no está configurada (falta GROQ_API_KEY)." },

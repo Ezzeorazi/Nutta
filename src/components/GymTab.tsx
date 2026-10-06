@@ -149,6 +149,7 @@ export default function GymTab({
   onPickPlanDay,
   onSwapExercise,
   onUndoSwap,
+  hasPlan = true,
 }: {
   strengthSets: StrengthSet[];
   exercises?: ExerciseEntry[];
@@ -179,6 +180,12 @@ export default function GymTab({
   onPickPlanDay?: (date: string, dow: number) => void;
   onSwapExercise?: (date: string, from: string, to: string) => void;
   onUndoSwap?: (date: string, from: string) => void;
+  /**
+   * El plan del mes es de este usuario (ver `lib/planOwner.ts`). Si no, se
+   * ocultan la sesión sugerida y la rutina fija: las dos salen de ese plan, y
+   * queda el registro libre de series.
+   */
+  hasPlan?: boolean;
 }) {
   const [exercise, setExercise] = useState("");
   const [reps, setReps] = useState("");
@@ -407,7 +414,7 @@ export default function GymTab({
       {/* "¿Qué hago hoy?". Va a pedido, en un sheet: la rutina del plan ya está
           abajo, y dos rutinas compitiendo en la misma pantalla fue justamente
           el problema que sacamos. */}
-      {isToday && (
+      {isToday && hasPlan && (
         <button
           type="button"
           onClick={() => setSessionOpen(true)}
@@ -460,7 +467,7 @@ export default function GymTab({
       {/* De vacaciones, el día lo elegís. Es la contracara del modo: si no hay
           calendario que cumplir, tampoco hay uno que te diga qué toca — y si
           apareció un gimnasio en el viaje, la rutina corta no alcanza. */}
-      {deViaje && onPickPlanDay && (
+      {hasPlan && deViaje && onPickPlanDay && (
         <section className="flex flex-col gap-2">
           <h2 className="text-sm font-semibold text-muted">
             ¿Qué entrenás {isToday ? "hoy" : `el ${dayLabel(viewDate)}`}?
@@ -487,15 +494,17 @@ export default function GymTab({
       )}
 
       {/* Rutina fija del plan del mes, para el día que se está viendo. */}
-      <PlanDayCard
-        planDay={planDay}
-        daySets={daySets}
-        isToday={isToday}
-        viewDate={viewDate}
-        lastByExercise={lastByExercise}
-        onSelectExercise={selectExercise}
-        onSwapExercise={onSwapExercise ? setSwapping : undefined}
-      />
+      {hasPlan && (
+        <PlanDayCard
+          planDay={planDay}
+          daySets={daySets}
+          isToday={isToday}
+          viewDate={viewDate}
+          lastByExercise={lastByExercise}
+          onSelectExercise={selectExercise}
+          onSwapExercise={onSwapExercise ? setSwapping : undefined}
+        />
+      )}
 
       {/* Alta de serie (hoy o un día pasado que estés completando) */}
       <section className="flex flex-col gap-4 rounded-card bg-card p-4 shadow-e1">

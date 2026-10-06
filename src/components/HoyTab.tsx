@@ -84,6 +84,8 @@ export default function HoyTab({
   toggleSupplement,
   setSupplementQty,
   planActive,
+  hasPlan,
+  email,
   memories,
   onTogglePlan,
   vacation,
@@ -148,6 +150,10 @@ export default function HoyTab({
   toggleSupplement: (supId: string, date: string) => void;
   setSupplementQty: (supId: string, date: string, qty: number) => void;
   planActive: boolean;
+  /** Si el plan del mes es de este usuario (ver `lib/planOwner.ts`). */
+  hasPlan: boolean;
+  /** Email de la sesión: se muestra junto a "Cerrar sesión". */
+  email?: string | null;
   memories: MemoryFact[];
   onTogglePlan: () => void;
   /** Tramo de vacaciones que cubre el día visto, si hay uno. */
@@ -291,6 +297,7 @@ export default function HoyTab({
 
       <PlanCard
         planActive={planActive}
+        hasPlan={hasPlan}
         onTogglePlan={onTogglePlan}
         vacationActive={vacationToday}
         onOpenVacation={() => setVacationOpen(true)}
@@ -353,12 +360,15 @@ export default function HoyTab({
         onSetQty={setSupplementQty}
       />
 
-      <button
-        onClick={onSignOut}
-        className="mx-auto min-h-11 text-xs text-muted underline-offset-2 hover:underline"
-      >
-        Cerrar sesión
-      </button>
+      <div className="flex flex-col items-center">
+        {email && <p className="text-xs text-muted">{email}</p>}
+        <button
+          onClick={onSignOut}
+          className="min-h-11 text-xs text-muted underline-offset-2 hover:underline"
+        >
+          Cerrar sesión
+        </button>
+      </div>
 
       {foodOpen && (
         <FoodForm

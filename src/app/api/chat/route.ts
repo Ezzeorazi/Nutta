@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireUser } from "@/lib/apiAuth";
 import { interpretMessage } from "@/lib/coach";
 import { enrichExercises, enrichStrength } from "@/lib/coachEnrich";
 
@@ -6,6 +7,9 @@ export const maxDuration = 30;
 
 /** Interpreta un mensaje en lenguaje natural → registros de comida/ejercicio. */
 export async function POST(request: Request) {
+  const denied = await requireUser(request);
+  if (denied) return denied;
+
   if (!process.env.GROQ_API_KEY) {
     return NextResponse.json(
       { error: "La IA no está configurada (falta GROQ_API_KEY)." },

@@ -45,6 +45,8 @@ export function athleteBrief(input: {
   objective?: ObjectiveKey;
   bodyWeight: number;
   hour: number;
+  /** Si el plan del mes es de este usuario (ver `lib/planOwner.ts`). */
+  hasPlan?: boolean;
 }): string {
   const { state, hour, bodyWeight } = input;
   const { training, nutrition, week, recovery } = state;
@@ -87,11 +89,14 @@ export function athleteBrief(input: {
     `Entrenamiento de hoy: ${trainedLine}.`,
     // El plan que él eligió: sin esto la IA sugiere rutinas inventadas en vez
     // de la suya.
-    `Plan (recomposición, 6 días PPL, meta cintura ${PLAN_WAIST.start}→${PLAN_WAIST.target} cm): hoy toca ${
-      plan.rest
-        ? `descanso (${plan.cardio})`
-        : `${plan.label}: ${plan.exercises.map((e) => `${e.name} ${e.sets}`).join(", ")}`
-    }.`,
+    // A otro usuario no se le empuja una rutina que no es suya.
+    input.hasPlan === false
+      ? null
+      : `Plan (recomposición, 6 días PPL, meta cintura ${PLAN_WAIST.start}→${PLAN_WAIST.target} cm): hoy toca ${
+          plan.rest
+            ? `descanso (${plan.cardio})`
+            : `${plan.label}: ${plan.exercises.map((e) => `${e.name} ${e.sets}`).join(", ")}`
+        }.`,
     `Calorías: ${round(nutrition.consumed.calories)} consumidas de ${round(nutrition.goals.calories)} (netas ${round(nutrition.netCalories)}) → ${
       nutrition.remaining.calories >= 0
         ? `quedan ${round(nutrition.remaining.calories)}`

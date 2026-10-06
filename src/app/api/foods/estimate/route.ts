@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireUser } from "@/lib/apiAuth";
 import { estimateFood } from "@/lib/coach";
 import type { FoodProduct } from "@/lib/food";
 
@@ -6,6 +7,9 @@ export const maxDuration = 30;
 
 /** Estima con IA los macros (por 100 g/ml) de un alimento por su nombre. */
 export async function POST(request: Request) {
+  const denied = await requireUser(request);
+  if (denied) return denied;
+
   if (!process.env.GROQ_API_KEY) {
     return NextResponse.json(
       { error: "La IA no está configurada (falta GROQ_API_KEY)." },

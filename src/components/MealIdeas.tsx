@@ -5,6 +5,7 @@ import { Sparkles } from "lucide-react";
 import { frequentFoodsSummary } from "@/lib/coachContext";
 import { mealTarget, nextMeal } from "@/lib/mealIdeas";
 import type { FoodEntry, Goals, MemoryFact } from "@/lib/types";
+import { aiFetch } from "@/lib/aiFetch";
 
 type Idea = {
   title: string;
@@ -61,7 +62,7 @@ export default function MealIdeas({
     setError(null);
     try {
       const hour = new Date().getHours();
-      const res = await fetch("/api/ideas", {
+      const res = await aiFetch("/api/ideas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

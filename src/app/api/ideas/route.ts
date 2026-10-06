@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireUser } from "@/lib/apiAuth";
 import { suggestMeals } from "@/lib/coach";
 
 export const maxDuration = 30;
@@ -15,6 +16,9 @@ function macros(v: unknown): Macros | null {
 
 /** Tres ideas de comida con IA para cerrar los macros que faltan hoy. */
 export async function POST(request: Request) {
+  const denied = await requireUser(request);
+  if (denied) return denied;
+
   if (!process.env.GROQ_API_KEY) {
     return NextResponse.json(
       { error: "La IA no está configurada (falta GROQ_API_KEY)." },

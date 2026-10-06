@@ -35,6 +35,7 @@ import {
   vacationOn,
 } from "@/lib/vacation";
 import { usePlanReminders } from "@/lib/usePlanReminders";
+import { usePlanOwner } from "@/lib/usePlanOwner";
 import { useNutta } from "@/lib/useNutta";
 import {
   DEFAULT_GOALS,
@@ -44,6 +45,7 @@ import {
   type FoodEntry,
   type MemoryKind,
 } from "@/lib/types";
+import { aiFetch } from "@/lib/aiFetch";
 
 /** Registros creados en un turno del chat (para poder deshacerlos). */
 type ChatBatch = { foods: string[]; exercises: string[]; sets: string[] };
@@ -183,10 +185,16 @@ export default function Home() {
   // (que se completa una vez y queda viejo). De él dependen las metas, el agua
   // y las calorías de todo el ejercicio.
   const bodyWeight = effectiveWeight(profile?.weight ?? 0, weights, today);
+  // El plan del mes es de una persona (ver lib/planOwner.ts). Mientras se
+  // resuelve (`null`) se muestra igual, para que a la dueña no le parpadee;
+  // las escrituras esperan a `true`.
+  const planOwner = usePlanOwner(user?.email);
+  const hasPlan = planOwner !== false;
+
   // Las de siempre: las del plan del mes o las calculadas del perfil.
   const baseGoals = !profile
     ? DEFAULT_GOALS
-    : planActive
+    : planActive && hasPlan
       ? PLAN_GOALS
       : computeGoals({ ...profile, weight: bodyWeight });
 
@@ -203,8 +211,9 @@ export default function Home() {
   // Semilla única de la meta de peso del plan: solo si el usuario todavía no
   // cargó una propia (no la pisa si ya la eligió en Progreso).
   useEffect(() => {
-    if (profile && targetWeight == null) setTargetWeight(PLAN_TARGET_WEIGHT);
-  }, [profile, targetWeight, setTargetWeight]);
+    if (planOwner === true && profile && targetWeight == null)
+      setTargetWeight(PLAN_TARGET_WEIGHT);
+  }, [planOwner, profile, targetWeight, setTargetWeight]);
 
   // --- Estado del atleta ---
   // Todo lo que se sabe del usuario, cruzado en un solo lugar (lib/athlete.ts).
@@ -330,7 +339,7 @@ export default function Home() {
     setLastBatch(null); // el lote anterior deja de ser "deshacible"
     setSending(true);
     try {
-      const res = await fetch("/api/chat", {
+      const res = await aiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -348,6 +357,7 @@ export default function Home() {
             objective: profile.objective,
             bodyWeight,
             hour,
+            hasPlan,
           }),
           history,
         }),
@@ -465,7 +475,7 @@ export default function Home() {
     addMessage("user", "📊 Analizá mi semana");
     setSending(true);
     try {
-      const res = await fetch("/api/coach", {
+      const res = await aiFetch("/api/coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -587,6 +597,7 @@ export default function Home() {
           }
           onSwapExercise={swapExercise}
           onUndoSwap={undoSwap}
+          hasPlan={hasPlan}
         />
       ) : tab === "progreso" ? (
         <ProgresoTab
@@ -659,6 +670,8 @@ export default function Home() {
           toggleSupplement={toggleSupplement}
           setSupplementQty={setSupplementQty}
           planActive={planActive}
+          hasPlan={hasPlan}
+          email={user.email}
           memories={memories}
           onTogglePlan={togglePlan}
           vacation={viewVacation}

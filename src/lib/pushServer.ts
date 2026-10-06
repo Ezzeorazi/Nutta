@@ -17,6 +17,7 @@ import { buildAthleteState } from "@/lib/athlete";
 import { APP_ID } from "@/lib/appId";
 import { effectiveWeight } from "@/lib/nutrition";
 import { PLAN_GOALS, getPlanDay } from "@/lib/plan";
+import { isPlanOwner } from "@/lib/planOwner";
 import { inSlot, planReminder, type Slot } from "@/lib/reminders";
 import {
   planDayFor,
@@ -54,6 +55,8 @@ export type SendResult = {
   skippedHour: number;
   /** Sin nada que valga la pena interrumpir. */
   skippedEmpty: number;
+  /** Cuentas que no son las del plan: los avisos son del plan, no aplican. */
+  skippedNoPlan: number;
   /** Suscripciones vencidas que se borraron. */
   expired: number;
   failed: number;
@@ -121,7 +124,15 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
     weights: {},
     vacations: {},
     planPicks: {},
+    $users: {},
   })) as unknown as Record<string, unknown[]>;
+
+  // Los avisos hablan del plan del mes, que es de una sola persona (ver
+  // lib/planOwner.ts). Al resto no se le manda nada en vez de reclamarle una
+  // rutina ajena.
+  const users = (data.$users ?? []) as { id: string; email?: string | null }[];
+  const planOwners = new Set<string>();
+  for (const u of users) if (await isPlanOwner(u.email)) planOwners.add(u.id);
 
   const subs = (data.pushSubs ?? []) as unknown as PushSub[];
   const result: SendResult = {
@@ -129,6 +140,7 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
     sent: 0,
     skippedHour: 0,
     skippedEmpty: 0,
+    skippedNoPlan: 0,
     expired: 0,
     failed: 0,
   };
@@ -146,6 +158,10 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
     }
 
     const owner = sub.owner;
+    if (!planOwners.has(owner)) {
+      result.skippedNoPlan++;
+      continue;
+    }
     const tz = sub.tzOffset;
     const foods = withLocalDate(mine<FoodEntry & { owner: string }>(data.foods ?? [], owner), tz);
     const drinks = withLocalDate(mine<DrinkEntry & { owner: string }>(data.drinks ?? [], owner), tz);

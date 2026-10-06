@@ -17,6 +17,7 @@ import {
   type FoodEntry,
   type MealType,
 } from "@/lib/types";
+import { aiFetch } from "@/lib/aiFetch";
 
 type Per100 = FoodProduct["per100"];
 
@@ -222,7 +223,7 @@ export default function FoodForm({
     setEstimating(true);
     setEstimateError(null);
     try {
-      const r = await fetch("/api/foods/estimate", {
+      const r = await aiFetch("/api/foods/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: q }),

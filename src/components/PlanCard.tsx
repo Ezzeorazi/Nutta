@@ -94,6 +94,7 @@ export default function PlanCard({
   onOpenVacation,
   push,
   ideas,
+  hasPlan = true,
 }: {
   planActive: boolean;
   onTogglePlan: () => void;
@@ -108,10 +109,26 @@ export default function PlanCard({
     foods: FoodEntry[];
     memories: MemoryFact[];
   };
+  /**
+   * El plan es de otra persona (ver `lib/planOwner.ts`): de la tarjeta queda
+   * solo lo que sirve a cualquiera, las ideas de comida. Vacaciones y avisos
+   * también se van porque los dos giran alrededor de la rutina del plan.
+   */
+  hasPlan?: boolean;
 }) {
   const [showDay, setShowDay] = useState(false);
   const [showRules, setShowRules] = useState(false);
   const g = PLAN_GOALS;
+
+  if (!hasPlan) {
+    if (!ideas) return null;
+    return (
+      <section className="rounded-card bg-card p-4 shadow-e1">
+        <h2 className="mb-3 font-semibold">💡 Ideas para hoy</h2>
+        <MealIdeas {...ideas} />
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-card bg-card p-4 shadow-e1">
