@@ -1,5 +1,5 @@
 // Service worker mínimo de Nutta — cache del app-shell para uso offline.
-const CACHE = "nutta-v2";
+const CACHE = "nutta-v3";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -69,7 +69,27 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
 
-  // Stale-while-revalidate: responde del cache y actualiza en segundo plano.
+  // La página (HTML) va primero a la red: con cache-first, cada deploy se veía
+  // recién en la SEGUNDA apertura (y en el celular, con la app viva en segundo
+  // plano, eso podía ser días). El cache queda solo para cuando no hay señal.
+  if (req.mode === "navigate") {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res && res.status === 200 && res.type === "basic") {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put("/", copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match("/").then((r) => r || Response.error())),
+    );
+    return;
+  }
+
+  // El resto (JS/CSS con hash en el nombre, íconos): stale-while-revalidate.
+  // Un archivo con hash nunca cambia, así que servirlo del cache no deja nada
+  // viejo en pantalla.
   event.respondWith(
     caches.match(req).then((cached) => {
       const network = fetch(req)
