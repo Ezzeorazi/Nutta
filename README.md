@@ -15,6 +15,13 @@
 >
 > → se registran la comida con sus macros estimados, el sueño y el peso, sin tocar un formulario.
 
+<p align="center">
+  <img src="docs/screenshots/chat.jpg" width="250" alt="Chat: la IA registra un almuerzo y sugiere cómo completar la proteína">
+  <img src="docs/screenshots/hoy.jpg" width="250" alt="Hoy: calorías restantes y macros, con carbohidratos ajustados al entreno">
+  <img src="docs/screenshots/gym.jpg" width="250" alt="Gym: rutina del día con pesos tomados del historial">
+</p>
+<p align="center"><sub>Chat · Hoy · Gym</sub></p>
+
 ---
 
 ## Qué hace
