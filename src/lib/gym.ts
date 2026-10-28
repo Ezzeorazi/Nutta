@@ -1,4 +1,11 @@
-import type { StrengthSet } from "@/lib/types";
+import type { ExerciseKind, StrengthSet } from "@/lib/types";
+import {
+  fmtSeconds,
+  lessAssist,
+  setScore,
+  type BodyweightOn,
+  type KindOf,
+} from "@/lib/exerciseKind";
 import exerciseGroups from "@/data/exercise-groups.json";
 
 /** Mapa nombre_normalizado → grupo muscular (precalculado del dataset RepDB). */
@@ -124,30 +131,49 @@ export function groupStatsInRange(
   );
 }
 
-/** Mejor peso por día para un ejercicio (para graficar progresión). */
+/**
+ * El mejor puntaje de cada día para un ejercicio (para graficar progresión).
+ * Según el tipo es el peso máximo, los kg netos de una asistida, las reps o
+ * los segundos (ver `setScore`).
+ */
 export function exerciseProgress(
   sets: StrengthSet[],
   exercise: string,
-): { date: string; weight: number; volume: number }[] {
-  const byDay = new Map<string, StrengthSet[]>();
+  kind: ExerciseKind = "peso",
+  bwOn: BodyweightOn = () => 0,
+): { date: string; value: number }[] {
+  const byDay = new Map<string, number>();
   for (const s of sets) {
     if (s.exercise !== exercise) continue;
-    const arr = byDay.get(s.date) ?? [];
-    arr.push(s);
-    byDay.set(s.date, arr);
+    const v = setScore(s, kind, bwOn(s.date));
+    byDay.set(s.date, Math.max(byDay.get(s.date) ?? -Infinity, v));
   }
   return [...byDay.entries()]
-    .map(([date, arr]) => ({
-      date,
-      weight: Math.max(...arr.map((s) => s.weight)),
-      volume: totalVolume(arr),
-    }))
+    .map(([date, value]) => ({ date, value }))
     .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** El mejor puntaje histórico por ejercicio: el PR, según su tipo. */
+export function bestScores(
+  sets: StrengthSet[],
+  kindOf: KindOf,
+  bwOn: BodyweightOn,
+): Map<string, number> {
+  const best = new Map<string, number>();
+  for (const s of sets) {
+    const v = setScore(s, kindOf(s.exercise), bwOn(s.date));
+    best.set(s.exercise, Math.max(best.get(s.exercise) ?? -Infinity, v));
+  }
+  return best;
 }
 
 export type LastPerformance = {
   date: string;
-  /** Mejor peso de esa sesión y las reps más altas que hiciste con él. */
+  /**
+   * Mejor peso de esa sesión y las reps más altas que hiciste con él. En una
+   * asistida, la MENOR asistencia; en las de reps o tiempo, `reps` es lo
+   * máximo que hiciste (en segundos, si es de tiempo).
+   */
   weight: number;
   reps: number;
   /** Cuántas series hiciste con ese peso. */
@@ -157,11 +183,13 @@ export type LastPerformance = {
 };
 
 /**
- * Tope del rango de reps de un esquema del plan: "4 × 8-10" → 10. Los que van
- * por tiempo ("3 × 45-60 s") no tienen reps que topear.
+ * Tope del rango de un esquema del plan: "4 × 8-10" → 10 reps, "3 × 45-60 s"
+ * → 60 segundos. Un esquema en segundos solo tiene tope para un ejercicio de
+ * tiempo, y viceversa.
  */
-const rangeTop = (scheme: string): number | null => {
-  if (/\d\s*s\b/.test(scheme)) return null;
+const rangeTop = (scheme: string, kind: ExerciseKind): number | null => {
+  const bySeconds = /\d\s*s\b/.test(scheme);
+  if (bySeconds !== (kind === "tiempo")) return null;
   const m = scheme.match(/×\s*(?:\d+\s*-\s*)?(\d+)/);
   return m ? Number(m[1]) : null;
 };
@@ -188,6 +216,7 @@ export function lastPerformance(
   scheme?: string,
   same: (a: string, b: string) => boolean = (a, b) =>
     normName(a) === normName(b),
+  kind: ExerciseKind = "peso",
 ): LastPerformance | null {
   let lastDate = "";
   const byName = new Map<string, boolean>();
@@ -196,18 +225,26 @@ export function lastPerformance(
     if (ok === undefined) byName.set(name, (ok = same(name, exercise)));
     return ok;
   };
+  // Con peso, una serie en 0 kg es un dato roto o un calentamiento: no sirve
+  // de referencia. En los demás tipos el peso no dice nada.
+  const counts = (s: StrengthSet) => (kind === "peso" ? s.weight > 0 : s.reps > 0);
   for (const s of sets) {
-    if (s.date < before && s.date > lastDate && s.weight > 0 && matches(s.exercise))
+    if (s.date < before && s.date > lastDate && counts(s) && matches(s.exercise))
       lastDate = s.date;
   }
   if (!lastDate) return null;
 
   const session = sets.filter((s) => s.date === lastDate && matches(s.exercise));
-  const weight = Math.max(...session.map((s) => s.weight));
-  const atWeight = session.filter((s) => s.weight === weight);
+  const weights = session.map((s) => s.weight);
+  // La serie de referencia: la más pesada; en una asistida, la de menos ayuda.
+  const weight = kind === "asistido" ? Math.min(...weights) : Math.max(...weights);
+  const atWeight =
+    kind === "reps" || kind === "tiempo"
+      ? session
+      : session.filter((s) => s.weight === weight);
   const reps = Math.max(...atWeight.map((s) => s.reps));
 
-  const top = scheme ? rangeTop(scheme) : null;
+  const top = scheme ? rangeTop(scheme, kind) : null;
   const planned = scheme ? plannedSets(scheme) : null;
   const topped =
     top != null &&
@@ -224,3 +261,45 @@ export function lastPerformance(
  * se sube de a 1.
  */
 export const nextWeight = (w: number) => (w < 15 ? w + 1 : w + 2.5);
+
+/**
+ * Lo que toca hoy partiendo de la última vez: lo mismo, o el siguiente
+ * escalón si topeaste el rango. Más peso, menos asistencia, una rep más o
+ * 5 segundos más, según el tipo.
+ */
+export function nextTarget(
+  last: LastPerformance,
+  kind: ExerciseKind,
+): { reps: number; weight: number } {
+  if (!last.topped) return { reps: last.reps, weight: last.weight };
+  switch (kind) {
+    case "peso":
+      return { reps: last.reps, weight: nextWeight(last.weight) };
+    case "asistido":
+      return { reps: last.reps, weight: lessAssist(last.weight) };
+    case "reps":
+      return { reps: last.reps + 1, weight: last.weight };
+    case "tiempo":
+      return { reps: last.reps + 5, weight: 0 };
+  }
+}
+
+/**
+ * La referencia de la última vez, para mostrar al lado del ejercicio: lo que
+ * hiciste o, si topeaste, el siguiente escalón ("↑ 62,5 kg", "↓ asist. 17,5").
+ */
+export function lastLabel(last: LastPerformance, kind: ExerciseKind): string {
+  const t = nextTarget(last, kind);
+  switch (kind) {
+    case "peso":
+      return last.topped ? `↑ ${t.weight} kg` : `${last.weight} kg × ${last.reps}`;
+    case "asistido":
+      return last.topped
+        ? `↓ asist. ${t.weight} kg`
+        : `asist. ${last.weight} kg × ${last.reps}`;
+    case "reps":
+      return last.topped ? `↑ ${t.reps} reps` : `${last.reps} reps`;
+    case "tiempo":
+      return last.topped ? `↑ ${fmtSeconds(t.reps)}` : fmtSeconds(last.reps);
+  }
+}

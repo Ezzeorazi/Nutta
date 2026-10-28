@@ -10,7 +10,7 @@ import {
 import { readBody } from "@/lib/body";
 import { groupsOf, MUSCLE_GROUPS } from "@/lib/gym";
 import { OBJECTIVES, type ObjectiveKey } from "@/lib/nutrition";
-import { getPlanDay, PLAN_WAIST } from "@/lib/plan";
+import { getPlanDay, PLAN_WAIST, type PlanDay } from "@/lib/plan";
 import type {
   DailyMetrics,
   ExerciseEntry,
@@ -47,10 +47,15 @@ export function athleteBrief(input: {
   hour: number;
   /** Si el plan del mes es de este usuario (ver `lib/planOwner.ts`). */
   hasPlan?: boolean;
+  /** La semana vigente, con los días editados (ver `lib/routine.ts`). */
+  plan?: PlanDay[];
 }): string {
   const { state, hour, bodyWeight } = input;
   const { training, nutrition, week, recovery } = state;
-  const plan = getPlanDay(state.date);
+  const plan = getPlanDay(state.date, input.plan);
+  const planToday = plan.rest
+    ? `descanso (${plan.cardio})`
+    : `${plan.label}: ${plan.exercises.map((e) => `${e.name} ${e.sets}`).join(", ")}`;
   const objLabel = OBJECTIVES.find((o) => o.key === input.objective)?.label;
 
   // Lo comido hoy, por comida: es lo que permite no repetirle el mismo plato ni
@@ -89,14 +94,13 @@ export function athleteBrief(input: {
     `Entrenamiento de hoy: ${trainedLine}.`,
     // El plan que él eligió: sin esto la IA sugiere rutinas inventadas en vez
     // de la suya.
-    // A otro usuario no se le empuja una rutina que no es suya.
+    // A otro usuario no se le empuja una rutina que no es suya, pero si armó
+    // la propia en el editor, esa sí.
     input.hasPlan === false
-      ? null
-      : `Plan (recomposición, 6 días PPL, meta cintura ${PLAN_WAIST.start}→${PLAN_WAIST.target} cm): hoy toca ${
-          plan.rest
-            ? `descanso (${plan.cardio})`
-            : `${plan.label}: ${plan.exercises.map((e) => `${e.name} ${e.sets}`).join(", ")}`
-        }.`,
+      ? input.plan
+        ? `Su rutina: hoy toca ${planToday}.`
+        : null
+      : `Plan (recomposición, 6 días PPL, meta cintura ${PLAN_WAIST.start}→${PLAN_WAIST.target} cm): hoy toca ${planToday}.`,
     `Calorías: ${round(nutrition.consumed.calories)} consumidas de ${round(nutrition.goals.calories)} (netas ${round(nutrition.netCalories)}) → ${
       nutrition.remaining.calories >= 0
         ? `quedan ${round(nutrition.remaining.calories)}`

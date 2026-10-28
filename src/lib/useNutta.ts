@@ -6,13 +6,17 @@ import { downscaleImage } from "@/lib/image";
 import { localDateFromMs, startOfLocalDayMs } from "@/lib/types";
 import type { Profile } from "@/lib/nutrition";
 import { caloriesFor, type DrinkOption } from "@/lib/drinks";
+import { parseRoutineExercises } from "@/lib/routine";
+import type { PlanDay } from "@/lib/plan";
 import type {
   BodyPart,
   ChatMessage,
+  CustomExercise,
   CustomGoal,
   DailyMetrics,
   DrinkEntry,
   ExerciseEntry,
+  ExerciseKind,
   FavoriteFood,
   FoodEntry,
   GoalKind,
@@ -24,6 +28,7 @@ import type {
   PlanSwap,
   Recipe,
   RecipeItem,
+  RoutineDayRecord,
   StrengthSet,
   Supplement,
   SupplementLog,
@@ -76,6 +81,8 @@ export function useNutta() {
           strengthSets: {},
           planSwaps: {},
           planPicks: {},
+          routineDays: {},
+          customExercises: {},
           vacations: {},
           customGoals: {},
           favorites: {},
@@ -175,6 +182,21 @@ export function useNutta() {
   const planPicks = (
     (data?.planPicks ?? []) as unknown as (PlanPick & { owner: string })[]
   ).filter((p) => p.owner === owner);
+  // Días de la rutina editados (ver `lib/routine.ts`).
+  const routineDays: RoutineDayRecord[] = (
+    (data?.routineDays ?? []) as unknown as (Omit<RoutineDayRecord, "exercises"> & {
+      owner: string;
+      exercises: string;
+    })[]
+  )
+    .filter((d) => d.owner === owner)
+    .map((d) => ({ ...d, exercises: parseRoutineExercises(d.exercises) }));
+  // Ejercicios propios y overrides de medición/foto del catálogo.
+  const customExercises = (
+    (data?.customExercises ?? []) as unknown as (CustomExercise & { owner: string })[]
+  )
+    .filter((c) => c.owner === owner)
+    .sort((a, b) => a.name.localeCompare(b.name, "es"));
   // Tramos de vacaciones, del más reciente al más viejo: el activo, si hay
   // uno, es el primero que cubra el día que se esté mirando.
   const vacations = (
@@ -704,6 +726,76 @@ export function useNutta() {
     if (existing) db.transact(db.tx.planSwaps[existing.id].delete());
   };
 
+  /**
+   * Guarda un día de la rutina (pisa al del plan fijo). Uno por día de la
+   * semana: guardar de nuevo actualiza la misma fila.
+   */
+  const saveRoutineDay = (day: PlanDay) => {
+    if (!user) return;
+    const existing = routineDays.find((d) => d.dow === day.dow);
+    const exercises = day.rest
+      ? []
+      : day.exercises
+          .filter((e) => e.name.trim())
+          .map((e) => ({
+            name: e.name.trim(),
+            sets: e.sets.trim(),
+            ...(e.weight?.trim() ? { weight: e.weight.trim() } : {}),
+          }));
+    db.transact(
+      db.tx.routineDays[existing?.id ?? id()].update({
+        owner: user.id,
+        dow: day.dow,
+        label: day.label.trim() || "Entreno",
+        emoji: day.emoji.trim() || "💪",
+        exercises: JSON.stringify(exercises),
+        cardio: day.cardio?.trim() ?? "",
+        rest: !!day.rest,
+        updatedAt: Date.now(),
+      }),
+    );
+  };
+
+  /** Vuelve ese día al plan fijo (o a "sin rutina", si no hay plan). */
+  const resetRoutineDay = (dow: number) => {
+    const existing = routineDays.find((d) => d.dow === dow);
+    if (existing) db.transact(db.tx.routineDays[existing.id].delete());
+  };
+
+  /**
+   * Crea o actualiza un ejercicio propio. Sin `id`, se busca por nombre: así
+   * cambiar la medición de un ejercicio del catálogo no duplica filas.
+   */
+  const saveCustomExercise = (x: {
+    id?: string;
+    name: string;
+    kind: ExerciseKind;
+    image?: string;
+    group?: string;
+  }) => {
+    if (!user || !x.name.trim()) return;
+    const name = x.name.trim();
+    const existing = x.id
+      ? customExercises.find((c) => c.id === x.id)
+      : customExercises.find(
+          (c) => c.name.trim().toLowerCase() === name.toLowerCase(),
+        );
+    db.transact(
+      db.tx.customExercises[existing?.id ?? id()].update({
+        owner: user.id,
+        name,
+        kind: x.kind,
+        image: x.image ?? existing?.image ?? "",
+        group: x.group ?? existing?.group ?? "",
+        ...(existing ? {} : { createdAt: Date.now() }),
+      }),
+    );
+  };
+
+  /** Borra un ejercicio propio. Sus series quedan: se guardan por nombre. */
+  const removeCustomExercise = (cid: string) =>
+    db.transact(db.tx.customExercises[cid].delete());
+
   const addGoal = (
     kind: GoalKind,
     label: string,
@@ -925,6 +1017,8 @@ export function useNutta() {
     strengthSets,
     planSwaps,
     planPicks,
+    routineDays,
+    customExercises,
     vacations,
     customGoals,
     favorites,
@@ -965,6 +1059,10 @@ export function useNutta() {
     updateSet,
     swapExercise,
     undoSwap,
+    saveRoutineDay,
+    resetRoutineDay,
+    saveCustomExercise,
+    removeCustomExercise,
     pickPlanDay,
     clearPlanPick,
     startVacation,

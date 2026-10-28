@@ -15,8 +15,10 @@ import { init } from "@instantdb/admin";
 import webpush from "web-push";
 import { buildAthleteState } from "@/lib/athlete";
 import { APP_ID } from "@/lib/appId";
-import { effectiveWeight } from "@/lib/nutrition";
-import { PLAN_GOALS, getPlanDay } from "@/lib/plan";
+import { bodyweightResolver, effectiveWeight } from "@/lib/nutrition";
+import { PLAN_GOALS, WEEKLY_PLAN, getPlanDay } from "@/lib/plan";
+import { buildWeeklyPlan, parseRoutineExercises } from "@/lib/routine";
+import { kindResolver, loadSets } from "@/lib/exerciseKind";
 import { isPlanOwner } from "@/lib/planOwner";
 import { inSlot, planReminder, type Slot } from "@/lib/reminders";
 import {
@@ -26,11 +28,13 @@ import {
   vacationOn,
 } from "@/lib/vacation";
 import type {
+  CustomExercise,
   DailyMetrics,
   DrinkEntry,
   ExerciseEntry,
   FoodEntry,
   PlanPick,
+  RoutineDayRecord,
   StrengthSet,
   Supplement,
   SupplementLog,
@@ -124,6 +128,8 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
     weights: {},
     vacations: {},
     planPicks: {},
+    routineDays: {},
+    customExercises: {},
     $users: {},
   })) as unknown as Record<string, unknown[]>;
 
@@ -195,14 +201,36 @@ export async function sendSlot(slot: Slot, now = Date.now()): Promise<SendResult
     // De viaje el día lo elige el usuario: el aviso tiene que nombrar el que
     // eligió, no el que le tocaría por almanaque.
     const planPicks = mine<PlanPick & { owner: string }>(data.planPicks ?? [], owner);
-    const planDay = planDayFor(today, vacations, getPlanDay, planPicks);
+    // La rutina con los días que editó (ver `lib/routine.ts`).
+    const routineDays = mine<
+      Omit<RoutineDayRecord, "exercises"> & { owner: string; exercises: string }
+    >(data.routineDays ?? [], owner).map((d) => ({
+      ...d,
+      exercises: parseRoutineExercises(d.exercises),
+    }));
+    const plan = buildWeeklyPlan(routineDays, WEEKLY_PLAN);
+    const planDay = planDayFor(
+      today,
+      vacations,
+      (iso) => getPlanDay(iso, plan),
+      planPicks,
+      plan,
+    );
 
     const bodyWeight = effectiveWeight(profile?.weight ?? 0, weights, today);
+    // Asistidas y de tiempo, con su carga real (ver `lib/exerciseKind.ts`).
+    const kindOf = kindResolver(
+      mine<CustomExercise & { owner: string }>(data.customExercises ?? [], owner),
+    );
     const state = buildAthleteState({
       foods,
       drinks,
       exercises,
-      strengthSets,
+      strengthSets: loadSets(
+        strengthSets,
+        kindOf,
+        bodyweightResolver(profile?.weight ?? 0, weights),
+      ),
       metrics,
       supplements,
       supplementLogs,

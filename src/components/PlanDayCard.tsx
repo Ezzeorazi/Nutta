@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowLeftRight, Check } from "lucide-react";
+import { ArrowLeftRight, Check, Pencil } from "lucide-react";
 import { muscleWork } from "@/lib/exerciseDb";
-import { nextWeight, type LastPerformance } from "@/lib/gym";
+import { lastLabel, type LastPerformance } from "@/lib/gym";
+import type { KindOf } from "@/lib/exerciseKind";
 import type { SwappedDay } from "@/lib/planSwaps";
 import { dayLabel, type StrengthSet } from "@/lib/types";
 
@@ -20,6 +21,8 @@ export default function PlanDayCard({
   lastByExercise,
   onSelectExercise,
   onSwapExercise,
+  onEditRoutine,
+  kindOf = () => "peso",
 }: {
   planDay: SwappedDay;
   daySets: StrengthSet[];
@@ -30,6 +33,10 @@ export default function PlanDayCard({
   onSelectExercise: (name: string) => void;
   /** Abre el reemplazo de ese ejercicio. */
   onSwapExercise?: (name: string) => void;
+  /** Abre el editor de la rutina semanal. */
+  onEditRoutine?: () => void;
+  /** Cómo se mide cada ejercicio (ver `lib/exerciseKind.ts`). */
+  kindOf?: KindOf;
 }) {
   const doneNames = new Set(
     daySets.map((s) => s.exercise.trim().toLowerCase()),
@@ -37,11 +44,23 @@ export default function PlanDayCard({
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-sm font-semibold text-muted">
-        {isToday || !viewDate
-          ? "Tu rutina de hoy"
-          : `Tu rutina — ${dayLabel(viewDate)}`}
-      </h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold text-muted">
+          {isToday || !viewDate
+            ? "Tu rutina de hoy"
+            : `Tu rutina — ${dayLabel(viewDate)}`}
+        </h2>
+        {onEditRoutine && (
+          <button
+            type="button"
+            onClick={onEditRoutine}
+            className="flex items-center gap-1 rounded-full border border-dashed border-border px-3 py-1 text-xs font-medium text-primary active:scale-95 hover:border-primary"
+          >
+            <Pencil size={12} aria-hidden />
+            Editar rutina
+          </button>
+        )}
+      </div>
       <div className="flex flex-col gap-3 rounded-card border-l-4 border-l-primary bg-card px-4 py-3 shadow-e1">
         <div className="flex items-center gap-3">
           <span className="text-lg leading-none">{planDay.emoji}</span>
@@ -65,6 +84,7 @@ export default function PlanDayCard({
                 // de nombres de máquinas.
                 const musculos = muscleWork(ex.name).primary;
                 const last = lastByExercise?.get(ex.name);
+                const kind = kindOf(ex.name);
                 return (
                   <div
                     key={ex.swappedFrom ?? ex.name}
@@ -104,18 +124,21 @@ export default function PlanDayCard({
                       <span className="shrink-0 pl-2 text-right text-xs text-muted tabular-nums">
                         {ex.sets}
                         {last ? (
-                          last.topped ? (
-                            <span className="block font-semibold text-primary">
-                              ↑ {nextWeight(last.weight)} kg
-                            </span>
-                          ) : (
-                            <span className="block">
-                              {last.weight} kg × {last.reps}
-                            </span>
-                          )
+                          <span
+                            className={
+                              last.topped
+                                ? "block font-semibold text-primary"
+                                : "block"
+                            }
+                          >
+                            {lastLabel(last, kind)}
+                          </span>
                         ) : (
                           <span className="block">
-                            {ex.weight ?? "buscá tu peso"}
+                            {ex.weight ||
+                              (kind === "peso" || kind === "asistido"
+                                ? "buscá tu peso"
+                                : "peso corporal")}
                           </span>
                         )}
                       </span>

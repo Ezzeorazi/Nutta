@@ -122,6 +122,25 @@ export function effectiveWeight(
   return Math.round(avg * 10) / 10;
 }
 
+/**
+ * `effectiveWeight` para cualquier fecha, cacheado por día: lo usan las series
+ * asistidas, que se leen como peso corporal menos la ayuda de ESE día.
+ */
+export function bodyweightResolver(
+  profileWeight: number,
+  weights: Pick<WeightEntry, "date" | "kg">[],
+): (date: string) => number {
+  const cache = new Map<string, number>();
+  return (date) => {
+    let w = cache.get(date);
+    if (w === undefined) {
+      w = effectiveWeight(profileWeight, weights, date);
+      cache.set(date, w);
+    }
+    return w;
+  };
+}
+
 export type ActivityMismatch = {
   declared: ActivityKey;
   suggested: ActivityKey;

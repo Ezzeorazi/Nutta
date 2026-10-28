@@ -102,8 +102,11 @@ export function buildTodaySession(x: {
   swaps?: PlanSwap[];
   /** Días del plan elegidos a mano (modo vacaciones). */
   picks?: PlanPick[];
+  /** La semana vigente, con los días editados (ver `lib/routine.ts`). */
+  plan?: PlanDay[];
 }): TodaySession {
   const { state, today, daySets } = x;
+  const plan = x.plan ?? WEEKLY_PLAN;
   const hechos = new Set(daySets.map((s) => norm(s.exercise)));
   const rec = state.recovery.score;
   const reasons: string[] = [];
@@ -116,9 +119,9 @@ export function buildTodaySession(x: {
   const elegidoDelPlan = elegido != null && elegido !== VACATION_DOW;
   const base = deViaje
     ? elegidoDelPlan
-      ? (WEEKLY_PLAN.find((d) => d.dow === elegido) ?? VACATION_DAY)
+      ? (plan.find((d) => d.dow === elegido) ?? VACATION_DAY)
       : VACATION_DAY
-    : getPlanDay(today);
+    : getPlanDay(today, plan);
   // Con los cambios del día ya aplicados: si reemplazaste un ejercicio, la
   // sesión sugerida tiene que hablar del que vas a hacer, no del que no podés.
   const calendario = applySwaps(base, x.swaps ?? [], today);
@@ -196,7 +199,7 @@ export function buildTodaySession(x: {
   // "qué toca hoy" es justo la decisión que el modo saca del medio.
   if (!deViaje && propia != null && propia <= 1) {
     // Se busca el día del plan cuyo grupo más reciente esté MÁS descansado.
-    const alternativas = WEEKLY_PLAN.filter(
+    const alternativas = plan.filter(
       (d) => !d.rest && d.dow !== calendario.dow,
     )
       .map((d) => ({ day: d, fresh: freshness(d, state.muscles) ?? 99 }))

@@ -152,10 +152,17 @@ export const shortPlanLabel = (d: PlanDay) => d.label.replace(/\s*\(.*\)$/, "");
 /** Abreviatura del día de la semana de un `dow` (0 = domingo). */
 export const DOW_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-/** El día del plan que corresponde a una fecha YYYY-MM-DD. */
-export function getPlanDay(iso: string): PlanDay {
+/**
+ * El día del plan que corresponde a una fecha YYYY-MM-DD. `plan` es la semana
+ * vigente (con los días editados, ver `lib/routine.ts`); por defecto, la fija.
+ */
+export function getPlanDay(iso: string, plan: PlanDay[] = WEEKLY_PLAN): PlanDay {
   const dow = new Date(`${iso}T00:00:00`).getDay();
-  return WEEKLY_PLAN.find((d) => d.dow === dow) ?? WEEKLY_PLAN[6];
+  return (
+    plan.find((d) => d.dow === dow) ??
+    WEEKLY_PLAN.find((d) => d.dow === dow) ??
+    WEEKLY_PLAN[6]
+  );
 }
 
 /**

@@ -153,10 +153,12 @@ export const VACATION_DOW = -1;
  * El día de descanso del plan queda afuera: de vacaciones, un día sin elegir
  * nada YA es descanso, así que ofrecerlo sería ofrecer lo que ya está puesto.
  */
-export const VACATION_OPTIONS: PlanDay[] = [
+export const vacationOptions = (plan: PlanDay[] = WEEKLY_PLAN): PlanDay[] => [
   VACATION_DAY,
-  ...WEEKLY_PLAN.filter((d) => !d.rest).sort((a, b) => a.dow - b.dow),
+  ...plan.filter((d) => !d.rest).sort((a, b) => a.dow - b.dow),
 ];
+
+export const VACATION_OPTIONS: PlanDay[] = vacationOptions();
 
 /** El `dow` elegido a mano para esa fecha, o `null` si no elegiste nada. */
 export function pickedDow(picks: PlanPick[], date: string): number | null {
@@ -176,11 +178,13 @@ export function planDayFor(
   vacations: Vacation[],
   fallback: (iso: string) => PlanDay,
   picks: PlanPick[] = [],
+  /** La semana vigente, con los días editados (ver `lib/routine.ts`). */
+  plan: PlanDay[] = WEEKLY_PLAN,
 ): PlanDay {
   if (!vacationOn(vacations, date)) return fallback(date);
   const dow = pickedDow(picks, date);
   if (dow == null || dow === VACATION_DOW) return VACATION_DAY;
-  return WEEKLY_PLAN.find((d) => d.dow === dow) ?? VACATION_DAY;
+  return plan.find((d) => d.dow === dow) ?? VACATION_DAY;
 }
 
 /** Lo que dice la app cuando el día cae en vacaciones. */

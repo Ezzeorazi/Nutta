@@ -18,6 +18,8 @@ import ExerciseImage from "@/components/ExerciseImage";
 import ExercisePickerSheet from "@/components/ExercisePickerSheet";
 import CardioSheet from "@/components/CardioSheet";
 import PlanDayCard from "@/components/PlanDayCard";
+import RoutineEditorSheet from "@/components/RoutineEditorSheet";
+import type { ExerciseDraft } from "@/components/ExerciseEditor";
 import RestTimer from "@/components/RestTimer";
 import SessionSheet from "@/components/SessionSheet";
 import SwapExerciseSheet from "@/components/SwapExerciseSheet";
@@ -26,23 +28,42 @@ import Chip from "@/components/ui/Chip";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
 import {
+  bestScores,
   exerciseProgress,
   groupByExercise,
   lastPerformance,
-  nextWeight,
-  personalRecords,
+  nextTarget,
   totalVolume,
   usedExercises,
   type LastPerformance,
 } from "@/lib/gym";
-import { canonicalName, matchExercise } from "@/lib/exerciseDb";
-import { DOW_SHORT, getPlanDay, shortPlanLabel } from "@/lib/plan";
+import { canonicalName } from "@/lib/exerciseDb";
+import {
+  KINDS,
+  customFinder,
+  fmtScore,
+  fmtSeconds,
+  fmtSet,
+  imageResolver,
+  kindResolver,
+  loadSets,
+  loadVolume,
+  setScore,
+  type BodyweightOn,
+} from "@/lib/exerciseKind";
+import {
+  DOW_SHORT,
+  WEEKLY_PLAN,
+  getPlanDay,
+  shortPlanLabel,
+  type PlanDay,
+} from "@/lib/plan";
 import {
   VACATION_DOW,
-  VACATION_OPTIONS,
   pickedDow,
   planDayFor,
   vacationOn,
+  vacationOptions,
 } from "@/lib/vacation";
 import { applySwaps } from "@/lib/planSwaps";
 import { buildTodaySession } from "@/lib/session";
@@ -50,6 +71,8 @@ import type { AthleteState } from "@/lib/athlete";
 import {
   COMMON_LIFTS,
   dayLabel,
+  type CustomExercise,
+  type ExerciseKind,
   startOfLocalDayMs,
   type DailyMetrics,
   type ExerciseEntry,
@@ -60,17 +83,105 @@ import {
 } from "@/lib/types";
 import exerciseNames from "@/data/exercise-names.json";
 
+const NO_DOWS = new Set<number>();
+const NO_CUSTOM: CustomExercise[] = [];
+const NO_BW: BodyweightOn = () => 0;
+
 const shortDate = (iso: string) => {
   const d = new Date(`${iso}T00:00:00`);
   return `${d.getDate()}/${d.getMonth() + 1}`;
 };
 
 /**
- * Mini-formulario de una serie (reps + peso) con steppers. Se usa tanto para
- * EDITAR una serie existente como para AGREGAR otra a un ejercicio ya cargado,
- * así ambos flujos se ven y se cargan igual (con −/+, sin teclado).
+ * Los campos de una serie según cómo se mide el ejercicio: reps + kg, reps +
+ * asistencia, solo reps o solo segundos. Steppers en vez de campos sueltos:
+ * entre serie y serie se carga con una mano y sin mirar. Van apilados (no lado
+ * a lado) porque a dos columnas no queda ancho para el número.
+ */
+function SetFields({
+  kind,
+  reps,
+  weight,
+  onReps,
+  onWeight,
+  bodyweight,
+  compact = false,
+}: {
+  kind: ExerciseKind;
+  reps: string;
+  weight: string;
+  onReps: (v: string) => void;
+  onWeight: (v: string) => void;
+  /** Peso corporal: con él, la asistencia se traduce a kg reales. */
+  bodyweight: number;
+  compact?: boolean;
+}) {
+  const label = (text: string, control: React.ReactNode) =>
+    compact ? (
+      <div>
+        <p className="mb-1 text-[11px] text-muted">{text}</p>
+        {control}
+      </div>
+    ) : (
+      <Field label={text}>{control}</Field>
+    );
+  const assist = Number(weight) || 0;
+  return (
+    <div className={`flex flex-col ${compact ? "gap-2" : "gap-3"}`}>
+      {kind === "tiempo"
+        ? label(
+            "Segundos",
+            <Stepper
+              value={reps}
+              onChange={onReps}
+              step={5}
+              min={0}
+              max={600}
+              ariaLabel="Segundos"
+            />,
+          )
+        : label(
+            "Repeticiones",
+            <Stepper
+              value={reps}
+              onChange={onReps}
+              step={1}
+              min={0}
+              max={100}
+              ariaLabel="Repeticiones"
+            />,
+          )}
+      {(kind === "peso" || kind === "asistido") &&
+        label(
+          kind === "asistido" ? "Asistencia (kg)" : "Peso (kg)",
+          <Stepper
+            value={weight}
+            onChange={onWeight}
+            step={5}
+            min={0}
+            max={500}
+            ariaLabel={kind === "asistido" ? "Asistencia en kilos" : "Peso en kilos"}
+          />,
+        )}
+      {kind === "asistido" && (
+        <p className="text-xs text-muted">
+          {bodyweight > 0
+            ? `Con tu peso de ${bodyweight} kg levantás ${Math.max(0, Math.round((bodyweight - assist) * 10) / 10)} kg. Menos asistencia = más difícil.`
+            : "Registrá tu peso en Progreso para calcular cuánto levantás de verdad."}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Mini-formulario de una serie con steppers. Se usa tanto para EDITAR una serie
+ * existente como para AGREGAR otra a un ejercicio ya cargado, así ambos flujos
+ * se ven y se cargan igual (con −/+, sin teclado).
  */
 function SetForm({
+  kind,
+  bodyweight,
   reps,
   weight,
   onReps,
@@ -79,6 +190,8 @@ function SetForm({
   onCancel,
   saveLabel,
 }: {
+  kind: ExerciseKind;
+  bodyweight: number;
   reps: string;
   weight: string;
   onReps: (v: string) => void;
@@ -89,30 +202,15 @@ function SetForm({
 }) {
   return (
     <div className="flex flex-col gap-2 rounded-xl bg-sunken p-2">
-      <div className="flex flex-col gap-2">
-        <div>
-          <p className="mb-1 text-[11px] text-muted">Reps</p>
-          <Stepper
-            value={reps}
-            onChange={onReps}
-            step={1}
-            min={0}
-            max={100}
-            ariaLabel="Repeticiones"
-          />
-        </div>
-        <div>
-          <p className="mb-1 text-[11px] text-muted">Peso (kg)</p>
-          <Stepper
-            value={weight}
-            onChange={onWeight}
-            step={5}
-            min={0}
-            max={500}
-            ariaLabel="Peso en kilos"
-          />
-        </div>
-      </div>
+      <SetFields
+        kind={kind}
+        reps={reps}
+        weight={weight}
+        onReps={onReps}
+        onWeight={onWeight}
+        bodyweight={bodyweight}
+        compact
+      />
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="secondary" onClick={onCancel}>
           Cancelar
@@ -130,6 +228,10 @@ function SetForm({
     </div>
   );
 }
+
+/** Peso que se guarda según el tipo: en reps y tiempo no hay kg que cargar. */
+const storedWeight = (kind: ExerciseKind, weight: string) =>
+  kind === "peso" || kind === "asistido" ? Number(weight) || 0 : 0;
 
 export default function GymTab({
   strengthSets,
@@ -150,6 +252,15 @@ export default function GymTab({
   onSwapExercise,
   onUndoSwap,
   hasPlan = true,
+  plan = WEEKLY_PLAN,
+  basePlan = WEEKLY_PLAN,
+  savedDows = NO_DOWS,
+  customExercises = NO_CUSTOM,
+  bodyweightOn = NO_BW,
+  onSaveRoutineDay,
+  onResetRoutineDay,
+  onSaveExercise,
+  onRemoveCustomExercise,
 }: {
   strengthSets: StrengthSet[];
   exercises?: ExerciseEntry[];
@@ -186,11 +297,33 @@ export default function GymTab({
    * queda el registro libre de series.
    */
   hasPlan?: boolean;
+  /** La semana vigente: plan fijo + días editados (ver `lib/routine.ts`). */
+  plan?: PlanDay[];
+  /** El plan fijo sin ediciones (vacío si el usuario no tiene plan propio). */
+  basePlan?: PlanDay[];
+  /** Días de la semana con una edición guardada. */
+  savedDows?: Set<number>;
+  /** Ejercicios propios y overrides de medición/foto. */
+  customExercises?: CustomExercise[];
+  /** Peso corporal en una fecha: para leer las asistidas en kg reales. */
+  bodyweightOn?: BodyweightOn;
+  onSaveRoutineDay?: (day: PlanDay) => void;
+  onResetRoutineDay?: (dow: number) => void;
+  onSaveExercise?: (d: ExerciseDraft) => void;
+  onRemoveCustomExercise?: (id: string) => void;
 }) {
   const [exercise, setExercise] = useState("");
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [routineOpen, setRoutineOpen] = useState(false);
+  // Cómo se mide cada ejercicio y qué foto lleva, con lo tuyo encima.
+  const kindOf = useMemo(() => kindResolver(customExercises), [customExercises]);
+  const findCustom = useMemo(() => customFinder(customExercises), [customExercises]);
+  const imageOf = useMemo(() => imageResolver(customExercises), [customExercises]);
+  // La rutina se muestra si hay plan propio o si armaste una en el editor.
+  const hasRoutine = hasPlan || savedDows.size > 0;
+  const bwToday = bodyweightOn(today);
   const [cardioOpen, setCardioOpen] = useState(false);
   // Ejercicio de la rutina que se está por reemplazar (null = sheet cerrado).
   const [swapping, setSwapping] = useState<string | null>(null);
@@ -213,8 +346,9 @@ export default function GymTab({
   };
   const cancelEdit = () => setEditId(null);
   const saveEdit = () => {
-    if (editId && Number(editReps) > 0) {
-      onEditSet(editId, Number(editReps), Number(editWeight) || 0);
+    const set = strengthSets.find((s) => s.id === editId);
+    if (set && Number(editReps) > 0) {
+      onEditSet(set.id, Number(editReps), storedWeight(kindOf(set.exercise), editWeight));
     }
     setEditId(null);
   };
@@ -232,8 +366,13 @@ export default function GymTab({
     [exercises, viewDate],
   );
   const groups = useMemo(() => groupByExercise(daySets), [daySets]);
-  const prs = useMemo(() => personalRecords(strengthSets), [strengthSets]);
-  const dayVolume = totalVolume(daySets);
+  // PR según el tipo: más kg, menos asistencia, más reps o más segundos.
+  const prs = useMemo(
+    () => bestScores(strengthSets, kindOf, bodyweightOn),
+    [strengthSets, kindOf, bodyweightOn],
+  );
+  // Volumen con la carga real: una asistida suma tu peso menos la ayuda.
+  const dayVolume = totalVolume(loadSets(daySets, kindOf, bodyweightOn));
   // Descanso declarado para el día que se está viendo. Con series cargadas el
   // día cuenta como entrenamiento igual (lo hecho manda sobre lo declarado).
   const restDay = useMemo(
@@ -255,8 +394,9 @@ export default function GymTab({
         daySets: todaySets,
         swaps: planSwaps,
         picks: planPicks,
+        plan,
       }),
-    [state, today, todaySets, planSwaps, planPicks],
+    [state, today, todaySets, planSwaps, planPicks, plan],
   );
 
   // La rutina del día que se está viendo, con sus cambios ya aplicados. Si ese
@@ -265,11 +405,17 @@ export default function GymTab({
   const planDay = useMemo(
     () =>
       applySwaps(
-        planDayFor(viewDate, vacations, getPlanDay, planPicks),
+        planDayFor(
+          viewDate,
+          vacations,
+          (iso) => getPlanDay(iso, plan),
+          planPicks,
+          plan,
+        ),
         planSwaps,
         viewDate,
       ),
-    [planPicks, planSwaps, vacations, viewDate],
+    [planPicks, planSwaps, vacations, viewDate, plan],
   );
   // De viaje el calendario no manda: el día lo elegís vos, y solo para ese día.
   const deViaje = useMemo(
@@ -291,11 +437,18 @@ export default function GymTab({
     const same = (a: string, b: string) => key(a) === key(b);
     const out = new Map<string, LastPerformance>();
     for (const ex of planDay.exercises) {
-      const last = lastPerformance(strengthSets, ex.name, viewDate, ex.sets, same);
+      const last = lastPerformance(
+        strengthSets,
+        ex.name,
+        viewDate,
+        ex.sets,
+        same,
+        kindOf(ex.name),
+      );
       if (last) out.set(ex.name, last);
     }
     return out;
-  }, [planDay, strengthSets, viewDate]);
+  }, [planDay, strengthSets, viewDate, kindOf]);
 
   // Tocar un ejercicio de la rutina lo carga con tu último peso y reps (o el
   // siguiente escalón si la última vez topeaste el rango en todas las series).
@@ -303,8 +456,9 @@ export default function GymTab({
     setExercise(name);
     const last = lastByExercise.get(name);
     if (last) {
-      setWeight(String(last.topped ? nextWeight(last.weight) : last.weight));
-      setReps(String(last.reps));
+      const t = nextTarget(last, kindOf(name));
+      setWeight(String(t.weight));
+      setReps(String(t.reps));
     }
   };
 
@@ -323,26 +477,42 @@ export default function GymTab({
   );
 
   const selectedProg = progExercise ?? used[0] ?? null;
+  const progKind = selectedProg ? kindOf(selectedProg) : "peso";
   const progData = useMemo(
     () =>
       selectedProg
-        ? exerciseProgress(strengthSets, selectedProg).map((p) => ({
+        ? exerciseProgress(
+            strengthSets,
+            selectedProg,
+            progKind,
+            bodyweightOn,
+          ).map((p) => ({
             label: shortDate(p.date),
-            peso: p.weight,
+            // Sin peso corporal, una asistida va en negativo (para que el PR
+            // sea la menor ayuda); en el gráfico se muestra la asistencia.
+            peso: Math.abs(p.value),
           }))
         : [],
-    [strengthSets, selectedProg],
+    [strengthSets, selectedProg, progKind, bodyweightOn],
   );
+  const progTooltip = (v: number): [string, string] =>
+    progKind === "tiempo"
+      ? [fmtSeconds(v), "Mejor tiempo"]
+      : progKind === "reps"
+        ? [`${v} reps`, "Máx. reps"]
+        : progKind === "asistido"
+          ? bwToday > 0
+            ? [`${v} kg`, "Kg netos (peso − asistencia)"]
+            : [`${v} kg`, "Asistencia"]
+          : [`${v} kg`, "Peso máx."];
   const progAxis = useMemo(
     () => yAxis(progData.map((p) => p.peso)),
     [progData],
   );
 
-  // Ejercicio del catálogo que matchea lo escrito (para mostrar su miniatura).
-  const matched = useMemo(
-    () => (exercise.trim() ? matchExercise(exercise) : null),
-    [exercise],
-  );
+  // Foto y medición de lo escrito (del catálogo o tuyas).
+  const image = exercise.trim() ? imageOf(exercise) : null;
+  const kind: ExerciseKind = exercise.trim() ? kindOf(exercise) : "peso";
 
   const canAdd = exercise.trim() !== "" && Number(reps) > 0;
   const submit = () => {
@@ -352,7 +522,7 @@ export default function GymTab({
     const createdAt = isToday
       ? undefined
       : startOfLocalDayMs(viewDate) + daySets.length * 60_000;
-    onAddSet(exercise.trim(), Number(reps), Number(weight) || 0, viewDate, createdAt);
+    onAddSet(exercise.trim(), Number(reps), storedWeight(kind, weight), viewDate, createdAt);
     // Ejercicio, reps y peso quedan cargados: lo normal es repetir la misma
     // serie, así que la próxima sale con un solo toque. Antes se borraban las
     // reps y había que reescribirlas en cada serie de un 4×10.
@@ -378,7 +548,7 @@ export default function GymTab({
       onAddSet(
         addingTo,
         Number(newReps),
-        Number(newWeight) || 0,
+        storedWeight(kindOf(addingTo), newWeight),
         viewDate,
         createdAt,
       );
@@ -477,7 +647,7 @@ export default function GymTab({
             para este día, así que mañana volvés a elegir.
           </p>
           <div className="flex flex-wrap gap-2">
-            {VACATION_OPTIONS.map((d) => (
+            {vacationOptions(plan).map((d) => (
               <Chip
                 key={d.dow}
                 selected={elegido === d.dow}
@@ -493,8 +663,10 @@ export default function GymTab({
         </section>
       )}
 
-      {/* Rutina fija del plan del mes, para el día que se está viendo. */}
-      {hasPlan && (
+      {/* La rutina de la semana (el plan del mes con tus ediciones), para el
+          día que se está viendo. Sin plan ni rutina propia, la invitación a
+          armarla. */}
+      {hasRoutine ? (
         <PlanDayCard
           planDay={planDay}
           daySets={daySets}
@@ -503,7 +675,20 @@ export default function GymTab({
           lastByExercise={lastByExercise}
           onSelectExercise={selectExercise}
           onSwapExercise={onSwapExercise ? setSwapping : undefined}
+          onEditRoutine={onSaveRoutineDay ? () => setRoutineOpen(true) : undefined}
+          kindOf={kindOf}
         />
+      ) : (
+        onSaveRoutineDay && (
+          <button
+            type="button"
+            onClick={() => setRoutineOpen(true)}
+            className="flex min-h-11 items-center justify-center gap-2 rounded-card border border-dashed border-border px-4 py-3 text-sm font-medium text-primary transition-colors active:scale-[0.99] hover:border-primary"
+          >
+            <Pencil size={15} strokeWidth={2} aria-hidden />
+            Armá tu rutina semanal
+          </button>
+        )
       )}
 
       {/* Alta de serie (hoy o un día pasado que estés completando) */}
@@ -515,10 +700,10 @@ export default function GymTab({
         )}
 
         <div className="flex items-center gap-2">
-          {matched && (
+          {image && (
             <ExerciseImage
-              image={matched.image}
-              name={matched.name_es}
+              image={image}
+              name={exercise}
               className="h-11 w-11 shrink-0"
             />
           )}
@@ -545,34 +730,44 @@ export default function GymTab({
           ))}
         </datalist>
 
-        {/* Steppers en vez de campos sueltos: entre serie y serie se carga con
-            una mano y sin mirar. El peso salta de a 5 kg (para 10, dos toques);
-            para ajustes finos el campo sigue siendo editable a mano. Van
-            apilados (no lado a lado) porque a dos columnas no queda ancho
-            para el número: con dos botones de 44px a cada lado, el dígito
-            termina tapado. */}
-        <div className="flex flex-col gap-3">
-          <Field label="Repeticiones">
-            <Stepper
-              value={reps}
-              onChange={setReps}
-              step={1}
-              min={0}
-              max={100}
-              ariaLabel="Repeticiones"
-            />
-          </Field>
-          <Field label="Peso (kg)">
-            <Stepper
-              value={weight}
-              onChange={setWeight}
-              step={5}
-              min={0}
-              max={500}
-              ariaLabel="Peso en kilos"
-            />
-          </Field>
-        </div>
+        {/* Cómo se mide lo que escribiste. Viene del catálogo, pero se puede
+            corregir acá mismo: queda guardado para ese ejercicio. */}
+        {exercise.trim() && onSaveExercise && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs text-muted">Se mide por:</span>
+            {KINDS.map((k) => (
+              <Chip
+                key={k.key}
+                tone="accent"
+                selected={kind === k.key}
+                className="min-h-7! px-2.5! text-xs!"
+                onClick={() =>
+                  kind !== k.key &&
+                  onSaveExercise({
+                    id: findCustom(exercise)?.id,
+                    name: findCustom(exercise)?.name ?? exercise.trim(),
+                    kind: k.key,
+                    image: imageOf(exercise) ?? "",
+                    group: findCustom(exercise)?.group ?? "",
+                  })
+                }
+              >
+                {k.label}
+              </Chip>
+            ))}
+          </div>
+        )}
+
+        {/* El peso salta de a 5 kg (para 10, dos toques); para ajustes finos
+            el campo sigue siendo editable a mano. */}
+        <SetFields
+          kind={kind}
+          reps={reps}
+          weight={weight}
+          onReps={setReps}
+          onWeight={setWeight}
+          bodyweight={bwToday}
+        />
 
         <Button variant="accent" size="lg" full onClick={submit} disabled={!canAdd}>
           <Plus size={18} strokeWidth={2.5} aria-hidden />
@@ -584,8 +779,7 @@ export default function GymTab({
         )}
 
         <p className="text-xs text-muted">
-          Dejá el peso en 0 para ejercicios con peso corporal. Los valores quedan
-          cargados para repetir la serie de un toque.
+          Los valores quedan cargados para repetir la serie de un toque.
         </p>
       </section>
 
@@ -602,16 +796,33 @@ export default function GymTab({
             {isToday ? "Sesión de hoy" : `Sesión — ${dayLabel(viewDate)}`}
           </h2>
           {groups.map((g) => {
+            const gKind = kindOf(g.exercise);
+            const bw = bodyweightOn(viewDate);
+            // PR y resumen según cómo se mide: kg, asistencia, reps o tiempo.
             const pr = prs.get(g.exercise) ?? 0;
-            const isPr = g.topWeight >= pr && pr > 0;
+            const top = Math.max(...g.sets.map((s) => setScore(s, gKind, bw)));
+            const isPr = top >= pr && top !== 0;
+            const summary =
+              gKind === "tiempo"
+                ? fmtSeconds(g.sets.reduce((a, s) => a + s.reps, 0))
+                : gKind === "reps"
+                  ? `${g.sets.reduce((a, s) => a + s.reps, 0)} reps`
+                  : `${Math.round(
+                      g.sets.reduce((a, s) => a + loadVolume(s, gKind, bw), 0),
+                    ).toLocaleString("es-AR")} kg`;
             return (
               <div
                 key={g.exercise}
                 className="rounded-card bg-card p-4 shadow-e1"
               >
                 <div className="mb-2 flex items-center justify-between">
-                  <h3 className="font-semibold">
-                    {g.exercise}
+                  <h3 className="flex min-w-0 items-center gap-2 font-semibold">
+                    <ExerciseImage
+                      image={imageOf(g.exercise)}
+                      name={g.exercise}
+                      className="h-9 w-9"
+                    />
+                    <span className="min-w-0">{g.exercise}</span>
                     {isPr && (
                       <span
                         className="ml-2 align-middle text-xs text-accent"
@@ -621,8 +832,8 @@ export default function GymTab({
                       </span>
                     )}
                   </h3>
-                  <span className="text-xs text-muted tabular-nums">
-                    {Math.round(g.volume).toLocaleString("es-AR")} kg
+                  <span className="shrink-0 pl-2 text-xs text-muted tabular-nums">
+                    {summary}
                   </span>
                 </div>
                 <ul className="flex flex-col gap-1.5">
@@ -630,6 +841,8 @@ export default function GymTab({
                     editId === s.id ? (
                       <li key={s.id}>
                         <SetForm
+                          kind={gKind}
+                          bodyweight={bw}
                           reps={editReps}
                           weight={editWeight}
                           onReps={setEditReps}
@@ -646,15 +859,14 @@ export default function GymTab({
                       >
                         <span className="tabular-nums">
                           <span className="mr-2 text-muted">{i + 1}.</span>
-                          {s.reps} <span className="text-muted">reps ×</span>{" "}
-                          {s.weight} <span className="text-muted">kg</span>
+                          {fmtSet(s, gKind)}
                         </span>
                         <div className="flex items-center">
                           <button
                             type="button"
                             onClick={() => startEdit(s)}
                             className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-primary"
-                            aria-label={`Editar serie: ${s.reps} reps × ${s.weight} kg`}
+                            aria-label={`Editar serie: ${fmtSet(s, gKind)}`}
                           >
                             <Pencil size={14} aria-hidden />
                           </button>
@@ -662,7 +874,7 @@ export default function GymTab({
                             type="button"
                             onClick={() => onRemoveSet(s.id)}
                             className="-mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition-transform duration-(--duration-fast) active:scale-90 hover:text-accent"
-                            aria-label={`Eliminar serie: ${s.reps} reps × ${s.weight} kg`}
+                            aria-label={`Eliminar serie: ${fmtSet(s, gKind)}`}
                           >
                             <Trash2 size={15} aria-hidden />
                           </button>
@@ -674,6 +886,8 @@ export default function GymTab({
                 {addingTo === g.exercise ? (
                   <div className="mt-2">
                     <SetForm
+                      kind={gKind}
+                      bodyweight={bw}
                       reps={newReps}
                       weight={newWeight}
                       onReps={setNewReps}
@@ -686,7 +900,7 @@ export default function GymTab({
                 ) : (
                   <div className="mt-2 flex items-center justify-between">
                     <p className="text-xs text-muted">
-                      PR: {pr} kg · {g.sets.length}{" "}
+                      PR: {fmtScore(pr, gKind, bw > 0)} · {g.sets.length}{" "}
                       {g.sets.length === 1 ? "serie" : "series"}
                     </p>
                     <button
@@ -787,7 +1001,7 @@ export default function GymTab({
                   <YAxis {...axisProps} {...progAxis} />
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(v) => [`${v} kg`, "Peso máx."]}
+                    formatter={(v) => progTooltip(Number(v))}
                   />
                   <Line
                     type="monotone"
@@ -854,8 +1068,30 @@ export default function GymTab({
       {pickerOpen && (
         <ExercisePickerSheet
           strengthSets={strengthSets}
+          customExercises={customExercises}
+          imageOf={imageOf}
           onSelect={setExercise}
+          onSaveExercise={onSaveExercise}
+          onRemoveExercise={onRemoveCustomExercise}
           onClose={() => setPickerOpen(false)}
+        />
+      )}
+
+      {routineOpen && onSaveRoutineDay && onResetRoutineDay && onSaveExercise && onRemoveCustomExercise && (
+        <RoutineEditorSheet
+          plan={plan}
+          basePlan={basePlan}
+          savedDows={savedDows}
+          initialDow={new Date(`${viewDate}T00:00:00`).getDay()}
+          strengthSets={strengthSets}
+          customExercises={customExercises}
+          kindOf={kindOf}
+          imageOf={imageOf}
+          onSaveDay={onSaveRoutineDay}
+          onResetDay={onResetRoutineDay}
+          onSaveExercise={onSaveExercise}
+          onRemoveExercise={onRemoveCustomExercise}
+          onClose={() => setRoutineOpen(false)}
         />
       )}
     </main>

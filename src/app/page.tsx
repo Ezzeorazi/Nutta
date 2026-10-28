@@ -17,7 +17,12 @@ import Onboarding from "@/components/Onboarding";
 import { uid } from "@/lib/uid";
 import { formatLog, splitLog } from "@/lib/chatLog";
 import { db } from "@/lib/db";
-import { computeGoals, effectiveWeight, waterGoalL } from "@/lib/nutrition";
+import {
+  bodyweightResolver,
+  computeGoals,
+  effectiveWeight,
+  waterGoalL,
+} from "@/lib/nutrition";
 import { buildAthleteState } from "@/lib/athlete";
 import { dailyScore } from "@/lib/score";
 import { buildInsights } from "@/lib/insights";
@@ -27,7 +32,10 @@ import {
   weeklySummary,
 } from "@/lib/coachContext";
 import { emojiForExercise, emojiForFood } from "@/lib/emoji";
-import { PLAN_GOALS, PLAN_TARGET_WEIGHT } from "@/lib/plan";
+import { PLAN_GOALS, PLAN_TARGET_WEIGHT, WEEKLY_PLAN } from "@/lib/plan";
+import { buildWeeklyPlan } from "@/lib/routine";
+import type { PlanDay } from "@/lib/plan";
+import { kindResolver, loadSets } from "@/lib/exerciseKind";
 import {
   VACATION_DOW,
   vacationDays,
@@ -53,6 +61,9 @@ const emptyBatch = (): ChatBatch => ({ foods: [], exercises: [], sets: [] });
 const batchSize = (b: ChatBatch) =>
   b.foods.length + b.exercises.length + b.sets.length;
 
+/** Semana sin plan fijo: estable entre renders para no romper los memos. */
+const NO_PLAN: PlanDay[] = [];
+
 export default function Home() {
   const today = todayISO();
 
@@ -74,6 +85,12 @@ export default function Home() {
     strengthSets,
     planSwaps,
     planPicks,
+    routineDays,
+    customExercises,
+    saveRoutineDay,
+    resetRoutineDay,
+    saveCustomExercise,
+    removeCustomExercise,
     vacations,
     customGoals,
     favorites,
@@ -191,6 +208,32 @@ export default function Home() {
   const planOwner = usePlanOwner(user?.email);
   const hasPlan = planOwner !== false;
 
+  // La rutina de la semana: el plan fijo con los días que editaste encima. Sin
+  // plan propio se arranca de una semana vacía (ver `lib/routine.ts`).
+  const basePlan = hasPlan ? WEEKLY_PLAN : NO_PLAN;
+  const plan = useMemo(
+    () => buildWeeklyPlan(routineDays, basePlan),
+    [routineDays, basePlan],
+  );
+  const savedDows = useMemo(
+    () => new Set(routineDays.map((d) => d.dow)),
+    [routineDays],
+  );
+  const hasRoutine = hasPlan || routineDays.length > 0;
+
+  // Cómo se mide cada ejercicio y el peso corporal de cada día: con eso una
+  // asistida suma tu peso menos la ayuda, y una plancha no suma kg.
+  const kindOf = useMemo(() => kindResolver(customExercises), [customExercises]);
+  const profileWeight = profile?.weight ?? 0;
+  const bodyweightOn = useMemo(
+    () => bodyweightResolver(profileWeight, weights),
+    [profileWeight, weights],
+  );
+  const loadedSets = useMemo(
+    () => loadSets(strengthSets, kindOf, bodyweightOn),
+    [strengthSets, kindOf, bodyweightOn],
+  );
+
   // Las de siempre: las del plan del mes o las calculadas del perfil.
   const baseGoals = !profile
     ? DEFAULT_GOALS
@@ -231,7 +274,7 @@ export default function Home() {
       foods,
       drinks,
       exercises,
-      strengthSets,
+      strengthSets: loadedSets,
       metrics,
       supplements,
       supplementLogs,
@@ -246,7 +289,6 @@ export default function Home() {
       foods,
       drinks,
       exercises,
-      strengthSets,
       metrics,
       supplements,
       supplementLogs,
@@ -256,6 +298,7 @@ export default function Home() {
       objective,
       vacationDaySet,
       hour,
+      loadedSets,
     ],
   );
   // El estado de HOY manda la rutina del Gym; el del día VISTO, el tab Hoy.
@@ -358,6 +401,7 @@ export default function Home() {
             bodyWeight,
             hour,
             hasPlan,
+            plan: hasRoutine ? plan : undefined,
           }),
           history,
         }),
@@ -598,6 +642,15 @@ export default function Home() {
           onSwapExercise={swapExercise}
           onUndoSwap={undoSwap}
           hasPlan={hasPlan}
+          plan={plan}
+          basePlan={basePlan}
+          savedDows={savedDows}
+          customExercises={customExercises}
+          bodyweightOn={bodyweightOn}
+          onSaveRoutineDay={saveRoutineDay}
+          onResetRoutineDay={resetRoutineDay}
+          onSaveExercise={saveCustomExercise}
+          onRemoveCustomExercise={removeCustomExercise}
         />
       ) : tab === "progreso" ? (
         <ProgresoTab

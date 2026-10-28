@@ -125,6 +125,29 @@ const schema = i.schema({
       dow: i.number(), // 0-6 = día del plan · -1 = rutina de vacaciones
       createdAt: i.number(),
     }),
+    // La rutina editada por el usuario, un registro por día de la semana. Un
+    // día sin registro sigue con el plan fijo de `lib/plan.ts`: editar el
+    // lunes no obliga a reescribir la semana entera.
+    routineDays: i.entity({
+      owner: i.string().indexed(),
+      dow: i.number().indexed(), // 0 = domingo … 6 = sábado
+      label: i.string(),
+      emoji: i.string(),
+      exercises: i.string(), // JSON: [{name, sets, weight?}]
+      cardio: i.string().optional(),
+      rest: i.boolean().optional(),
+      updatedAt: i.number(),
+    }),
+    // Ejercicios del usuario: propios, o del catálogo con otra medición/foto.
+    // Las series siguen guardando el NOMBRE; esto dice cómo leerlas.
+    customExercises: i.entity({
+      owner: i.string().indexed(),
+      name: i.string(),
+      kind: i.string(), // peso | asistido | reps | tiempo
+      image: i.string(), // archivo del catálogo en /public/exercises, "" = sin foto
+      group: i.string(), // pecho | espalda | … | "" = sin definir
+      createdAt: i.number(),
+    }),
     // Tramos de vacaciones: los días en que la app pasa a modo flexible.
     // Van en la base (y no en localStorage, como la preferencia del plan)
     // porque el cron de los avisos también los tiene que leer: si no, el

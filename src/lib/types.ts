@@ -161,6 +161,43 @@ export type PlanSwap = {
   createdAt: number;
 };
 
+/**
+ * Cómo se mide un ejercicio. Decide qué significan `reps` y `weight` de sus
+ * series, que son las mismas columnas para todos:
+ * - `peso`: reps × kg, lo de siempre.
+ * - `asistido`: `weight` es la AYUDA de la máquina. Menos es más difícil.
+ * - `reps`: peso corporal, cuenta la cantidad (flexiones, abdominales).
+ * - `tiempo`: `reps` guarda SEGUNDOS (plancha, isométricos).
+ */
+export type ExerciseKind = "peso" | "asistido" | "reps" | "tiempo";
+
+/**
+ * Un ejercicio del usuario: uno propio que no está en el catálogo, o uno del
+ * catálogo al que le cambió la medición o la foto (mismo nombre = lo pisa).
+ */
+export type CustomExercise = {
+  id: string;
+  name: string;
+  kind: ExerciseKind;
+  /** Archivo de /public/exercises (catálogo RepDB). "" = sin foto. */
+  image: string;
+  /** Grupo muscular principal (pecho, espalda…). "" = sin definir. */
+  group: string;
+  createdAt: number;
+};
+
+/** Un día de la rutina editado por el usuario: pisa al del plan fijo. */
+export type RoutineDayRecord = {
+  id: string;
+  dow: number; // 0 = domingo … 6 = sábado
+  label: string;
+  emoji: string;
+  exercises: { name: string; sets: string; weight?: string }[];
+  cardio?: string;
+  rest?: boolean;
+  updatedAt: number;
+};
+
 /** Ejercicios de fuerza comunes para alta rápida. */
 export const COMMON_LIFTS = [
   "Press banca",
