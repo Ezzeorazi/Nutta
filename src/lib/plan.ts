@@ -153,6 +153,13 @@ export const shortPlanLabel = (d: PlanDay) => d.label.replace(/\s*\(.*\)$/, "");
 export const DOW_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 /**
+ * La semana como se lee: de lunes a domingo. `WEEKLY_PLAN` guarda el domingo
+ * con `dow` 0, así que ordenar por el número crudo lo pondría primero.
+ */
+export const weekOrdered = (plan: PlanDay[] = WEEKLY_PLAN): PlanDay[] =>
+  [...plan].sort((a, b) => ((a.dow + 6) % 7) - ((b.dow + 6) % 7));
+
+/**
  * El día del plan que corresponde a una fecha YYYY-MM-DD. `plan` es la semana
  * vigente (con los días editados, ver `lib/routine.ts`); por defecto, la fija.
  */

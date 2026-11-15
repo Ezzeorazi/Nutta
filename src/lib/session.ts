@@ -111,17 +111,20 @@ export function buildTodaySession(x: {
   const rec = state.recovery.score;
   const reasons: string[] = [];
 
-  // De vacaciones el calendario no es el split del mes: es la rutina corta sin
-  // equipamiento… salvo que hayas elegido un día del plan a mano, que es lo
-  // que se hace cuando aparece un gimnasio en el viaje (ver `lib/vacation.ts`).
+  // Lo que elegiste a mano manda, de viaje o no (ver `lib/vacation.ts`). Sin
+  // elección: de vacaciones la rutina corta sin equipamiento, y si no, el día
+  // que toca por almanaque.
   const deViaje = state.vacation;
-  const elegido = deViaje ? pickedDow(x.picks ?? [], today) : null;
-  const elegidoDelPlan = elegido != null && elegido !== VACATION_DOW;
-  const base = deViaje
-    ? elegidoDelPlan
-      ? (plan.find((d) => d.dow === elegido) ?? VACATION_DAY)
-      : VACATION_DAY
-    : getPlanDay(today, plan);
+  const elegido = pickedDow(x.picks ?? [], today);
+  const elegidoDelPlan =
+    elegido != null &&
+    elegido !== VACATION_DOW &&
+    plan.some((d) => d.dow === elegido);
+  const base = elegidoDelPlan
+    ? plan.find((d) => d.dow === elegido)!
+    : deViaje
+      ? VACATION_DAY
+      : getPlanDay(today, plan);
   // Con los cambios del día ya aplicados: si reemplazaste un ejercicio, la
   // sesión sugerida tiene que hablar del que vas a hacer, no del que no podés.
   const calendario = applySwaps(base, x.swaps ?? [], today);
@@ -195,9 +198,10 @@ export function buildTodaySession(x: {
   let day: typeof calendario = calendario;
   let swap: TodaySession["swap"];
   const propia = freshness(calendario, state.muscles);
-  // De viaje no se rota nada: la rutina flexible es de cuerpo entero y elegir
-  // "qué toca hoy" es justo la decisión que el modo saca del medio.
-  if (!deViaje && propia != null && propia <= 1) {
+  // No se rota nada si de viaje (la rutina flexible es de cuerpo entero) ni si
+  // elegiste el día a mano: en los dos casos la decisión ya la tomaste vos, y
+  // pisarla sería discutirle al usuario algo que acaba de pedir.
+  if (!deViaje && !elegidoDelPlan && propia != null && propia <= 1) {
     // Se busca el día del plan cuyo grupo más reciente esté MÁS descansado.
     const alternativas = plan.filter(
       (d) => !d.rest && d.dow !== calendario.dow,

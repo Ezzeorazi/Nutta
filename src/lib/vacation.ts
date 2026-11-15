@@ -169,9 +169,13 @@ export function pickedDow(picks: PlanPick[], date: string): number | null {
 /**
  * El día que toca.
  *
- * Fuera de vacaciones manda el calendario del plan, sin más. De viaje, la
- * rutina corta es el default y tu elección la pisa: no estás siguiendo el
- * split, así que qué entrenar hoy es una decisión tuya y no del almanaque.
+ * Lo que elegiste a mano manda SIEMPRE, de viaje o no. El almanaque es un
+ * default razonable, no una orden: la semana real se corre sola —el sábado
+ * descansaste y el domingo te queda la pierna que no hiciste— y hasta ahora la
+ * única salida era cargar las series a mano, sin rutina en pantalla que
+ * seguir.
+ *
+ * Sin elección: de viaje, la rutina corta; si no, el día del calendario.
  */
 export function planDayFor(
   date: string,
@@ -181,10 +185,13 @@ export function planDayFor(
   /** La semana vigente, con los días editados (ver `lib/routine.ts`). */
   plan: PlanDay[] = WEEKLY_PLAN,
 ): PlanDay {
-  if (!vacationOn(vacations, date)) return fallback(date);
   const dow = pickedDow(picks, date);
-  if (dow == null || dow === VACATION_DOW) return VACATION_DAY;
-  return plan.find((d) => d.dow === dow) ?? VACATION_DAY;
+  if (dow === VACATION_DOW) return VACATION_DAY;
+  if (dow != null) {
+    const elegido = plan.find((d) => d.dow === dow);
+    if (elegido) return elegido;
+  }
+  return vacationOn(vacations, date) ? VACATION_DAY : fallback(date);
 }
 
 /** Lo que dice la app cuando el día cae en vacaciones. */

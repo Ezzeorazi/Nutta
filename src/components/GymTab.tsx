@@ -11,7 +11,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Check, Compass, Moon, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import {
+  CalendarSync,
+  Check,
+  Compass,
+  Moon,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import DayNavigator from "@/components/DayNavigator";
 import ExerciseImage from "@/components/ExerciseImage";
@@ -55,6 +64,7 @@ import {
   DOW_SHORT,
   WEEKLY_PLAN,
   getPlanDay,
+  weekOrdered,
   shortPlanLabel,
   type PlanDay,
 } from "@/lib/plan";
@@ -249,6 +259,7 @@ export default function GymTab({
   vacations = [],
   planPicks = [],
   onPickPlanDay,
+  onClearPlanPick,
   onSwapExercise,
   onUndoSwap,
   hasPlan = true,
@@ -285,10 +296,12 @@ export default function GymTab({
   planSwaps?: PlanSwap[];
   /** Tramos de vacaciones: los días que cubren muestran la rutina de viaje. */
   vacations?: Vacation[];
-  /** Días del plan elegidos a mano, por fecha (solo en vacaciones). */
+  /** Días del plan elegidos a mano, por fecha. */
   planPicks?: PlanPick[];
   /** Elegir qué día del plan hacer en esa fecha (`VACATION_DOW` = rutina de viaje). */
   onPickPlanDay?: (date: string, dow: number) => void;
+  /** Volver al default del día: el del calendario, o la rutina de viaje. */
+  onClearPlanPick?: (date: string) => void;
   onSwapExercise?: (date: string, from: string, to: string) => void;
   onUndoSwap?: (date: string, from: string) => void;
   /**
@@ -422,7 +435,22 @@ export default function GymTab({
     () => !!vacationOn(vacations, viewDate),
     [vacations, viewDate],
   );
-  const elegido = pickedDow(planPicks, viewDate) ?? VACATION_DOW;
+  // Qué día de la rutina se está haciendo hoy, y si lo elegiste vos.
+  // El almanaque es el default; tu elección lo pisa (ver `lib/vacation.ts`).
+  const elegidoAMano = pickedDow(planPicks, viewDate);
+  const dowCalendario = new Date(`${viewDate}T00:00:00`).getDay();
+  const dowDefault = deViaje ? VACATION_DOW : dowCalendario;
+  const elegido = elegidoAMano ?? dowDefault;
+  // Fuera de vacaciones el selector va plegado: la mayoría de los días se
+  // entrena lo que toca, y una fila de siete chips todos los días es ruido
+  // para el caso raro. Si ya elegiste algo, queda abierto para poder deshacerlo.
+  const [dayPickerOpen, setDayPickerOpen] = useState(false);
+  const pickerAbierto = deViaje || dayPickerOpen || elegidoAMano != null;
+  /** Elegir el default es volver atrás: se borra la elección, no se guarda. */
+  const elegirDia = (dow: number) => {
+    if (dow === dowDefault) onClearPlanPick?.(viewDate);
+    else onPickPlanDay?.(viewDate, dow);
+  };
 
   // Lo último que hiciste en cada ejercicio de la rutina, antes del día que se
   // ve: de ahí sale el peso sugerido. Se compara por nombre canónico para que
@@ -634,32 +662,56 @@ export default function GymTab({
         )
       )}
 
-      {/* De vacaciones, el día lo elegís. Es la contracara del modo: si no hay
-          calendario que cumplir, tampoco hay uno que te diga qué toca — y si
-          apareció un gimnasio en el viaje, la rutina corta no alcanza. */}
-      {hasPlan && deViaje && onPickPlanDay && (
+      {/* Qué día de la rutina se hace hoy.
+          De vacaciones es la contracara del modo: no hay calendario que cumplir
+          y la rutina corta puede no alcanzar si apareció un gimnasio. Pero el
+          resto del año hace falta igual, porque la semana real se corre: si el
+          sábado descansaste, el domingo te queda la pierna que no hiciste y el
+          almanaque sigue marcando descanso. */}
+      {hasPlan && onPickPlanDay && (
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-semibold text-muted">
-            ¿Qué entrenás {isToday ? "hoy" : `el ${dayLabel(viewDate)}`}?
-          </h2>
-          <p className="text-xs text-muted">
-            Estás de vacaciones: elegí el día del plan que quieras. Vale solo
-            para este día, así que mañana volvés a elegir.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {vacationOptions(plan).map((d) => (
-              <Chip
-                key={d.dow}
-                selected={elegido === d.dow}
-                onClick={() => onPickPlanDay(viewDate, d.dow)}
-              >
-                <span aria-hidden>{d.emoji}</span>
-                {d.dow === VACATION_DOW
-                  ? "Rutina de viaje"
-                  : `${DOW_SHORT[d.dow]} · ${shortPlanLabel(d)}`}
-              </Chip>
-            ))}
-          </div>
+          {!pickerAbierto ? (
+            <button
+              type="button"
+              onClick={() => setDayPickerOpen(true)}
+              className="flex min-h-11 items-center justify-center gap-2 rounded-card border border-dashed border-border px-4 py-3 text-sm font-medium text-muted transition-colors active:scale-[0.99] hover:border-primary hover:text-primary"
+            >
+              <CalendarSync size={16} strokeWidth={2} aria-hidden />
+              Entrenar otro día de la rutina
+            </button>
+          ) : (
+            <>
+              <h2 className="text-sm font-semibold text-muted">
+                ¿Qué entrenás {isToday ? "hoy" : `el ${dayLabel(viewDate)}`}?
+              </h2>
+              <p className="text-xs text-muted">
+                {deViaje
+                  ? "Estás de vacaciones: elegí el día del plan que quieras. Vale solo para este día, así que mañana volvés a elegir."
+                  : "Vale solo para este día: la semana no se reordena. Volvé a tocar el día que te tocaba para dejarlo como estaba."}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(deViaje ? vacationOptions(plan) : weekOrdered(plan)).map(
+                  (d) => (
+                    <Chip
+                      key={d.dow}
+                      selected={elegido === d.dow}
+                      onClick={() => elegirDia(d.dow)}
+                    >
+                      <span aria-hidden>{d.emoji}</span>
+                      {d.dow === VACATION_DOW
+                        ? "Rutina de viaje"
+                        : `${DOW_SHORT[d.dow]} · ${shortPlanLabel(d)}`}
+                    </Chip>
+                  ),
+                )}
+              </div>
+              {elegidoAMano != null && !deViaje && (
+                <p className="text-xs text-primary">
+                  Estás haciendo el día que elegiste, no el del calendario.
+                </p>
+              )}
+            </>
+          )}
         </section>
       )}
 
@@ -773,10 +825,6 @@ export default function GymTab({
           <Plus size={18} strokeWidth={2.5} aria-hidden />
           Agregar serie
         </Button>
-
-        {restSince != null && (
-          <RestTimer since={restSince} onDismiss={() => setRestSince(null)} />
-        )}
 
         <p className="text-xs text-muted">
           Los valores quedan cargados para repetir la serie de un toque.
@@ -917,6 +965,13 @@ export default function GymTab({
             );
           })}
         </section>
+      )}
+
+      {/* El cronómetro de descanso, debajo de lo que llevás hecho: entre serie
+          y serie se mira la sesión, no el formulario de carga. Ahí arriba
+          quedaba tapado por el teclado al corregir un peso. */}
+      {restSince != null && (
+        <RestTimer since={restSince} onDismiss={() => setRestSince(null)} />
       )}
 
       {/* Cardio del día (correr, bici, estilo libre… con datos del reloj) */}

@@ -36,12 +36,7 @@ import { PLAN_GOALS, PLAN_TARGET_WEIGHT, WEEKLY_PLAN } from "@/lib/plan";
 import { buildWeeklyPlan } from "@/lib/routine";
 import type { PlanDay } from "@/lib/plan";
 import { kindResolver, loadSets } from "@/lib/exerciseKind";
-import {
-  VACATION_DOW,
-  vacationDays,
-  vacationGoals,
-  vacationOn,
-} from "@/lib/vacation";
+import { vacationDays, vacationGoals, vacationOn } from "@/lib/vacation";
 import { usePlanReminders } from "@/lib/usePlanReminders";
 import { usePlanOwner } from "@/lib/usePlanOwner";
 import { useNutta } from "@/lib/useNutta";
@@ -634,11 +629,10 @@ export default function Home() {
           planSwaps={planSwaps}
           vacations={vacations}
           planPicks={planPicks}
-          onPickPlanDay={(date, dow) =>
-            // La rutina de viaje es el default del día: elegirla es borrar la
-            // elección, no guardar una fila que diga "lo de siempre".
-            dow === VACATION_DOW ? clearPlanPick(date) : pickPlanDay(date, dow)
-          }
+          onPickPlanDay={pickPlanDay}
+          // Elegir el día que ya tocaba es volver atrás: el Gym llama a esto en
+          // vez de guardar una fila que diga "lo de siempre".
+          onClearPlanPick={clearPlanPick}
           onSwapExercise={swapExercise}
           onUndoSwap={undoSwap}
           hasPlan={hasPlan}
