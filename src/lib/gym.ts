@@ -19,6 +19,30 @@ const normName = (s: string) =>
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
+/**
+ * Clave con la que dos nombres son el MISMO ejercicio.
+ *
+ * El historial se escribe a mano y por el chat, así que el mismo movimiento
+ * entra como "Jalón al Pecho", "Jalón al pecho" y "Jalon al pecho" — y antes
+ * cada variante tenía su propia progresión, su propio PR y su propia fila en
+ * la sesión: el gráfico mostraba la mitad de los puntos y el PR salía de la
+ * mitad del historial.
+ *
+ * Fusiona SOLO por texto: mayúsculas, tildes, puntuación y espacios. Da la
+ * tentación de resolver contra el catálogo —así "Abductor" y "Abducción de
+ * Cadera en Máquina" caerían juntos—, pero probado contra un historial real
+ * el fuzzy matching también fusiona ejercicios DISTINTOS ("Apertura de
+ * Deltoides Posterior" con "Apertura con mancuernas", remo de agarre vertical
+ * con el de agarre ancho). Partir un ejercicio en dos se ve y se corrige;
+ * mezclar dos en uno corrompe la progresión en silencio, que es con lo que el
+ * usuario decide cuánto cargar.
+ *
+ * El peso sugerido de la rutina sí usa el catálogo, porque ahí la comparación
+ * es contra UN nombre del plan y no contra todo el historial (ver el
+ * parámetro `same` de `lastPerformance`).
+ */
+export const exerciseKey = (name: string): string => normName(name);
+
 /** Volumen de una serie = reps × peso. */
 export const setVolume = (s: Pick<StrengthSet, "reps" | "weight">) =>
   s.reps * s.weight;
@@ -34,41 +58,79 @@ export type ExerciseGroup = {
   topWeight: number; // mejor peso del grupo
 };
 
-/** Agrupa series por ejercicio (orden por primera aparición). */
+/**
+ * Agrupa series por ejercicio (orden por primera aparición). Las variantes de
+ * un mismo nombre caen juntas; se muestra la grafía que más usaste.
+ */
 export function groupByExercise(sets: StrengthSet[]): ExerciseGroup[] {
   const map = new Map<string, StrengthSet[]>();
   for (const s of sets) {
-    const key = s.exercise;
+    const key = exerciseKey(s.exercise);
     const arr = map.get(key) ?? [];
     arr.push(s);
     map.set(key, arr);
   }
-  return [...map.entries()].map(([exercise, arr]) => ({
-    exercise,
+  return [...map.values()].map((arr) => ({
+    exercise: displayName(arr),
     sets: arr.sort((a, b) => a.createdAt - b.createdAt),
     volume: totalVolume(arr),
     topWeight: Math.max(...arr.map((s) => s.weight)),
   }));
 }
 
+/**
+ * De varias grafías del mismo ejercicio, la que se muestra: la más repetida, y
+ * ante empate la más reciente. Se prefiere lo que el usuario escribe a lo que
+ * dice el catálogo: es su historial.
+ */
+function displayName(sets: StrengthSet[]): string {
+  const count = new Map<string, { n: number; last: number }>();
+  for (const s of sets) {
+    const c = count.get(s.exercise) ?? { n: 0, last: 0 };
+    c.n++;
+    c.last = Math.max(c.last, s.createdAt);
+    count.set(s.exercise, c);
+  }
+  return [...count.entries()].sort(
+    (a, b) => b[1].n - a[1].n || b[1].last - a[1].last,
+  )[0][0];
+}
+
 /** Mejor peso histórico (PR) por ejercicio, sobre todas las series. */
 export function personalRecords(sets: StrengthSet[]): Map<string, number> {
-  const pr = new Map<string, number>();
+  const best = new Map<string, { name: string; kg: number }>();
   for (const s of sets) {
-    pr.set(s.exercise, Math.max(pr.get(s.exercise) ?? 0, s.weight));
+    const k = exerciseKey(s.exercise);
+    const prev = best.get(k);
+    if (!prev) best.set(k, { name: s.exercise, kg: s.weight });
+    else prev.kg = Math.max(prev.kg, s.weight);
   }
+  // Se devuelve por nombre visible (lo consume el PDF de exportación), ya con
+  // las variantes fusionadas: antes el mismo ejercicio salía dos veces.
+  const byKey = new Map<string, StrengthSet[]>();
+  for (const s of sets) {
+    const k = exerciseKey(s.exercise);
+    byKey.set(k, [...(byKey.get(k) ?? []), s]);
+  }
+  const pr = new Map<string, number>();
+  for (const [k, arr] of byKey) pr.set(displayName(arr), best.get(k)!.kg);
   return pr;
 }
 
 /** Nombres de ejercicios ya usados (para autocompletar), más recientes primero. */
 export function usedExercises(sets: StrengthSet[]): string[] {
-  const seen = new Map<string, number>();
+  const seen = new Map<string, { name: string; last: number }>();
   for (const s of sets) {
-    seen.set(s.exercise, Math.max(seen.get(s.exercise) ?? 0, s.createdAt));
+    const k = exerciseKey(s.exercise);
+    const prev = seen.get(k);
+    // Una sola entrada por ejercicio, con la grafía que usaste la última vez:
+    // el autocompletado mostraba "Jalón al Pecho" y "Jalón al pecho" juntos.
+    if (!prev || s.createdAt > prev.last)
+      seen.set(k, { name: s.exercise, last: s.createdAt });
   }
-  return [...seen.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([name]) => name);
+  return [...seen.values()]
+    .sort((a, b) => b.last - a.last)
+    .map((v) => v.name);
 }
 
 /** Grupos musculares detectables por el nombre del ejercicio. */
@@ -143,8 +205,9 @@ export function exerciseProgress(
   bwOn: BodyweightOn = () => 0,
 ): { date: string; value: number }[] {
   const byDay = new Map<string, number>();
+  const target = exerciseKey(exercise);
   for (const s of sets) {
-    if (s.exercise !== exercise) continue;
+    if (exerciseKey(s.exercise) !== target) continue;
     const v = setScore(s, kind, bwOn(s.date));
     byDay.set(s.date, Math.max(byDay.get(s.date) ?? -Infinity, v));
   }
@@ -162,7 +225,8 @@ export function bestScores(
   const best = new Map<string, number>();
   for (const s of sets) {
     const v = setScore(s, kindOf(s.exercise), bwOn(s.date));
-    best.set(s.exercise, Math.max(best.get(s.exercise) ?? -Infinity, v));
+    const k = exerciseKey(s.exercise);
+    best.set(k, Math.max(best.get(k) ?? -Infinity, v));
   }
   return best;
 }
@@ -180,6 +244,14 @@ export type LastPerformance = {
   setsAtWeight: number;
   /** Todas las series con ese peso llegaron al tope del rango: toca subir. */
   topped: boolean;
+  /**
+   * El siguiente escalón REAL de ese ejercicio, sacado de los pesos que ya
+   * usaste en él. Sin esto el aviso mandaba a pesos que no existen: 16 kg de
+   * mancuerna "suben" a 18,5 (las mancuernas van de 2 en 2) y una placa de 59
+   * a 61,5 (la torre salta a 62). Si nunca levantaste más, cae a un escalón
+   * genérico por magnitud.
+   */
+  next: number;
 };
 
 /**
@@ -246,21 +318,48 @@ export function lastPerformance(
 
   const top = scheme ? rangeTop(scheme, kind) : null;
   const planned = scheme ? plannedSets(scheme) : null;
+  // Se pide UNA serie menos de las planificadas (mínimo 2) al peso tope: casi
+  // nadie arranca pesado, y exigir las cuatro con una serie de entrada liviana
+  // hacía que el aviso no saltara nunca. En un historial real había cinco
+  // ejercicios listos para subir hace semanas y ninguno avisaba por esto.
+  const necesarias = planned == null ? null : Math.max(2, planned - 1);
   const topped =
     top != null &&
-    planned != null &&
-    atWeight.length >= planned &&
+    necesarias != null &&
+    atWeight.length >= necesarias &&
     atWeight.every((s) => s.reps >= top);
 
-  return { date: lastDate, weight, reps, setsAtWeight: atWeight.length, topped };
+  // El escalón siguiente, preferentemente uno que ya existió en ese ejercicio:
+  // es la única evidencia de qué pesos hay de verdad en ese gimnasio.
+  const usados = [
+    ...new Set(sets.filter((s) => matches(s.exercise) && s.weight > 0).map((s) => s.weight)),
+  ].sort((a, b) => a - b);
+  const next =
+    kind === "asistido"
+      ? // Menos asistencia es progresar: se busca hacia abajo.
+        (usados.filter((w) => w < weight).pop() ?? lessAssist(weight))
+      : (usados.find((w) => w > weight) ?? nextWeight(weight));
+
+  return {
+    date: lastDate,
+    weight,
+    reps,
+    setsAtWeight: atWeight.length,
+    topped,
+    next,
+  };
 }
 
 /**
- * El siguiente escalón de peso: 2,5 kg en barra y máquina; con pesos chicos
- * (mancuerna liviana, polea de laterales) 2,5 kg es un salto del 30 %, así que
- * se sube de a 1.
+ * El siguiente escalón de peso cuando no hay historial que lo diga.
+ *
+ * Por magnitud, no uno fijo: con 8 kg, 2,5 es un salto del 30 %; con una
+ * mancuerna de 16, el medio kilo de un 18,5 directamente no existe (van de 2
+ * en 2). Es solo el respaldo — si ya levantaste más en ese ejercicio, manda
+ * ese peso real (ver `LastPerformance.next`).
  */
-export const nextWeight = (w: number) => (w < 15 ? w + 1 : w + 2.5);
+export const nextWeight = (w: number) =>
+  w < 10 ? w + 1 : w < 22 ? w + 2 : w + 2.5;
 
 /**
  * Lo que toca hoy partiendo de la última vez: lo mismo, o el siguiente
@@ -274,9 +373,8 @@ export function nextTarget(
   if (!last.topped) return { reps: last.reps, weight: last.weight };
   switch (kind) {
     case "peso":
-      return { reps: last.reps, weight: nextWeight(last.weight) };
     case "asistido":
-      return { reps: last.reps, weight: lessAssist(last.weight) };
+      return { reps: last.reps, weight: last.next };
     case "reps":
       return { reps: last.reps + 1, weight: last.weight };
     case "tiempo":

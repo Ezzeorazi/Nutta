@@ -38,6 +38,7 @@ import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
 import {
   bestScores,
+  exerciseKey,
   exerciseProgress,
   groupByExercise,
   lastPerformance,
@@ -46,7 +47,6 @@ import {
   usedExercises,
   type LastPerformance,
 } from "@/lib/gym";
-import { canonicalName } from "@/lib/exerciseDb";
 import {
   KINDS,
   customFinder,
@@ -453,16 +453,17 @@ export default function GymTab({
   };
 
   // Lo último que hiciste en cada ejercicio de la rutina, antes del día que se
-  // ve: de ahí sale el peso sugerido. Se compara por nombre canónico para que
-  // "Abductor" y "Abducción de Cadera en Máquina" sean el mismo historial.
+  // ve: de ahí sale el peso sugerido.
+  //
+  // Se compara por texto normalizado y NO por nombre canónico del catálogo.
+  // El canónico emparejaba de más: contra un historial real metía las series
+  // del "remo sentado agarre vertical" (15 kg) dentro del "remo en polea
+  // agarre ancho" (52 kg), y la app terminaba sugiriendo cargar 15,8 kg para
+  // un ejercicio que se hace con 52. Un ejercicio al que no le encuentra
+  // historial se nota y se arregla solo a la primera serie; un peso sugerido
+  // de otro ejercicio se obedece.
   const lastByExercise = useMemo(() => {
-    const canon = new Map<string, string>();
-    const key = (n: string) => {
-      let k = canon.get(n);
-      if (k === undefined) canon.set(n, (k = canonicalName(n).trim().toLowerCase()));
-      return k;
-    };
-    const same = (a: string, b: string) => key(a) === key(b);
+    const same = (a: string, b: string) => exerciseKey(a) === exerciseKey(b);
     const out = new Map<string, LastPerformance>();
     for (const ex of planDay.exercises) {
       const last = lastPerformance(
@@ -847,7 +848,7 @@ export default function GymTab({
             const gKind = kindOf(g.exercise);
             const bw = bodyweightOn(viewDate);
             // PR y resumen según cómo se mide: kg, asistencia, reps o tiempo.
-            const pr = prs.get(g.exercise) ?? 0;
+            const pr = prs.get(exerciseKey(g.exercise)) ?? 0;
             const top = Math.max(...g.sets.map((s) => setScore(s, gKind, bw)));
             const isPr = top >= pr && top !== 0;
             const summary =

@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowLeftRight, Check, Pencil } from "lucide-react";
+import { ArrowLeftRight, Check, Pencil, TrendingUp } from "lucide-react";
 import { muscleWork } from "@/lib/exerciseDb";
-import { lastLabel, type LastPerformance } from "@/lib/gym";
+import { lastLabel, nextTarget, type LastPerformance } from "@/lib/gym";
 import type { KindOf } from "@/lib/exerciseKind";
 import type { SwappedDay } from "@/lib/planSwaps";
 import { dayLabel, type StrengthSet } from "@/lib/types";
@@ -42,6 +42,33 @@ export default function PlanDayCard({
     daySets.map((s) => s.exercise.trim().toLowerCase()),
   );
 
+  /**
+   * Los que topearon el rango la última vez: hoy toca subirles.
+   *
+   * Va arriba y con nombre y peso, no solo como una flechita al lado del
+   * ejercicio. La flecha ya estaba y pasaba desapercibida: en un historial
+   * real había cinco ejercicios listos para subir hace semanas y el usuario
+   * seguía repitiendo el mismo peso, porque la app le sugería el último y él
+   * lo confirmaba.
+   */
+  const paraSubir = planDay.rest
+    ? []
+    : planDay.exercises
+        .map((ex) => {
+          const last = lastByExercise?.get(ex.name);
+          if (!last?.topped) return null;
+          const kind = kindOf(ex.name);
+          if (kind !== "peso" && kind !== "asistido") return null;
+          const t = nextTarget(last, kind);
+          return {
+            name: ex.name,
+            de: last.weight,
+            a: t.weight,
+            asistido: kind === "asistido",
+          };
+        })
+        .filter((x) => x !== null);
+
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
@@ -71,6 +98,32 @@ export default function PlanDayCard({
             )}
           </div>
         </div>
+
+        {paraSubir.length > 0 && (
+          <div className="flex items-start gap-2 rounded-xl bg-primary/10 px-3 py-2">
+            <TrendingUp
+              size={15}
+              strokeWidth={2.25}
+              className="mt-0.5 shrink-0 text-primary"
+              aria-hidden
+            />
+            <p className="text-xs text-foreground">
+              <span className="font-semibold text-primary">
+                Hoy toca subir:{" "}
+              </span>
+              {paraSubir.map((x, i) => (
+                <span key={x.name}>
+                  {i > 0 && " · "}
+                  {x.name}{" "}
+                  <span className="font-semibold tabular-nums">
+                    {x.de} → {x.a} kg
+                  </span>
+                  {x.asistido && " de asistencia"}
+                </span>
+              ))}
+            </p>
+          </div>
+        )}
 
         {planDay.rest ? (
           <p className="pl-1 text-xs text-muted">🧘 {planDay.cardio}</p>

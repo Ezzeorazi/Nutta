@@ -1,7 +1,6 @@
 /**
- * El plan de Ezequiel de octubre 2026 (vuelta de vacaciones, más fuerte):
- * recomposición —bajar cintura sin perder la fuerza ganada—, 6 días de 60-75
- * min en Smartfit.
+ * El plan de Ezequiel de noviembre 2026: misma recomposición, mismos 6 días,
+ * revisado con los datos de las 7 semanas que llevaba del plan de octubre.
  *
  * Es data estática a propósito: no es una rutina que la app inventa según el
  * historial (esa ya existe en `lib/gym.ts`), es la que él decidió seguir. Vive
@@ -10,6 +9,26 @@
  * Por qué así (PPL ondulado): cada músculo 2 veces por semana, una pesada (A,
  * 5-8 reps, para sostener la fuerza) y una de volumen (B, 8-15, la que hace
  * crecer). 16-19 series por sesión: con más no entra en 70 min con el cardio.
+ *
+ * QUÉ CAMBIÓ Y POR QUÉ (637 series, 35 sesiones, 5 días/semana reales):
+ *
+ * - **Los rangos de reps se cerraron.** Era el problema de fondo: con "3 × 8-12"
+ *   se quedaba en 10 reps para siempre, porque el tope quedaba lejos y el peso
+ *   nunca subía. Rangos de 2-3 reps (8-10, 6-8) hacen que topear sea alcanzable
+ *   y el aviso de subir carga salte cuando corresponde.
+ * - **Los ejercicios son los que hace de verdad.** "Press Inclinado en Máquina
+ *   Smith" era el único del plan que nunca cargó en 7 semanas: en su lugar hace
+ *   press en banco inclinado con barra, así que ese entra. Sobre 28 ejercicios
+ *   registrados fuera del plan, los que repite entraron al que corresponde.
+ * - **Core de 3,7 a ~9 series por semana.** Era lo único claramente corto
+ *   (piernas 24,6 y espalda 21,6 por semana contra 3,7 de core).
+ * - **Lo del Smith con banco se queda el fin de semana.** Hip thrust y búlgara
+ *   necesitan Smith Y banco a la vez, que entre semana no se consigue. El resto
+ *   de la semana no depende del Smith (el peso muerto rumano no lleva banco).
+ *
+ * Lo que NO se tocó: el split de 6 días, porque funciona —cumplió 5 de 6 días
+ * casi todas las semanas— y los básicos pesados suben solos (prensa +10 kg,
+ * hip thrust +15, búlgara +20, sentadilla +10 en 7 semanas).
  *
  * Los pesos NO están escritos acá: salen de la última serie real de cada
  * ejercicio (`lastPerformance` en `lib/gym.ts`). Un número fijo queda viejo a
@@ -59,11 +78,12 @@ export const WEEKLY_PLAN: PlanDay[] = [
     label: "Empuje A (fuerza)",
     emoji: "💪",
     exercises: [
-      { name: "Press de Banca con Barra", sets: "4 × 5-7" },
-      { name: "Press de Hombros con Mancuernas", sets: "3 × 6-8" },
+      { name: "Press de Banca con Barra", sets: "4 × 5-8" },
       { name: "Press con mancuernas en banco inclinado", sets: "3 × 8-10" },
-      { name: "Elevación lateral en polea", sets: "3 × 12-15" },
+      { name: "Press de Hombros con Mancuernas", sets: "3 × 8-10" },
       { name: "Fondos en Máquina Asistida", sets: "3 × 8-10" },
+      { name: "Elevación lateral en polea", sets: "3 × 12-15" },
+      { name: "Elevación de Piernas Colgado", sets: "3 × 10-15" },
     ],
     cardio: "10-15 min cinta suave",
   },
@@ -72,11 +92,11 @@ export const WEEKLY_PLAN: PlanDay[] = [
     label: "Tirón A (fuerza)",
     emoji: "🔙",
     exercises: [
-      { name: "Dominadas Asistidas", sets: "4 × 5-8" },
       { name: "Remo con Barra Inclinado", sets: "4 × 6-8" },
+      { name: "Dominadas Asistidas", sets: "4 × 6-8" },
       { name: "Remo en Polea Sentado en Agarre Ancho", sets: "3 × 8-10" },
       { name: "Face Pull en Polea", sets: "3 × 12-15" },
-      { name: "Curl con barra", sets: "3 × 6-8" },
+      { name: "Curl con barra", sets: "3 × 8-10" },
     ],
     cardio: "10-15 min escaladora",
   },
@@ -85,12 +105,12 @@ export const WEEKLY_PLAN: PlanDay[] = [
     label: "Pierna A (cuádriceps, fuerza)",
     emoji: "🦵",
     exercises: [
-      { name: "Sentadilla Trasera con Barra", sets: "4 × 5-7", weight: "o en Smith" },
-      { name: "Peso muerto rumano en Smith", sets: "3 × 6-8" },
+      { name: "Sentadilla Trasera con Barra", sets: "4 × 5-8", weight: "o en Smith" },
       { name: "Prensa de Piernas", sets: "3 × 8-10" },
-      { name: "Curl de Piernas Sentado", sets: "3 × 8-10" },
-      { name: "Elevación de Talones de Pie", sets: "3 × 8-12" },
-      { name: "Crunch con Cable", sets: "3 × 10-12" },
+      { name: "Peso muerto rumano en Smith", sets: "3 × 8-10" },
+      { name: "Curl de Piernas Sentado", sets: "3 × 10-12" },
+      { name: "Elevación de Talones de Pie", sets: "4 × 10-12" },
+      { name: "Crunch con Cable", sets: "3 × 12-15" },
     ],
     cardio: "10 min caminata inclinada",
   },
@@ -99,11 +119,11 @@ export const WEEKLY_PLAN: PlanDay[] = [
     label: "Empuje B (volumen)",
     emoji: "🎽",
     exercises: [
-      { name: "Press Inclinado en Máquina Smith", sets: "3 × 8-10" },
-      { name: "Press de Banca con Mancuernas", sets: "3 × 10-12" },
-      { name: "Pec Deck", sets: "3 × 12-15" },
-      { name: "Elevación lateral con mancuerna sentado", sets: "4 × 12-20" },
-      { name: "Extensión de Tríceps por Encima de la Cabeza", sets: "3 × 10-15", weight: "en polea" },
+      { name: "Press en banco inclinado con barra", sets: "4 × 6-8" },
+      { name: "Press de Banca con Mancuernas", sets: "3 × 8-10" },
+      { name: "Pec Deck", sets: "3 × 10-12" },
+      { name: "Elevación lateral con mancuerna sentado", sets: "4 × 10-12" },
+      { name: "Extensión de Tríceps por Encima de la Cabeza", sets: "3 × 10-12", weight: "en polea" },
       { name: "Extensión de Tríceps en Polea con Barra en V", sets: "2 × 12-15" },
     ],
     cardio: "10-15 min cinta",
@@ -113,12 +133,12 @@ export const WEEKLY_PLAN: PlanDay[] = [
     label: "Tirón B (volumen)",
     emoji: "🔙",
     exercises: [
-      { name: "Jalón al Pecho", sets: "3 × 8-12" },
-      { name: "Remo con Mancuerna a Un Brazo", sets: "3 × 10-12" },
+      { name: "Jalón al Pecho", sets: "3 × 8-10" },
+      { name: "Remo con Mancuerna a Un Brazo", sets: "3 × 8-10" },
       { name: "Jalón con Brazos Rectos", sets: "3 × 12-15" },
-      { name: "Apertura de Deltoides Posterior", sets: "3 × 15-20", weight: "pec deck invertido" },
-      { name: "Curl con mancuernas en banco inclinado", sets: "3 × 10-12" },
-      { name: "Curl de Martillo con Mancuernas", sets: "2 × 12-15" },
+      { name: "Apertura de Deltoides Posterior", sets: "3 × 12-15", weight: "pec deck invertido" },
+      { name: "Curl con mancuernas en banco inclinado", sets: "3 × 8-10" },
+      { name: "Curl de Martillo con Mancuernas", sets: "3 × 10-12" },
     ],
     cardio: "10-15 min escaladora",
   },
@@ -126,12 +146,16 @@ export const WEEKLY_PLAN: PlanDay[] = [
     dow: 6,
     label: "Pierna B (posterior y glúteo)",
     emoji: "🦵",
+    // El día del Smith con banco: hip thrust y búlgara necesitan las dos cosas
+    // a la vez y entre semana el gimnasio no las da. Por eso van al finde, que
+    // además es el día que más se corre (sábado o domingo, lo decide él con el
+    // selector del Gym).
     exercises: [
       { name: "Hip thrust con barra", sets: "4 × 8-12" },
-      { name: "Sentadilla Búlgara en Máquina Smith", sets: "3 × 8-10 por pierna" },
+      { name: "Sentadilla Búlgara en Máquina Smith", sets: "3 × 6-8 por pierna" },
       { name: "Curl de Piernas Tumbado", sets: "3 × 10-12" },
-      { name: "Extensión de Piernas", sets: "3 × 12-15" },
-      { name: "Elevación de Talones Sentado", sets: "3 × 12-20" },
+      { name: "Extensión de Piernas", sets: "3 × 10-12" },
+      { name: "Elevación de Pantorrillas en Máquina", sets: "3 × 12-15" },
       { name: "Plancha", sets: "3 × 45-60 s" },
     ],
     cardio: "15-20 min caminata inclinada o bici",
@@ -142,7 +166,8 @@ export const WEEKLY_PLAN: PlanDay[] = [
     emoji: "🧘",
     rest: true,
     exercises: [],
-    cardio: "Caminata 40 min + movilidad. Nada de gimnasio ni calistenia: el músculo crece cuando descansa.",
+    cardio:
+      "Caminata 40 min + movilidad. Nada de gimnasio: el músculo crece cuando descansa. Si querés descansar otro día, movelo con «Entrenar otro día de la rutina» en el Gym.",
   },
 ];
 
