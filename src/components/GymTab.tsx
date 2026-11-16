@@ -744,100 +744,12 @@ export default function GymTab({
         )
       )}
 
-      {/* Alta de serie (hoy o un día pasado que estés completando) */}
-      <section className="flex flex-col gap-4 rounded-card bg-card p-4 shadow-e1">
-        {!isToday && (
-          <p className="text-xs font-medium text-accent">
-            Cargando series en {dayLabel(viewDate)}
-          </p>
-        )}
-
-        <div className="flex items-center gap-2">
-          {image && (
-            <ExerciseImage
-              image={image}
-              name={exercise}
-              className="h-11 w-11 shrink-0"
-            />
-          )}
-          <input
-            className={inputCls}
-            list="lift-options"
-            placeholder="Ejercicio (ej. Press banca)"
-            value={exercise}
-            onChange={(e) => setExercise(e.target.value)}
-            aria-label="Ejercicio"
-          />
-          <button
-            type="button"
-            onClick={() => setPickerOpen(true)}
-            aria-label="Buscar ejercicio por grupo muscular"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-sunken text-primary transition-transform duration-(--duration-fast) active:scale-90"
-          >
-            <Search size={19} strokeWidth={2} aria-hidden />
-          </button>
-        </div>
-        <datalist id="lift-options">
-          {options.map((o) => (
-            <option key={o} value={o} />
-          ))}
-        </datalist>
-
-        {/* Cómo se mide lo que escribiste. Viene del catálogo, pero se puede
-            corregir acá mismo: queda guardado para ese ejercicio. */}
-        {exercise.trim() && onSaveExercise && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-muted">Se mide por:</span>
-            {KINDS.map((k) => (
-              <Chip
-                key={k.key}
-                tone="accent"
-                selected={kind === k.key}
-                className="min-h-7! px-2.5! text-xs!"
-                onClick={() =>
-                  kind !== k.key &&
-                  onSaveExercise({
-                    id: findCustom(exercise)?.id,
-                    name: findCustom(exercise)?.name ?? exercise.trim(),
-                    kind: k.key,
-                    image: imageOf(exercise) ?? "",
-                    group: findCustom(exercise)?.group ?? "",
-                  })
-                }
-              >
-                {k.label}
-              </Chip>
-            ))}
-          </div>
-        )}
-
-        {/* El peso salta de a 5 kg (para 10, dos toques); para ajustes finos
-            el campo sigue siendo editable a mano. */}
-        <SetFields
-          kind={kind}
-          reps={reps}
-          weight={weight}
-          onReps={setReps}
-          onWeight={setWeight}
-          bodyweight={bwToday}
-        />
-
-        <Button variant="accent" size="lg" full onClick={submit} disabled={!canAdd}>
-          <Plus size={18} strokeWidth={2.5} aria-hidden />
-          Agregar serie
-        </Button>
-
-        <p className="text-xs text-muted">
-          Los valores quedan cargados para repetir la serie de un toque.
-        </p>
-      </section>
-
       {/* Sesión del día */}
       {groups.length === 0 ? (
         <p className="rounded-card border border-dashed border-border p-6 text-center text-sm text-muted">
           {isToday
-            ? "Todavía no cargaste series hoy. Sumá tu primera serie arriba 💪"
-            : "No hay series este día. Si te lo olvidaste, cargalas arriba 💪"}
+            ? "Todavía no cargaste series hoy. Sumá tu primera serie acá abajo 💪"
+            : "No hay series este día. Si te lo olvidaste, cargalas acá abajo 💪"}
         </p>
       ) : (
         <section className="flex flex-col gap-3">
@@ -968,12 +880,100 @@ export default function GymTab({
         </section>
       )}
 
-      {/* El cronómetro de descanso, debajo de lo que llevás hecho: entre serie
-          y serie se mira la sesión, no el formulario de carga. Ahí arriba
-          quedaba tapado por el teclado al corregir un peso. */}
-      {restSince != null && (
-        <RestTimer since={restSince} onDismiss={() => setRestSince(null)} />
-      )}
+      {/* Alta de serie. Va DEBAJO de la sesión: entre serie y serie se mira lo
+          que llevás hecho, y el formulario —que con el teclado abierto ocupa la
+          pantalla entera— no tiene por qué estar antes. */}
+      <section className="flex flex-col gap-4 rounded-card bg-card p-4 shadow-e1">
+        {!isToday && (
+          <p className="text-xs font-medium text-accent">
+            Cargando series en {dayLabel(viewDate)}
+          </p>
+        )}
+
+        <div className="flex items-center gap-2">
+          {image && (
+            <ExerciseImage
+              image={image}
+              name={exercise}
+              className="h-11 w-11 shrink-0"
+            />
+          )}
+          <input
+            className={inputCls}
+            list="lift-options"
+            placeholder="Ejercicio (ej. Press banca)"
+            value={exercise}
+            onChange={(e) => setExercise(e.target.value)}
+            aria-label="Ejercicio"
+          />
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            aria-label="Buscar ejercicio por grupo muscular"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-control bg-sunken text-primary transition-transform duration-(--duration-fast) active:scale-90"
+          >
+            <Search size={19} strokeWidth={2} aria-hidden />
+          </button>
+        </div>
+        <datalist id="lift-options">
+          {options.map((o) => (
+            <option key={o} value={o} />
+          ))}
+        </datalist>
+
+        {/* Cómo se mide lo que escribiste. Viene del catálogo, pero se puede
+            corregir acá mismo: queda guardado para ese ejercicio. */}
+        {exercise.trim() && onSaveExercise && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs text-muted">Se mide por:</span>
+            {KINDS.map((k) => (
+              <Chip
+                key={k.key}
+                tone="accent"
+                selected={kind === k.key}
+                className="min-h-7! px-2.5! text-xs!"
+                onClick={() =>
+                  kind !== k.key &&
+                  onSaveExercise({
+                    id: findCustom(exercise)?.id,
+                    name: findCustom(exercise)?.name ?? exercise.trim(),
+                    kind: k.key,
+                    image: imageOf(exercise) ?? "",
+                    group: findCustom(exercise)?.group ?? "",
+                  })
+                }
+              >
+                {k.label}
+              </Chip>
+            ))}
+          </div>
+        )}
+
+        {/* El peso salta de a 5 kg (para 10, dos toques); para ajustes finos
+            el campo sigue siendo editable a mano. */}
+        <SetFields
+          kind={kind}
+          reps={reps}
+          weight={weight}
+          onReps={setReps}
+          onWeight={setWeight}
+          bodyweight={bwToday}
+        />
+
+        <Button variant="accent" size="lg" full onClick={submit} disabled={!canAdd}>
+          <Plus size={18} strokeWidth={2.5} aria-hidden />
+          Agregar serie
+        </Button>
+
+        {restSince != null && (
+          <RestTimer since={restSince} onDismiss={() => setRestSince(null)} />
+        )}
+
+        <p className="text-xs text-muted">
+          Los valores quedan cargados para repetir la serie de un toque.
+        </p>
+      </section>
+
 
       {/* Cardio del día (correr, bici, estilo libre… con datos del reloj) */}
       <section className="flex flex-col gap-3">
