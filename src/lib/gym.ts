@@ -162,6 +162,34 @@ export const groupsOf = (name: string): string[] => {
   return MUSCLE_LIFTS.filter((m) => m.re.test(name)).map((m) => m.group);
 };
 
+/**
+ * El siguiente ejercicio de una rutina: el primero sin cargar que venga
+ * DESPUÉS del que estás haciendo; si ese es el último, o no pertenece a la
+ * rutina, el primero que quede pendiente.
+ *
+ * `null` cuando no queda nada por hacer. Sirve para encadenar la sesión sin
+ * volver a la lista de la rutina entre ejercicio y ejercicio: en el gimnasio
+ * ese scroll es la diferencia entre usar la app y anotar en otro lado.
+ */
+export function nextPending<T extends { name: string }>(
+  routine: T[],
+  daySets: Pick<StrengthSet, "exercise">[],
+  current: string,
+): T | null {
+  const hechos = new Set(daySets.map((s) => exerciseKey(s.exercise)));
+  const pendientes = routine.filter((e) => !hechos.has(exerciseKey(e.name)));
+  if (pendientes.length === 0) return null;
+  const actual = current.trim()
+    ? routine.findIndex((e) => exerciseKey(e.name) === exerciseKey(current))
+    : -1;
+  const indexOf = (e: T) =>
+    routine.findIndex((x) => exerciseKey(x.name) === exerciseKey(e.name));
+  return (
+    (actual >= 0 ? pendientes.find((e) => indexOf(e) > actual) : undefined) ??
+    pendientes[0]
+  );
+}
+
 export type GroupStats = { group: string; sets: number; volume: number };
 
 /**

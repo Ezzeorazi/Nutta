@@ -19,6 +19,7 @@ import {
   Pencil,
   Plus,
   Search,
+  SkipForward,
   Trash2,
 } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
@@ -41,7 +42,9 @@ import {
   exerciseKey,
   exerciseProgress,
   groupByExercise,
+  lastLabel,
   lastPerformance,
+  nextPending,
   nextTarget,
   totalVolume,
   usedExercises,
@@ -481,6 +484,13 @@ export default function GymTab({
 
   // Tocar un ejercicio de la rutina lo carga con tu último peso y reps (o el
   // siguiente escalón si la última vez topeaste el rango en todas las series).
+  // Qué toca después en la rutina del día (ver `nextPending`).
+  const siguiente = useMemo(
+    () =>
+      planDay.rest ? null : nextPending(planDay.exercises, daySets, exercise),
+    [planDay, daySets, exercise],
+  );
+
   const selectExercise = (name: string) => {
     setExercise(name);
     const last = lastByExercise.get(name);
@@ -964,6 +974,45 @@ export default function GymTab({
           <Plus size={18} strokeWidth={2.5} aria-hidden />
           Agregar serie
         </Button>
+
+        {/* Qué viene después, sin volver a subir hasta la rutina. Dice el
+            nombre antes de tocarlo —sirve de anticipación mientras terminás
+            la serie— y al tocarlo lo carga con su peso, como la rutina. */}
+        {siguiente && (
+          <button
+            type="button"
+            onClick={() => selectExercise(siguiente.name)}
+            className="flex min-h-12 items-center gap-3 rounded-control border border-dashed border-border px-3.5 py-2 text-left transition-colors active:scale-[0.99] hover:border-primary"
+          >
+            <SkipForward
+              size={16}
+              strokeWidth={2}
+              className="shrink-0 text-primary"
+              aria-hidden
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[11px] text-muted">
+                Siguiente de {shortPlanLabel(planDay)}
+              </span>
+              <span className="block truncate text-sm font-medium">
+                {siguiente.name}
+              </span>
+            </span>
+            <span className="shrink-0 text-right text-xs text-muted tabular-nums">
+              <span className="block">{siguiente.sets}</span>
+              {(() => {
+                const last = lastByExercise.get(siguiente.name);
+                return last ? (
+                  <span
+                    className={last.topped ? "block font-semibold text-primary" : "block"}
+                  >
+                    {lastLabel(last, kindOf(siguiente.name))}
+                  </span>
+                ) : null;
+              })()}
+            </span>
+          </button>
+        )}
 
         {restSince != null && (
           <RestTimer since={restSince} onDismiss={() => setRestSince(null)} />
