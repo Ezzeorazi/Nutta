@@ -37,6 +37,7 @@ import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import Stepper from "@/components/ui/Stepper";
 import { Field, inputCls } from "@/components/ui/Field";
+import { useToast } from "@/components/ui/Toast";
 import {
   bestScores,
   exerciseKey,
@@ -333,6 +334,7 @@ export default function GymTab({
   const [weight, setWeight] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [routineOpen, setRoutineOpen] = useState(false);
+  const toast = useToast();
   // Cómo se mide cada ejercicio y qué foto lleva, con lo tuyo encima.
   const kindOf = useMemo(() => kindResolver(customExercises), [customExercises]);
   const findCustom = useMemo(() => customFinder(customExercises), [customExercises]);
@@ -565,7 +567,10 @@ export default function GymTab({
     // Ejercicio, reps y peso quedan cargados: lo normal es repetir la misma
     // serie, así que la próxima sale con un solo toque. Antes se borraban las
     // reps y había que reescribirlas en cada serie de un 4×10.
-    if (isToday) setRestSince(Date.now());
+    // El reloj se lee dentro del updater, no acá: el linter del compilador de
+    // React marca `Date.now()` suelto en el cuerpo del componente como impuro
+    // (no puede probar que esto solo corre en un evento). Es el mismo valor.
+    if (isToday) setRestSince(() => Date.now());
   };
 
   // Agregar otra serie a un ejercicio ya cargado, sin reescribir el nombre.
@@ -942,16 +947,31 @@ export default function GymTab({
                 tone="accent"
                 selected={kind === k.key}
                 className="min-h-7! px-2.5! text-xs!"
-                onClick={() =>
-                  kind !== k.key &&
-                  onSaveExercise({
+                onClick={() => {
+                  if (kind === k.key) return;
+                  // Cambiar esto es grande y silencioso: pasar un ejercicio a
+                  // "repeticiones" le saca el campo de peso, y las series que
+                  // cargues después quedan sin kilos. Es también un botón
+                  // chico, al alcance del pulgar mientras se scrollea. Por eso
+                  // avisa y se puede deshacer de un toque, como todo lo que
+                  // escribe en la app.
+                  const anterior = kind;
+                  const draft = (kk: ExerciseKind) => ({
                     id: findCustom(exercise)?.id,
                     name: findCustom(exercise)?.name ?? exercise.trim(),
-                    kind: k.key,
+                    kind: kk,
                     image: imageOf(exercise) ?? "",
                     group: findCustom(exercise)?.group ?? "",
-                  })
-                }
+                  });
+                  onSaveExercise(draft(k.key));
+                  toast(
+                    `${exercise.trim()}: se mide por ${k.label.toLowerCase()}`,
+                    {
+                      label: "Deshacer",
+                      onAction: () => onSaveExercise(draft(anterior)),
+                    },
+                  );
+                }}
               >
                 {k.label}
               </Chip>
