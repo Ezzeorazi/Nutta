@@ -745,6 +745,7 @@ export default function GymTab({
           onSwapExercise={onSwapExercise ? setSwapping : undefined}
           onEditRoutine={onSaveRoutineDay ? () => setRoutineOpen(true) : undefined}
           kindOf={kindOf}
+          imageOf={imageOf}
         />
       ) : (
         onSaveRoutineDay && (

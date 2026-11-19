@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeftRight, Check, Pencil, TrendingUp } from "lucide-react";
+import ExerciseImage from "@/components/ExerciseImage";
 import { muscleWork } from "@/lib/exerciseDb";
 import { lastLabel, nextTarget, type LastPerformance } from "@/lib/gym";
 import type { KindOf } from "@/lib/exerciseKind";
@@ -23,6 +24,7 @@ export default function PlanDayCard({
   onSwapExercise,
   onEditRoutine,
   kindOf = () => "peso",
+  imageOf = () => null,
 }: {
   planDay: SwappedDay;
   daySets: StrengthSet[];
@@ -37,6 +39,8 @@ export default function PlanDayCard({
   onEditRoutine?: () => void;
   /** Cómo se mide cada ejercicio (ver `lib/exerciseKind.ts`). */
   kindOf?: KindOf;
+  /** La foto de cada ejercicio (la del catálogo o la propia). */
+  imageOf?: (name: string) => string | null;
 }) {
   const doneNames = new Set(
     daySets.map((s) => s.exercise.trim().toLowerCase()),
@@ -151,7 +155,17 @@ export default function PlanDayCard({
                       onClick={() => onSelectExercise(ex.name)}
                       className="flex min-w-0 flex-1 items-center justify-between gap-2 px-3 py-2 text-left text-sm active:scale-[0.99]"
                     >
-                      <span className="flex min-w-0 flex-col gap-0.5">
+                      {/* El dibujo es lo que distingue dos ejercicios con
+                          nombres parecidos: un press inclinado con barra y uno
+                          plano con mancuernas se leen casi igual y comprometen
+                          el mismo músculo ("pectoral"), así que la fila de
+                          texto sola parecía repetida. */}
+                      <ExerciseImage
+                        image={imageOf(ex.name)}
+                        name={ex.name}
+                        className="h-9 w-9 shrink-0"
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                         <span className="flex min-w-0 items-center gap-2">
                           {done && (
                             <Check
